@@ -5,6 +5,7 @@ import CreateChallenge from './pages/CreateChallenge';
 import PlayChallenge from './pages/PlayChallenge';
 import Admin from './pages/Admin';
 import DevTools from './pages/DevTools';
+import LogoShowcase from './pages/LogoShowcase';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/play" element={<PlayChallenge />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/dev" element={<DevTools />} />
+        <Route path="/logos" element={<LogoShowcase />} />
       </Routes>
     </BrowserRouter>
   );
