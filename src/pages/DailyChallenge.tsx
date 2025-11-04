@@ -16,14 +16,25 @@ export default function DailyChallenge() {
 
   const loadDailyChallenge = async () => {
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`);
+      console.log('Fetching daily challenge from:', `${SUPABASE_URL}/functions/v1/daily-challenge`);
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Failed to load daily challenge');
       }
 
       const data = await response.json();
+      console.log('Got daily challenge:', data);
 
       if (data.token) {
         navigate(`/play?t=${data.token}`);
@@ -31,7 +42,8 @@ export default function DailyChallenge() {
         throw new Error('No token received');
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error('Daily challenge error:', err);
+      setError(err.message || 'Failed to fetch');
       setLoading(false);
     }
   };
