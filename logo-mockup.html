@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threefold Logo Concepts</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      padding: 60px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 60px;
+      font-size: 1.1rem;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .logo-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+      transition: all 0.3s ease;
+    }
+
+    .logo-card:hover {
+      border-color: #444;
+      transform: translateY(-4px);
+    }
+
+    .logo-title {
+      font-size: 0.9rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .logo-display {
+      margin-bottom: 30px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-notes {
+      font-size: 0.9rem;
+      color: #999;
+      line-height: 1.6;
+      text-align: left;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid #2a2a2a;
+    }
+
+    .logo-notes li {
+      margin-bottom: 8px;
+      list-style: none;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .logo-notes li:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #666;
+    }
+
+    /* Logo 1: Minimal 3 with subtle accent */
+    .logo-1 {
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: -2px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .logo-1 .main-text {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-1 .accent {
+      position: absolute;
+      top: -8px;
+      right: -20px;
+      font-size: 1.2rem;
+      color: #3b82f6;
+      opacity: 0.4;
+    }
+
+    /* Logo 2: Three folded cards */
+    .logo-2 {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      width: 50px;
+      height: 70px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+      border-radius: 6px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .card:nth-child(2) {
+      transform: translateY(-10px);
+    }
+
+    .card:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+      border-radius: 6px;
+    }
+
+    .logo-2-text {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #fff;
+      margin-left: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Logo 3: Simple geometric 3 */
+    .logo-3 {
+      font-size: 5rem;
+      font-weight: 800;
+      font-family: 'Georgia', serif;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+      position: relative;
+    }
+
+    .logo-3:after {
+      content: 'THREEFOLD';
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #666;
+    }
+
+    /* Logo 4: Origami-inspired */
+    .logo-4 {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto;
+    }
+
+    .fold {
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .fold-1 {
+      border-width: 0 50px 50px 50px;
+      border-color: transparent transparent #60a5fa transparent;
+      top: 0;
+      left: 0;
+    }
+
+    .fold-2 {
+      border-width: 50px 50px 0 50px;
+      border-color: #3b82f6 transparent transparent transparent;
+      top: 25px;
+      left: 0;
+    }
+
+    .fold-3 {
+      border-width: 0 50px 50px 50px;
+      border-color: transparent transparent #1e40af transparent;
+      top: 50px;
+      left: 0;
+    }
+
+    .logo-4-text {
+      text-align: center;
+      margin-top: 120px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: #fff;
+    }
+
+    /* Logo 5: Stack of 3 */
+    .logo-5 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .layer {
+      width: 120px;
+      height: 30px;
+      background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+      border-radius: 4px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .layer:nth-child(2) {
+      width: 140px;
+      background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .layer:nth-child(3) {
+      width: 160px;
+      background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
+    }
+
+    .logo-5-text {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+
+    /* Logo 6: Minimalist with Japanese touch */
+    .logo-6 {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .logo-6 .number {
+      font-size: 5rem;
+      font-weight: 300;
+      color: #fff;
+      font-family: 'Georgia', serif;
+    }
+
+    .logo-6 .text {
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .logo-6 .kanji {
+      font-size: 1rem;
+      color: #3b82f6;
+      opacity: 0.5;
+      margin-left: 4px;
+    }
+
+    .recommended {
+      border: 2px solid #3b82f6;
+      position: relative;
+      overflow: visible;
+    }
+
+    .recommended:before {
+      content: 'RECOMMENDED';
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: #3b82f6;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>THREEFOLD</h1>
+    <p class="subtitle">Logo Concept Explorations</p>
+
+    <div class="logo-grid">
+
+      <div class="logo-card">
+        <div class="logo-title">Concept 1: Minimal Number</div>
+        <div class="logo-display">
+          <div class="logo-1">
+            <span class="main-text">3</span>
+            <span class="accent">折</span>
+          </div>
+        </div>
+        <ul class="logo-notes">
+          <li>Clean, modern numeral</li>
+          <li>Tiny Japanese accent (optional)</li>
+          <li>Easy to scale</li>
+          <li>Works as app icon</li>
+        </ul>
+      </div>
+
+      <div class="logo-card recommended">
+        <div class="logo-title">Concept 2: Three Cards</div>
+        <div class="logo-display">
+          <div class="logo-2">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <span class="logo-2-text">THREEFOLD</span>
+          </div>
+        </div>
+        <ul class="logo-notes">
+          <li>Represents game mechanic</li>
+          <li>Memorable visual</li>
+          <li>No foreign text needed</li>
+          <li>Premium feel</li>
+        </ul>
+      </div>
+
+      <div class="logo-card">
+        <div class="logo-title">Concept 3: Bold Serif</div>
+        <div class="logo-display">
+          <div class="logo-3">3</div>
+        </div>
+        <ul class="logo-notes">
+          <li>Classic, trustworthy</li>
+          <li>Stands out in app stores</li>
+          <li>Versatile sizing</li>
+          <li>Strong brand presence</li>
+        </ul>
+      </div>
+
+      <div class="logo-card">
+        <div class="logo-title">Concept 4: Origami Fold</div>
+        <div class="logo-display">
+          <div class="logo-4">
+            <div class="fold fold-1"></div>
+            <div class="fold fold-2"></div>
+            <div class="fold fold-3"></div>
+            <div class="logo-4-text">THREEFOLD</div>
+          </div>
+        </div>
+        <ul class="logo-notes">
+          <li>Abstract origami reference</li>
+          <li>Unique shape</li>
+          <li>Puzzle aesthetic</li>
+          <li>Japanese inspiration without text</li>
+        </ul>
+      </div>
+
+      <div class="logo-card">
+        <div class="logo-title">Concept 5: Layered Stack</div>
+        <div class="logo-display">
+          <div class="logo-5">
+            <div class="layer"></div>
+            <div class="layer"></div>
+            <div class="layer"></div>
+            <span class="logo-5-text">THREEFOLD</span>
+          </div>
+        </div>
+        <ul class="logo-notes">
+          <li>Represents progression</li>
+          <li>Three difficulty levels</li>
+          <li>Modern gradient style</li>
+          <li>App icon friendly</li>
+        </ul>
+      </div>
+
+      <div class="logo-card">
+        <div class="logo-title">Concept 6: Hybrid Text</div>
+        <div class="logo-display">
+          <div class="logo-6">
+            <span class="number">3</span>
+            <span class="text">fold</span>
+            <span class="kanji">折</span>
+          </div>
+        </div>
+        <ul class="logo-notes">
+          <li>Balances English + Japanese</li>
+          <li>Kanji very subtle</li>
+          <li>Clean typography</li>
+          <li>Sophisticated feel</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div style="text-align: center; color: #666; margin-top: 60px; padding-top: 40px; border-top: 1px solid #2a2a2a;">
+      <p style="font-size: 0.9rem; line-height: 1.8;">
+        <strong style="color: #fff;">Domain Recommendation:</strong> threefoldgame.com<br>
+        <strong style="color: #fff;">Visual Direction:</strong> Minimal Japanese inspiration without requiring literacy<br>
+        <strong style="color: #fff;">Target Feel:</strong> Premium puzzle game, clean, sophisticated, accessible
+      </p>
+    </div>
+  </div>
+</body>
+</html>
