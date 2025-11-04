@@ -48,6 +48,59 @@ export default function PlayChallenge() {
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
 
+  const STORAGE_KEY_PREFIX = 'clueladder_progress_';
+
+  const saveProgress = () => {
+    if (!token) return;
+
+    const progress = {
+      phase,
+      lives,
+      guesses,
+      wrongGuesses,
+      startTime,
+      selectedCategory,
+      timestamp: Date.now(),
+    };
+
+    try {
+      localStorage.setItem(`${STORAGE_KEY_PREFIX}${token}`, JSON.stringify(progress));
+    } catch (error) {
+      console.warn('Failed to save progress:', error);
+    }
+  };
+
+  const loadProgress = () => {
+    if (!token) return null;
+
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY_PREFIX}${token}`);
+      if (!saved) return null;
+
+      const progress = JSON.parse(saved);
+
+      if (gameState === 'solved' || gameState === 'failed') {
+        return null;
+      }
+
+      const hoursSinceSave = (Date.now() - progress.timestamp) / (1000 * 60 * 60);
+      if (hoursSinceSave > 24) {
+        localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
+        return null;
+      }
+
+      return progress;
+    } catch (error) {
+      console.warn('Failed to load progress:', error);
+      return null;
+    }
+  };
+
+  const clearProgress = () => {
+    if (!token) return;
+    localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
+  };
+
   useEffect(() => {
     if (!token) {
       setError('No challenge token provided');
@@ -57,6 +110,28 @@ export default function PlayChallenge() {
 
     loadChallenge();
   }, [token]);
+
+  useEffect(() => {
+    if (token && gameState === 'playing' && challengeId) {
+      const progress = loadProgress();
+      if (progress) {
+        setPhase(progress.phase);
+        setLives(progress.lives);
+        setGuesses(progress.guesses);
+        setWrongGuesses(progress.wrongGuesses);
+        setStartTime(progress.startTime);
+        setSelectedCategory(progress.selectedCategory);
+      }
+    }
+  }, [challengeId]);
+
+  useEffect(() => {
+    if (gameState === 'playing') {
+      saveProgress();
+    } else if (gameState === 'solved' || gameState === 'failed') {
+      clearProgress();
+    }
+  }, [gameState, phase, lives, guesses, wrongGuesses, selectedCategory]);
 
   const loadChallenge = async () => {
     try {
@@ -296,6 +371,7 @@ export default function PlayChallenge() {
               solved={gameState === 'solved'}
               answer={answer}
               guesses={guesses}
+              phase={phase}
               shareUrl={token ? window.location.href : undefined}
               challengeId={challengeId || undefined}
             />

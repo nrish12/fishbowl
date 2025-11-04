@@ -6,6 +6,10 @@ export function getSessionId(): string {
   if (!sessionId) {
     sessionId = `session_${crypto.randomUUID()}`;
     localStorage.setItem(SESSION_KEY, sessionId);
+
+    if (window.Sentry) {
+      window.Sentry.setUser({ id: sessionId });
+    }
   }
   return sessionId;
 }
