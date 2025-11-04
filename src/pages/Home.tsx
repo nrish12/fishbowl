@@ -81,6 +81,17 @@ export default function Home() {
             One guess per phase unlocks the next. Gold, Silver, or Bronze rank based on when you solve it.
           </p>
         </div>
+
+        {import.meta.env.MODE === 'development' && (
+          <div className="text-center">
+            <Link
+              to="/dev"
+              className="inline-block px-4 py-2 bg-neutral-800 text-white text-sm rounded-lg hover:bg-neutral-700 transition-colors"
+            >
+              Developer Tools
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
