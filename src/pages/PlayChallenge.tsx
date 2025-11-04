@@ -1,0 +1,308 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import Logo from '../components/Logo';
+import Lives from '../components/Lives';
+import PhaseChips from '../components/PhaseChips';
+import SentenceCard from '../components/SentenceCard';
+import CategoryPicker from '../components/CategoryPicker';
+import GuessBar from '../components/GuessBar';
+import ShareCard from '../components/ShareCard';
+import { Leaderboard } from '../components/Leaderboard';
+import { trackEvent } from '../utils/tracking';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+interface Hints {
+  phase1: string[];
+  phase2: string;
+  phase3: {
+    geography: string;
+    history: string;
+    culture: string;
+    stats: string;
+    visual: string;
+  };
+}
+
+type GameState = 'loading' | 'playing' | 'solved' | 'failed';
+type Phase = 1 | 2 | 3;
+
+export default function PlayChallenge() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('t');
+
+  const [gameState, setGameState] = useState<GameState>('loading');
+  const [hints, setHints] = useState<Hints | null>(null);
+  const [challengeType, setChallengeType] = useState<string>('');
+  const [lives, setLives] = useState(3);
+  const [phase, setPhase] = useState<Phase>(1);
+  const [guesses, setGuesses] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [rank, setRank] = useState<'Gold' | 'Silver' | 'Bronze' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [isThinking, setIsThinking] = useState(false);
+  const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
+  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
+
+  useEffect(() => {
+    if (!token) {
+      setError('No challenge token provided');
+      setGameState('failed');
+      return;
+    }
+
+    loadChallenge();
+  }, [token]);
+
+  const loadChallenge = async () => {
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/resolve-challenge?t=${token}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load challenge');
+      }
+
+      const data = await response.json();
+      setHints(data.hints);
+      setChallengeType(data.type);
+      setChallengeId(data.id);
+      setGameState('playing');
+      setStartTime(Date.now());
+
+      if (data.id) {
+        await trackEvent('visit', data.id, {
+          referrer: document.referrer || 'direct',
+        });
+      }
+    } catch (err: any) {
+      setError(err.message);
+      setGameState('failed');
+    }
+  };
+
+  const handleGuess = async (guess: string) => {
+    if (!token || !hints || !challengeId) return;
+
+    setIsThinking(true);
+    setLastGuessResult(null);
+    setGuesses(prev => prev + 1);
+
+    await trackEvent('attempt', challengeId, {
+      guess_text: guess,
+      phase_revealed: phase,
+      is_correct: false,
+    });
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          guess,
+          phase,
+          player_fingerprint: `player_${Date.now()}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.result === 'correct') {
+        setLastGuessResult('correct');
+        setAnswer(data.canonical);
+        setRank(phase === 1 ? 'Gold' : phase === 2 ? 'Silver' : 'Bronze');
+        setTimeout(() => setGameState('solved'), 800);
+
+        const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+        await trackEvent('completion', challengeId, {
+          completed_phase: phase,
+          total_attempts: guesses + 1,
+          time_taken_seconds: timeElapsed,
+        });
+      } else {
+        setLastGuessResult('incorrect');
+        setWrongGuesses(prev => [...prev, guess]);
+        setLives(prev => prev - 1);
+
+        if (lives - 1 <= 0) {
+          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token,
+              guess: '__reveal__',
+              phase,
+            }),
+          });
+          const answerData = await answerResponse.json();
+          setAnswer(answerData.canonical || 'Unknown');
+          setGameState('failed');
+        } else {
+          if (phase < 3) {
+            setPhase(prev => (prev + 1) as Phase);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Guess error:', err);
+    } finally {
+      setTimeout(() => {
+        setIsThinking(false);
+        setLastGuessResult(null);
+      }, 1500);
+    }
+  };
+
+  const handleRevealPhase2 = () => {
+    setPhase(2);
+  };
+
+  const handleSelectCategory = (category: string) => {
+    setSelectedCategory(category);
+    setPhase(3);
+  };
+
+  if (gameState === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-gold mx-auto" />
+          <p className="text-neutral-600">Loading challenge...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200 text-center space-y-4">
+          <div className="text-5xl">❌</div>
+          <h2 className="text-2xl font-serif font-bold text-neutral-900">Challenge Error</h2>
+          <p className="text-neutral-600">{error}</p>
+          <Link
+            to="/"
+            className="inline-block px-6 py-3 bg-neutral-900 text-white rounded-full font-medium hover:bg-gold hover:text-neutral-900 transition-colors"
+          >
+            Back Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8 px-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors">
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </Link>
+          <Logo size="sm" />
+          <Lives current={lives} total={3} />
+        </div>
+
+        {gameState === 'playing' && hints && (
+          <div className="space-y-8">
+            <div className="text-center space-y-3">
+              <div className="inline-block px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 rounded-2xl shadow-lg">
+                <p className="text-xs font-semibold text-neutral-900 uppercase tracking-wider mb-1">You're guessing a</p>
+                <p className="text-3xl font-serif font-bold text-neutral-900">
+                  {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
+                </p>
+              </div>
+            </div>
+
+            <PhaseChips words={hints.phase1} revealed={phase >= 1} />
+
+            {phase >= 2 && (
+              <SentenceCard
+                sentence={hints.phase2}
+                revealed={phase >= 2}
+                onReveal={phase === 1 ? handleRevealPhase2 : undefined}
+              />
+            )}
+
+            {phase === 3 && !selectedCategory && (
+              <CategoryPicker
+                categories={hints.phase3}
+                revealed={false}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+              />
+            )}
+
+            {selectedCategory && (
+              <CategoryPicker
+                categories={hints.phase3}
+                revealed={true}
+                selectedCategory={selectedCategory}
+              />
+            )}
+
+            {isThinking && (
+              <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                <p className="text-sm font-medium text-blue-900">Checking your answer...</p>
+              </div>
+            )}
+
+            {lastGuessResult === 'correct' && !isThinking && (
+              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 rounded-lg border-2 border-green-200 animate-[fadeIn_0.3s_ease-in-out]">
+                <span className="text-2xl">✅</span>
+                <p className="text-sm font-bold text-green-900">Correct! Well done!</p>
+              </div>
+            )}
+
+            {lastGuessResult === 'incorrect' && !isThinking && (
+              <div className="flex items-center justify-center gap-3 p-4 bg-red-50 rounded-lg border-2 border-red-200 animate-[fadeIn_0.3s_ease-in-out]">
+                <span className="text-2xl">❌</span>
+                <p className="text-sm font-bold text-red-900">Not quite! Try again</p>
+              </div>
+            )}
+
+            {wrongGuesses.length > 0 && (
+              <div className="bg-white rounded-lg p-4 border border-neutral-200">
+                <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider mb-2">Your Previous Guesses:</p>
+                <div className="flex flex-wrap gap-2">
+                  {wrongGuesses.map((guess, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-sm">
+                      {guess}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+              <div className="text-center text-sm text-neutral-500">
+                Phase {phase} of 3 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(gameState === 'solved' || gameState === 'failed') && (
+          <>
+            <ShareCard
+              rank={rank}
+              solved={gameState === 'solved'}
+              answer={answer}
+              guesses={guesses}
+              shareUrl={token ? window.location.href : undefined}
+              challengeId={challengeId || undefined}
+            />
+            {challengeId && <Leaderboard challengeId={challengeId} />}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
