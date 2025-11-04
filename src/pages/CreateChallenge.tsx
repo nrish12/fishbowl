@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, Check, AlertCircle } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -45,6 +45,7 @@ export default function CreateChallenge() {
   const [copied, setCopied] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const [difficultyReasoning, setDifficultyReasoning] = useState<string>('');
 
   const handleGenerate = async () => {
     if (!target.trim()) {
@@ -60,7 +61,7 @@ export default function CreateChallenge() {
     setSelectedPhase2(0);
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/validate-challenge`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-challenge-fast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, target: target.trim() }),
@@ -107,6 +108,36 @@ export default function CreateChallenge() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    async function selectOptimalDifficulty() {
+      if (!challengeData) return;
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/suggest-difficulty`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: challengeData.type,
+            fame_score: challengeData.fame_score,
+          }),
+        });
+
+        if (response.ok) {
+          const suggestion = await response.json();
+          setSelectedPhase1(suggestion.recommended_phase1_index);
+          setSelectedPhase2(suggestion.recommended_phase2_index);
+          setDifficultyReasoning(suggestion.reasoning);
+
+          console.log('AI-selected difficulty:', suggestion);
+        }
+      } catch (error) {
+        console.warn('Failed to get difficulty suggestion:', error);
+      }
+    }
+
+    selectOptimalDifficulty();
+  }, [challengeData]);
 
   const handleFinalize = async () => {
     if (!challengeData) return;
@@ -265,6 +296,17 @@ export default function CreateChallenge() {
               <h2 className="text-2xl font-serif font-bold text-neutral-900">Customize Your Challenge</h2>
               <p className="text-sm text-neutral-600 mt-1">Choose the difficulty level for each phase</p>
             </div>
+
+            {difficultyReasoning && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+                <p className="text-blue-900">
+                  <span className="font-semibold">AI Recommendation:</span> {difficultyReasoning}
+                </p>
+                <p className="text-blue-700 text-xs mt-1">
+                  You can still change the difficulty if you prefer.
+                </p>
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-8">
               <div className="space-y-4">
