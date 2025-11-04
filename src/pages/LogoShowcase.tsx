@@ -12,198 +12,420 @@ export default function LogoShowcase() {
 
         <div className="text-center mb-12">
           <h1 className="text-5xl font-light tracking-wider mb-4">THREEFOLD</h1>
-          <p className="text-neutral-400 text-lg">Simple & Clean Logo Concepts</p>
+          <p className="text-neutral-400 text-lg">Premium Logo Concepts</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
 
-          <div className="bg-neutral-800 rounded-2xl p-12 border-2 border-blue-500 relative">
-            <div className="absolute -top-3 right-6 bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold tracking-wider">
-              RECOMMENDED
+          <div className="bg-neutral-800 rounded-2xl p-12 border-2 border-amber-500 relative">
+            <div className="absolute -top-3 right-6 bg-gradient-to-r from-amber-400 to-amber-600 text-white px-3 py-1 rounded text-xs font-bold tracking-wider">
+              LUXURY
             </div>
             <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Folded Note
+              Gold Foil Emboss
             </div>
             <div className="flex items-center justify-center mb-8">
-              <div className="w-32 h-40 bg-gradient-to-br from-neutral-50 to-neutral-200 rounded relative shadow-2xl">
-                <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-t-transparent border-r-[40px] border-r-blue-500 border-b-[40px] border-b-transparent"></div>
-                <div className="absolute inset-0 flex items-center justify-center text-7xl font-bold text-neutral-800">
-                  3
+              <div className="w-36 h-44 bg-gradient-to-br from-white to-neutral-100 rounded-lg relative shadow-2xl">
+                <div className="absolute inset-4 border-2 border-amber-400/30 rounded"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-8xl font-bold bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent"
+                       style={{ fontFamily: 'Georgia, serif', textShadow: '2px 2px 4px rgba(217, 119, 6, 0.3)' }}>
+                    3
+                  </div>
                 </div>
               </div>
             </div>
             <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Like passing a secret note</span>
+                <span className="text-amber-500">★</span>
+                <span>Embossed gold foil effect</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Blue corner fold = hint reveal</span>
+                <span className="text-amber-500">★</span>
+                <span>Premium & luxurious</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Simple, clean, recognizable</span>
+                <span className="text-amber-500">★</span>
+                <span>Elegant white base</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Perfect for app icon</span>
+                <span className="text-amber-500">★</span>
+                <span>High-end feel</span>
               </li>
             </ul>
           </div>
 
           <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
             <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Just the Number
+              Wax Seal
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-40 h-32 bg-gradient-to-br from-amber-50 to-white rounded relative shadow-2xl">
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 shadow-xl flex items-center justify-center border-4 border-amber-300">
+                  <div className="text-5xl font-bold text-white drop-shadow-lg">3</div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Classic wax seal design</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Trust & authenticity</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Old-world elegance</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Memorable & unique</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Champagne Card
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-32 h-40 bg-gradient-to-br from-amber-50 via-white to-amber-50 rounded relative shadow-2xl border border-amber-200">
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-t-transparent border-r-[40px] border-r-amber-500 border-b-[40px] border-b-transparent"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-light text-amber-700" style={{ fontFamily: 'Georgia, serif' }}>
+                    3
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Warm champagne tones</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Gold corner accent</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Sophisticated & clean</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Celebration vibes</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Gold Line Art
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-32 h-32 bg-white rounded-full relative shadow-2xl">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-thin bg-gradient-to-br from-amber-400 to-amber-600 bg-clip-text text-transparent">
+                    3
+                  </div>
+                </div>
+                <div className="absolute inset-2 rounded-full border-2 border-amber-400"></div>
+                <div className="absolute inset-5 rounded-full border border-amber-300"></div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Minimalist gold rings</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Delicate & refined</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Modern luxury</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Works anywhere</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Gold Ribbon
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-28 h-40 bg-white rounded relative shadow-2xl">
+                <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 shadow-lg"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-semibold text-neutral-800">3</div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Gold ribbon bookmark</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Gift-wrapped feel</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Special & thoughtful</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Friendly luxury</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Marble & Gold
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-36 h-36 bg-gradient-to-br from-neutral-50 via-white to-neutral-100 rounded-lg relative shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 opacity-20" style={{
+                  backgroundImage: 'linear-gradient(45deg, transparent 40%, #d1d5db 50%, transparent 60%)',
+                  backgroundSize: '20px 20px'
+                }}></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-8xl font-light bg-gradient-to-br from-amber-400 via-amber-600 to-amber-500 bg-clip-text text-transparent"
+                       style={{ fontFamily: 'Georgia, serif' }}>
+                    3
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>White marble texture</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Luxe gold number</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Timeless elegance</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Premium materials</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Art Deco Frame
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-36 h-36 bg-white relative shadow-2xl">
+                <div className="absolute inset-0 border-4 border-amber-500"></div>
+                <div className="absolute inset-2 border border-amber-300"></div>
+                <div className="absolute top-0 left-0 w-8 h-8 bg-amber-500"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 bg-amber-500"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 bg-amber-500"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-500"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-light text-amber-700" style={{ fontFamily: 'Georgia, serif' }}>
+                    3
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>1920s Art Deco style</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Geometric gold frame</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Vintage glamour</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Bold & confident</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Origami Fold
+            </div>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-36 h-36 bg-white relative shadow-2xl rounded">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white via-neutral-50 to-white"></div>
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[60px] border-t-transparent border-r-[60px] border-r-amber-400 border-b-[60px] border-b-transparent"></div>
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[50px] border-t-transparent border-r-[50px] border-r-amber-500 border-b-[50px] border-b-transparent"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-light text-neutral-700">3</div>
+                </div>
+              </div>
+            </div>
+            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Layered gold fold</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Paper craft aesthetic</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Playful yet elegant</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500">★</span>
+                <span>Depth & dimension</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
+            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
+              Gold Gradient
             </div>
             <div className="flex items-center justify-center mb-8 h-40">
-              <div className="text-8xl font-light text-white" style={{ fontFamily: 'Georgia, serif' }}>
+              <div className="text-9xl font-bold bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 bg-clip-text text-transparent">
                 3
               </div>
             </div>
             <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Ultra minimal</span>
+                <span className="text-amber-500">★</span>
+                <span>Pure gold gradient</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Elegant serif font</span>
+                <span className="text-amber-500">★</span>
+                <span>Ultra modern</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Easy to remember</span>
+                <span className="text-amber-500">★</span>
+                <span>Simple but striking</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Timeless design</span>
+                <span className="text-amber-500">★</span>
+                <span>Tech-meets-luxury</span>
               </li>
             </ul>
           </div>
 
           <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
             <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Sealed Letter
+              Gold on Cream
             </div>
             <div className="flex items-center justify-center mb-8">
-              <div className="w-40 h-28 bg-neutral-50 rounded relative shadow-2xl">
-                <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-blue-500 to-blue-600"
-                     style={{ clipPath: 'polygon(0 0, 100% 0, 50% 60%)' }}>
-                </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-4xl font-semibold text-neutral-800">
-                  3
+              <div className="w-32 h-44 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg relative shadow-2xl">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-8xl font-semibold text-amber-600">3</div>
                 </div>
               </div>
             </div>
             <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Mystery/reveal concept</span>
+                <span className="text-amber-500">★</span>
+                <span>Warm cream background</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Blue triangle = opening flap</span>
+                <span className="text-amber-500">★</span>
+                <span>Soft & inviting</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Friendly, approachable</span>
+                <span className="text-amber-500">★</span>
+                <span>Cozy elegance</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Like getting mail</span>
+                <span className="text-amber-500">★</span>
+                <span>Like aged paper</span>
               </li>
             </ul>
           </div>
 
           <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
             <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Clean Card
+              Minimalist Foil
             </div>
             <div className="flex items-center justify-center mb-8">
-              <div className="w-28 h-40 bg-white rounded-lg shadow-2xl border-2 border-neutral-200 flex items-center justify-center">
-                <div className="text-7xl font-light text-blue-500" style={{ fontFamily: 'Georgia, serif' }}>
-                  3
+              <div className="w-32 h-40 bg-white rounded relative shadow-2xl">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-7xl font-light bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent"
+                       style={{ fontFamily: 'Georgia, serif' }}>
+                    3
+                  </div>
                 </div>
               </div>
             </div>
             <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Simple white card</span>
+                <span className="text-amber-500">★</span>
+                <span>Subtle gold accent line</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>One number, centered</span>
+                <span className="text-amber-500">★</span>
+                <span>Ultra refined</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Professional, trustworthy</span>
+                <span className="text-amber-500">★</span>
+                <span>Less is more</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Not overdone</span>
+                <span className="text-amber-500">★</span>
+                <span>Understated luxury</span>
               </li>
             </ul>
           </div>
 
           <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
             <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Text + Number
-            </div>
-            <div className="flex items-center justify-center mb-8 h-40">
-              <div className="flex items-baseline gap-1">
-                <span className="text-7xl font-light text-white">3</span>
-                <span className="text-4xl font-light text-neutral-500 tracking-wide">fold</span>
-              </div>
-            </div>
-            <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
-              <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Readable combination</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>No confusion on pronunciation</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Lightweight design</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Works at any size</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-700">
-            <div className="text-xs text-neutral-500 tracking-widest uppercase text-center mb-8 font-semibold">
-              Corner Fold
+              Gold & Shadows
             </div>
             <div className="flex items-center justify-center mb-8">
-              <div className="w-32 h-32 bg-white rounded relative shadow-2xl">
-                <div className="absolute top-0 right-0 w-0 h-0 border-t-[50px] border-t-transparent border-r-[50px] border-r-blue-500 border-b-[50px] border-b-transparent rounded-tr"></div>
-                <div className="absolute inset-0 flex items-center justify-center text-7xl font-semibold text-neutral-800">
-                  3
+              <div className="w-36 h-40 bg-white rounded-lg relative shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative">
+                    <div className="text-8xl font-bold text-amber-500" style={{
+                      textShadow: '4px 4px 8px rgba(217, 119, 6, 0.4), -2px -2px 4px rgba(255, 255, 255, 0.8)'
+                    }}>
+                      3
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
             <ul className="text-sm text-neutral-400 space-y-2 border-t border-neutral-700 pt-6">
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Like a bookmark or tag</span>
+                <span className="text-amber-500">★</span>
+                <span>3D embossed effect</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Blue fold = discovery</span>
+                <span className="text-amber-500">★</span>
+                <span>Depth with shadows</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Square format for icons</span>
+                <span className="text-amber-500">★</span>
+                <span>Tactile feel</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-neutral-600">→</span>
-                <span>Clean and balanced</span>
+                <span className="text-amber-500">★</span>
+                <span>Stands out</span>
               </li>
             </ul>
           </div>
@@ -212,9 +434,9 @@ export default function LogoShowcase() {
 
         <div className="text-center text-neutral-500 pt-12 border-t border-neutral-800">
           <p className="leading-relaxed max-w-2xl mx-auto">
-            <span className="text-white font-semibold">All designs:</span> Simple, clean, easy to look at<br />
-            <span className="text-white font-semibold">Inspiration:</span> Passing notes, Christmas cards, secret messages<br />
-            <span className="text-white font-semibold">Not overdone:</span> Minimal elements, maximum impact
+            <span className="text-amber-400 font-semibold">Gold & White:</span> Premium, elegant, timeless<br />
+            <span className="text-amber-400 font-semibold">Inspiration:</span> Luxury stationery, gold foil invitations, high-end branding<br />
+            <span className="text-amber-400 font-semibold">Feel:</span> Sophisticated yet approachable, special but not overdone
           </p>
         </div>
       </div>
