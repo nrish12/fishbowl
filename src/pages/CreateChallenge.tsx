@@ -86,15 +86,18 @@ export default function CreateChallenge() {
 
       setChallengeData(data);
 
-      const pvId = await logPreview(
+      logPreview(
         data.type,
         target.trim(),
         data.phase1_options,
         data.phase2_options,
         data.phase3,
         data.aliases
-      );
-      setPreviewId(pvId);
+      ).then(pvId => {
+        setPreviewId(pvId);
+      }).catch(err => {
+        console.error('Preview logging failed:', err);
+      });
     } catch (err: any) {
       setError({
         error: 'Connection Error',
