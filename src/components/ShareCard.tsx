@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { trackEvent } from '../utils/tracking';
-import { Share2, Check } from 'lucide-react';
+import { shareResults } from '../utils/shareResults';
+import { Share2, Check, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ShareCardProps {
@@ -8,11 +9,13 @@ interface ShareCardProps {
   solved: boolean;
   answer: string;
   guesses: number;
+  phase: number;
   shareUrl?: string;
   challengeId?: string;
+  isDaily?: boolean;
 }
 
-export default function ShareCard({ rank, solved, answer, guesses, shareUrl, challengeId }: ShareCardProps) {
+export default function ShareCard({ rank, solved, answer, guesses, phase, shareUrl, challengeId, isDaily = false }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   const rankColors = {
@@ -22,22 +25,19 @@ export default function ShareCard({ rank, solved, answer, guesses, shareUrl, cha
   };
 
   const handleShare = async () => {
-    const shareText = shareUrl
-      ? `ClueLadder - I ${solved ? `solved it with ${rank} rank` : 'gave it my best'} in ${guesses} ${guesses === 1 ? 'guess' : 'guesses'}!\nPlay yours: ${shareUrl}`
-      : `ClueLadder Daily - I ${solved ? `solved it with ${rank} rank` : 'gave it my best'} in ${guesses} ${guesses === 1 ? 'guess' : 'guesses'}!`;
+    const success = await shareResults(rank, solved, guesses, phase, isDaily, shareUrl);
 
-    try {
-      await navigator.clipboard.writeText(shareText);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
 
       if (challengeId) {
         await trackEvent('share', challengeId, {
-          share_method: 'clipboard',
+          share_method: navigator.share ? 'native' : 'clipboard',
+          rank,
+          solved,
         });
       }
-    } catch (err) {
-      console.error('Failed to copy:', err);
     }
   };
 
@@ -86,8 +86,8 @@ export default function ShareCard({ rank, solved, answer, guesses, shareUrl, cha
             </>
           ) : (
             <>
-              <Share2 size={18} />
-              Share Result
+              {navigator.share ? <Share2 size={18} /> : <Copy size={18} />}
+              {navigator.share ? 'Share Result' : 'Copy Result'}
             </>
           )}
         </button>
