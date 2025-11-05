@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, Check, AlertCircle } from 'lucide-react';
 import Logo from '../components/Logo';
-import PhaseChips from '../components/PhaseChips';
-import SentenceCard from '../components/SentenceCard';
 import { getSessionId, logPreview, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -294,7 +292,7 @@ export default function CreateChallenge() {
           <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
             <div className="text-center">
               <h2 className="text-2xl font-serif font-bold text-neutral-900">Customize Your Challenge</h2>
-              <p className="text-sm text-neutral-600 mt-1">Choose the difficulty level for each phase</p>
+              <p className="text-sm text-neutral-600 mt-1">Choose the difficulty level for each hint type</p>
             </div>
 
             {difficultyReasoning && (
@@ -311,7 +309,7 @@ export default function CreateChallenge() {
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-8">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-700">Phase 1 - Five Words</h3>
+                  <h3 className="text-lg font-semibold text-neutral-700">Five Words <span className="text-sm text-neutral-500">(Shown Last)</span></h3>
                   <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
                 </div>
                 <div className="space-y-3">
@@ -350,7 +348,7 @@ export default function CreateChallenge() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-700">Phase 2 - One Sentence</h3>
+                  <h3 className="text-lg font-semibold text-neutral-700">One Sentence <span className="text-sm text-neutral-500">(Shown Second)</span></h3>
                   <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
                 </div>
                 <div className="space-y-3">
@@ -379,8 +377,8 @@ export default function CreateChallenge() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-700 text-center">Phase 3 - Categories</h3>
-                <p className="text-xs text-neutral-500 text-center">These categories are fixed and cannot be changed</p>
+                <h3 className="text-lg font-semibold text-neutral-700 text-center">Categories <span className="text-sm text-neutral-500">(Shown First)</span></h3>
+                <p className="text-xs text-neutral-500 text-center">Player picks one category to see first. These hints are fixed and cannot be changed</p>
                 <div className="grid gap-3">
                   {Object.entries(challengeData.phase3).map(([key, value]) => (
                     <div key={key} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">

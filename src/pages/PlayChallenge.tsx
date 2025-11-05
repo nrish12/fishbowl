@@ -233,13 +233,9 @@ export default function PlayChallenge() {
     }
   };
 
-  const handleRevealPhase2 = () => {
-    setPhase(2);
-  };
-
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
-    setPhase(3);
+    setPhase(2);
   };
 
   if (gameState === 'loading') {
@@ -294,17 +290,7 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            <PhaseChips words={hints.phase1} revealed={phase >= 1} />
-
-            {phase >= 2 && (
-              <SentenceCard
-                sentence={hints.phase2}
-                revealed={phase >= 2}
-                onReveal={phase === 1 ? handleRevealPhase2 : undefined}
-              />
-            )}
-
-            {phase === 3 && !selectedCategory && (
+            {phase === 1 && !selectedCategory && (
               <CategoryPicker
                 categories={hints.phase3}
                 revealed={false}
@@ -320,6 +306,16 @@ export default function PlayChallenge() {
                 selectedCategory={selectedCategory}
               />
             )}
+
+            {phase >= 2 && (
+              <SentenceCard
+                sentence={hints.phase2}
+                revealed={phase >= 2}
+                onReveal={undefined}
+              />
+            )}
+
+            <PhaseChips words={hints.phase1} revealed={phase >= 3} />
 
             {isThinking && (
               <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
@@ -355,12 +351,14 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            <div className="space-y-4">
-              <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
-              <div className="text-center text-sm text-neutral-500">
-                Phase {phase} of 3 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+            {selectedCategory && (
+              <div className="space-y-4">
+                <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+                <div className="text-center text-sm text-neutral-500">
+                  Phase {phase} of 3 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

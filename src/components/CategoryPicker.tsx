@@ -37,7 +37,7 @@ export default function CategoryPicker({
             Choose your lens.
           </h2>
           <p className="text-sm text-neutral-600">
-            Pick one category for your final clue
+            Pick one category for your first clue
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

@@ -9,7 +9,7 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-neutral-700 text-center">
-        Five words. Build the picture.
+        Five words. Final hints.
       </h2>
       <div className="flex flex-wrap items-center justify-center gap-3">
         {words.map((word, index) => (
