@@ -1,7 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { getCorsHeaders } from "../_shared/cors.ts";
-import { validateEnv } from "../_shared/env-validation.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+};
 
 function normalizeGuess(text: string): string {
   let normalized = text.toLowerCase().trim();
@@ -13,15 +17,12 @@ function normalizeGuess(text: string): string {
 }
 
 Deno.serve(async (req: Request) => {
-  const origin = req.headers.get("origin");
-  const corsHeaders = getCorsHeaders(origin);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
-    validateEnv(["CHALLENGE_SIGNING_SECRET", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
     const { token, guess, phase, player_fingerprint } = await req.json();
 
     if (!token || !guess) {
