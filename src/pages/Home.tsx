@@ -64,7 +64,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-8 text-sm text-neutral-700">
             <div className="flex flex-col items-center">
               <span className="font-serif text-2xl text-gold">5</span>
-              <span>Words</span>
+              <span>Categories</span>
             </div>
             <div className="w-8 h-px bg-neutral-300" />
             <div className="flex flex-col items-center">
@@ -74,7 +74,7 @@ export default function Home() {
             <div className="w-8 h-px bg-neutral-300" />
             <div className="flex flex-col items-center">
               <span className="font-serif text-2xl text-gold">5</span>
-              <span>Categories</span>
+              <span>Words</span>
             </div>
           </div>
           <p className="text-xs text-neutral-500 max-w-md mx-auto pt-2">

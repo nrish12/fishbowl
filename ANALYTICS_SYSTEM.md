@@ -8,8 +8,8 @@ I've built a complete analytics and tracking system for your challenge game. Her
 
 ### 1. Challenge Creation & Previews
 - **Every input** users type when creating challenges (even if abandoned)
-- All 3 variations generated for Phase 1 (5 words)
-- All 3 variations generated for Phase 2 (sentence)
+- All 3 variations generated for 5 words hint
+- All 3 variations generated for sentence hint
 - Which specific options they selected (0, 1, or 2)
 - Whether they finalized and shared the challenge
 - Session ID to track individual creators
@@ -95,7 +95,7 @@ For each challenge, you can display:
 - Total unique visitors
 - Total completions
 - Completion rate (% who solved it)
-- How many solved on Phase 1 vs Phase 2 vs Phase 3
+- How many solved after seeing categories only (Gold), categories + sentence (Silver), or all hints (Bronze)
 - Average number of attempts
 - Average time to complete
 - Total shares
