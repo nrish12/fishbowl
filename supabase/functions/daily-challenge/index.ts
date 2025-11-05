@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (existing && existing.challenges) {
-      const challenge = existing.challenges;
+      const challenge = existing.challenges as any;
       const token = await createToken(challenge);
 
       return new Response(
@@ -121,8 +121,8 @@ Deno.serve(async (req: Request) => {
     const subjectIndex = Math.floor(Math.random() * subjects.length);
     const target = subjects[subjectIndex];
 
-    const validateUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/validate-challenge`;
-    const validateResponse = await fetch(validateUrl, {
+    const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
+    const createResponse = await fetch(createUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,12 +131,15 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({ type, target }),
     });
 
-    if (!validateResponse.ok) {
-      const errorData = await validateResponse.json();
+    if (!createResponse.ok) {
+      const errorData = await createResponse.json();
       throw new Error(`Failed to generate challenge: ${errorData.error || errorData.reason || 'Unknown error'}`);
     }
 
-    const challengeData = await validateResponse.json();
+    const challengeData = await createResponse.json();
+
+    const selectedPhase1Index = 1;
+    const selectedPhase2Index = 1;
 
     const { data: newChallenge, error: challengeInsertError } = await supabase
       .from("challenges")
@@ -146,8 +149,8 @@ Deno.serve(async (req: Request) => {
         target: challengeData.target,
         aliases: challengeData.aliases,
         hints: {
-          phase1_options: challengeData.phase1_options,
-          phase2_options: challengeData.phase2_options,
+          phase1: challengeData.phase1_options[selectedPhase1Index],
+          phase2: challengeData.phase2_options[selectedPhase2Index],
           phase3: challengeData.phase3,
         },
         fame_score: challengeData.fame_score,

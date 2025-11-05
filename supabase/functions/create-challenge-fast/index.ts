@@ -69,7 +69,10 @@ Respond with ONLY a JSON object:
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: scorePrompt }],
+        messages: [
+          { role: "system", content: "You are a helpful assistant that responds in JSON format." },
+          { role: "user", content: scorePrompt }
+        ],
         temperature: 0.3,
         response_format: { type: "json_object" },
       }),
@@ -261,7 +264,10 @@ Respond with ONLY valid JSON:
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: validationPrompt }],
+          messages: [
+            { role: "system", content: "You are a helpful assistant that responds in JSON format." },
+            { role: "user", content: validationPrompt }
+          ],
           temperature: 0.3,
           response_format: { type: "json_object" },
         }),
