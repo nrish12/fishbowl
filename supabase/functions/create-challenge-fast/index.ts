@@ -150,10 +150,18 @@ For disambiguation:
 
 For normal approval/rejection:
 {
-  "status": "APPROVED" or "REJECTED",
-  "fame_score": 0-5,
+  "status": "APPROVED",
+  "fame_score": 4,
+  "reason": "clear explanation"
+}
+
+OR
+
+{
+  "status": "REJECTED",
+  "fame_score": 1,
   "reason": "clear explanation",
-  "suggestion": "if rejected, provide alternative"
+  "suggestion": "alternative suggestion"
 }`;
 
     let phase2Guidance = '';
