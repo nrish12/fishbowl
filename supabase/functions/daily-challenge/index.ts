@@ -118,25 +118,37 @@ Deno.serve(async (req: Request) => {
     const typeIndex = new Date().getDate() % 3;
     const type = types[typeIndex];
     const subjects = FAMOUS_SUBJECTS[type];
-    const subjectIndex = Math.floor(Math.random() * subjects.length);
-    const target = subjects[subjectIndex];
 
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
-    const createResponse = await fetch(createUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-      },
-      body: JSON.stringify({ type, target }),
-    });
+    let challengeData = null;
+    let attempts = 0;
+    const maxAttempts = 5;
 
-    if (!createResponse.ok) {
-      const errorData = await createResponse.json();
-      throw new Error(`Failed to generate challenge: ${errorData.error || errorData.reason || 'Unknown error'}`);
+    while (!challengeData && attempts < maxAttempts) {
+      const subjectIndex = Math.floor(Math.random() * subjects.length);
+      const target = subjects[subjectIndex];
+      attempts++;
+
+      const createResponse = await fetch(createUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+        },
+        body: JSON.stringify({ type, target }),
+      });
+
+      if (createResponse.ok) {
+        challengeData = await createResponse.json();
+        break;
+      } else {
+        const errorData = await createResponse.json();
+        console.log(`Attempt ${attempts} failed for ${target}:`, errorData.error || errorData.reason);
+        if (attempts >= maxAttempts) {
+          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts`);
+        }
+      }
     }
-
-    const challengeData = await createResponse.json();
 
     const selectedPhase1Index = 1;
     const selectedPhase2Index = 1;
