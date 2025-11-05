@@ -1,4 +1,5 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const SESSION_KEY = 'clueladder_session_id';
 
 export function getSessionId(): string {
@@ -27,6 +28,7 @@ export async function logPreview(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         type,
@@ -60,6 +62,7 @@ export async function trackEvent(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         event_type: eventType,
@@ -76,7 +79,12 @@ export async function trackEvent(
 export async function getLeaderboard(challengeId: string): Promise<any> {
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/get-leaderboard?challenge_id=${challengeId}`
+      `${SUPABASE_URL}/functions/v1/get-leaderboard?challenge_id=${challengeId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      }
     );
 
     if (response.ok) {

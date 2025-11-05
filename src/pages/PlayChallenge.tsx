@@ -12,6 +12,7 @@ import { Leaderboard } from '../components/Leaderboard';
 import { trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 interface Hints {
   phase1: string[];
@@ -135,7 +136,11 @@ export default function PlayChallenge() {
 
   const loadChallenge = async () => {
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/resolve-challenge?t=${token}`);
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/resolve-challenge?t=${token}`, {
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -176,7 +181,10 @@ export default function PlayChallenge() {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           token,
           guess,
@@ -207,7 +215,10 @@ export default function PlayChallenge() {
         if (lives - 1 <= 0) {
           const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
             body: JSON.stringify({
               token,
               guess: '__reveal__',

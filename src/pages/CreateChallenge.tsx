@@ -5,6 +5,7 @@ import Logo from '../components/Logo';
 import { getSessionId, logPreview, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 type ChallengeType = 'person' | 'place' | 'thing';
 
@@ -61,7 +62,10 @@ export default function CreateChallenge() {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/create-challenge-fast`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({ type, target: target.trim() }),
       });
 
@@ -98,9 +102,10 @@ export default function CreateChallenge() {
         console.error('Preview logging failed:', err);
       });
     } catch (err: any) {
+      console.error('Create challenge error:', err);
       setError({
         error: 'Connection Error',
-        reason: 'Unable to connect to the server. Please check your internet connection and try again.',
+        reason: err?.message || 'Unable to connect to the server. Please check your internet connection and try again.',
       });
     } finally {
       setLoading(false);
@@ -114,7 +119,10 @@ export default function CreateChallenge() {
       try {
         const response = await fetch(`${SUPABASE_URL}/functions/v1/suggest-difficulty`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
           body: JSON.stringify({
             type: challengeData.type,
             fame_score: challengeData.fame_score,
@@ -146,7 +154,10 @@ export default function CreateChallenge() {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/finalize-challenge`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           challenge_id: challengeData.challenge_id,
           type: challengeData.type,

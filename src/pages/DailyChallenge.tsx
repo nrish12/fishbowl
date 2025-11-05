@@ -4,6 +4,7 @@ import { Calendar, Loader2, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export default function DailyChallenge() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function DailyChallenge() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
       });
 
