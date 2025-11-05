@@ -138,21 +138,44 @@ Deno.serve(async (req: Request) => {
 
     const challengeData = await validateResponse.json();
 
-    const { error: insertError } = await supabase
+    const { data: newChallenge, error: challengeInsertError } = await supabase
+      .from("challenges")
+      .insert({
+        id: challengeData.challenge_id,
+        type: challengeData.type,
+        target: challengeData.target,
+        aliases: challengeData.aliases,
+        hints: {
+          phase1_options: challengeData.phase1_options,
+          phase2_options: challengeData.phase2_options,
+          phase3: challengeData.phase3,
+        },
+        fame_score: challengeData.fame_score,
+      })
+      .select()
+      .single();
+
+    if (challengeInsertError) {
+      throw challengeInsertError;
+    }
+
+    const { error: dailyInsertError } = await supabase
       .from("daily_challenges")
       .insert({
         challenge_date: today,
         challenge_id: challengeData.challenge_id,
       });
 
-    if (insertError) {
-      throw insertError;
+    if (dailyInsertError) {
+      throw dailyInsertError;
     }
+
+    const token = await createToken(newChallenge);
 
     return new Response(
       JSON.stringify({
         challenge_id: challengeData.challenge_id,
-        token: challengeData.token,
+        token,
         date: today,
         type,
         message: "New daily challenge generated"
