@@ -32,6 +32,23 @@ interface ErrorResponse {
   suggestion?: string;
 }
 
+interface ClarificationResponse {
+  status: 'needs_clarification';
+  corrected_name: string;
+  reason: string;
+}
+
+interface DisambiguationOption {
+  name: string;
+  description: string;
+}
+
+interface DisambiguationResponse {
+  status: 'needs_disambiguation';
+  options: DisambiguationOption[];
+  reason: string;
+}
+
 export default function CreateChallenge() {
   const [type, setType] = useState<ChallengeType>('person');
   const [target, setTarget] = useState('');
@@ -45,6 +62,8 @@ export default function CreateChallenge() {
   const [finalizing, setFinalizing] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [difficultyReasoning, setDifficultyReasoning] = useState<string>('');
+  const [clarification, setClarification] = useState<ClarificationResponse | null>(null);
+  const [disambiguation, setDisambiguation] = useState<DisambiguationResponse | null>(null);
 
   const handleGenerate = async () => {
     if (!target.trim()) {
@@ -58,6 +77,8 @@ export default function CreateChallenge() {
     setShareUrl(null);
     setSelectedPhase1(0);
     setSelectedPhase2(0);
+    setClarification(null);
+    setDisambiguation(null);
 
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/create-challenge-fast`, {
@@ -70,6 +91,16 @@ export default function CreateChallenge() {
       });
 
       const data = await response.json();
+
+      if (data.status === 'needs_clarification') {
+        setClarification(data);
+        return;
+      }
+
+      if (data.status === 'needs_disambiguation') {
+        setDisambiguation(data);
+        return;
+      }
 
       if (!response.ok) {
         if (response.status === 503) {
@@ -264,6 +295,62 @@ export default function CreateChallenge() {
               />
             </label>
           </div>
+
+          {clarification && (
+            <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <AlertCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
+              <div className="flex-1 space-y-3">
+                <p className="text-sm font-semibold text-blue-900">Did you mean "{clarification.corrected_name}"?</p>
+                <p className="text-sm text-blue-700">{clarification.reason}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setTarget(clarification.corrected_name);
+                      setClarification(null);
+                      setTimeout(() => handleGenerate(), 100);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Yes, use "{clarification.corrected_name}"
+                  </button>
+                  <button
+                    onClick={() => setClarification(null)}
+                    className="px-4 py-2 bg-white text-blue-600 border border-blue-300 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+                  >
+                    No, keep my spelling
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {disambiguation && (
+            <div className="space-y-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-900">Which one did you mean?</p>
+                  <p className="text-sm text-amber-700 mt-1">{disambiguation.reason}</p>
+                </div>
+              </div>
+              <div className="space-y-2 mt-3">
+                {disambiguation.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setTarget(option.name);
+                      setDisambiguation(null);
+                      setTimeout(() => handleGenerate(), 100);
+                    }}
+                    className="w-full p-3 bg-white border border-amber-200 rounded-lg text-left hover:border-amber-400 hover:bg-amber-50 transition-all duration-200"
+                  >
+                    <p className="text-sm font-semibold text-neutral-900">{option.name}</p>
+                    <p className="text-xs text-neutral-600 mt-1">{option.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">

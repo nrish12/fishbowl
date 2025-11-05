@@ -17,15 +17,21 @@ function extractJSON(text: string): any {
 }
 
 interface ValidationResult {
-  status: "APPROVED" | "REJECTED";
+  status: "APPROVED" | "REJECTED" | "NEEDS_CLARIFICATION" | "NEEDS_DISAMBIGUATION";
   fame_score: number;
   reason: string;
   suggestion?: string;
+  corrected_name?: string;
+  disambiguation_options?: Array<{
+    name: string;
+    description: string;
+  }>;
 }
 
 interface ChallengeRequest {
   type: "person" | "place" | "thing";
   target: string;
+  confirmed?: boolean;
 }
 
 Deno.serve(async (req: Request) => {
@@ -68,12 +74,36 @@ Fame score scale (0-5):
 
 Input target: ${type}:${target}
 
-Respond with ONLY valid JSON in this exact format:
+IMPORTANT CHECKS:
+1. MISSPELLING: If the input appears to be a misspelling of a famous ${type}, return status "NEEDS_CLARIFICATION" with the corrected name
+2. DISAMBIGUATION: If there are multiple famous ${type}s with this exact name (e.g., multiple celebrities, different locations), return status "NEEDS_DISAMBIGUATION" with up to 5 most famous options
+3. Otherwise, evaluate normally
+
+Respond with ONLY valid JSON in one of these formats:
+
+For misspellings:
+{
+  "status": "NEEDS_CLARIFICATION",
+  "corrected_name": "the correct spelling",
+  "reason": "friendly message explaining the misspelling"
+}
+
+For disambiguation (multiple people/places/things with same name):
+{
+  "status": "NEEDS_DISAMBIGUATION",
+  "disambiguation_options": [
+    {"name": "Full specific name/title", "description": "brief distinguishing detail (occupation, era, location, etc.)"},
+    {"name": "Another option", "description": "distinguishing detail"}
+  ],
+  "reason": "There are multiple famous ${type}s with this name"
+}
+
+For normal approval/rejection:
 {
   "status": "APPROVED" or "REJECTED",
   "fame_score": 0-5,
-  "reason": "clear explanation of why this was approved or rejected",
-  "suggestion": "if rejected, provide a helpful suggestion for a more famous/suitable alternative in the same category. Make it specific and encouraging."
+  "reason": "clear explanation",
+  "suggestion": "if rejected, provide alternative"
 }`;
 
     const validationResponse = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -107,6 +137,28 @@ Respond with ONLY valid JSON in this exact format:
     const validationData = await validationResponse.json();
     const validationContent = validationData.choices[0].message.content;
     const validationResult: ValidationResult = extractJSON(validationContent);
+
+    if (validationResult.status === "NEEDS_CLARIFICATION") {
+      return new Response(
+        JSON.stringify({
+          status: "needs_clarification",
+          corrected_name: validationResult.corrected_name,
+          reason: validationResult.reason,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (validationResult.status === "NEEDS_DISAMBIGUATION") {
+      return new Response(
+        JSON.stringify({
+          status: "needs_disambiguation",
+          options: validationResult.disambiguation_options,
+          reason: validationResult.reason,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (validationResult.status === "REJECTED" || validationResult.fame_score < 3) {
       return new Response(
