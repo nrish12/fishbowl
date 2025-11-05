@@ -319,40 +319,14 @@ export default function CreateChallenge() {
 
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-8">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-700">Five Words <span className="text-sm text-neutral-500">(Shown Last)</span></h3>
-                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
-                </div>
-                <div className="space-y-3">
-                  {challengeData.phase1_options.map((words, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedPhase1(index)}
-                      className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                        selectedPhase1 === index
-                          ? 'border-gold bg-gold/5'
-                          : 'border-neutral-200 hover:border-neutral-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                          {index === 0 ? 'Easier' : index === 1 ? 'Medium' : 'Harder'}
-                        </span>
-                        {selectedPhase1 === index && (
-                          <Check className="text-gold" size={16} />
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {words.map((word, i) => (
-                          <span
-                            key={i}
-                            className="px-3 py-1 bg-neutral-100 rounded-full text-sm font-medium text-neutral-900"
-                          >
-                            {word}
-                          </span>
-                        ))}
-                      </div>
-                    </button>
+                <h3 className="text-lg font-semibold text-neutral-700 text-center">Categories <span className="text-sm text-neutral-500">(Shown First)</span></h3>
+                <p className="text-xs text-neutral-500 text-center">Player picks one category to see first. These hints are fixed and cannot be changed</p>
+                <div className="grid gap-3">
+                  {Object.entries(challengeData.phase3).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                      <span className="text-sm font-semibold text-neutral-900 uppercase tracking-wider">{key}</span>
+                      <p className="text-sm text-neutral-700 mt-1">{value}</p>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -388,14 +362,40 @@ export default function CreateChallenge() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-700 text-center">Categories <span className="text-sm text-neutral-500">(Shown First)</span></h3>
-                <p className="text-xs text-neutral-500 text-center">Player picks one category to see first. These hints are fixed and cannot be changed</p>
-                <div className="grid gap-3">
-                  {Object.entries(challengeData.phase3).map(([key, value]) => (
-                    <div key={key} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                      <span className="text-sm font-semibold text-neutral-900 uppercase tracking-wider">{key}</span>
-                      <p className="text-sm text-neutral-700 mt-1">{value}</p>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-neutral-700">Five Words <span className="text-sm text-neutral-500">(Shown Last)</span></h3>
+                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
+                </div>
+                <div className="space-y-3">
+                  {challengeData.phase1_options.map((words, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedPhase1(index)}
+                      className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                        selectedPhase1 === index
+                          ? 'border-gold bg-gold/5'
+                          : 'border-neutral-200 hover:border-neutral-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                          {index === 0 ? 'Easier' : index === 1 ? 'Medium' : 'Harder'}
+                        </span>
+                        {selectedPhase1 === index && (
+                          <Check className="text-gold" size={16} />
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {words.map((word, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 bg-neutral-100 rounded-full text-sm font-medium text-neutral-900"
+                          >
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
                   ))}
                 </div>
               </div>

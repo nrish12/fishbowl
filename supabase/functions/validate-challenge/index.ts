@@ -1,7 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { getCorsHeaders } from "../_shared/cors.ts";
-import { validateEnv } from "../_shared/env-validation.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Max-Age": "86400",
+};
 
 function extractJSON(text: string): any {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -24,15 +29,12 @@ interface ChallengeRequest {
 }
 
 Deno.serve(async (req: Request) => {
-  const origin = req.headers.get("origin");
-  const corsHeaders = getCorsHeaders(origin);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
-    validateEnv(["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
     const { type, target }: ChallengeRequest = await req.json();
 
     if (!type || !target || !["person", "place", "thing"].includes(type)) {
