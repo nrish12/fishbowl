@@ -1,6 +1,31 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "https://clueladder.com",
+];
+
+function getCorsHeaders(origin: string | null) {
+  const corsHeaders = {
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Access-Control-Max-Age": "86400",
+  };
+
+  if (origin && allowedOrigins.includes(origin)) {
+    return {
+      ...corsHeaders,
+      "Access-Control-Allow-Origin": origin,
+    };
+  }
+
+  return {
+    ...corsHeaders,
+    "Access-Control-Allow-Origin": allowedOrigins[0],
+  };
+}
 
 const FAMOUS_SUBJECTS = {
   person: [
