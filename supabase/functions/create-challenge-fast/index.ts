@@ -203,9 +203,10 @@ MEDIUM Version:
 - Include broader themes and contexts
 
 HARDER Version:
-- Use VERY ABSTRACT and SUBTLE words
+- Use VERY ABSTRACT and SUBTLE words (but still factual)
 - Cryptic associations that require deep thought
 - Avoid obvious connections - think laterally
+- NO purely abstract concepts - words should still relate to real facts
 
 PHASE 2 - One Sentence (3 variations):
 
@@ -215,13 +216,15 @@ EASIER Version:
 
 MEDIUM Version:
 - Be MODERATELY SPECIFIC with some inference required
-- Use less direct language than easier version
+- Use factual but less direct language than easier version
+- NO poetic language - stick to concrete details
 
 HARDER Version:
-- Be CRYPTIC but still informative (not purely poetic)
+- Be CRYPTIC but FACTUAL - absolutely NO poetic or flowery language
 - Use indirect language and lateral thinking
-- Describe specific details in an abstract way
-- Should make people think, but still be solvable with logic
+- Describe SPECIFIC CONCRETE FACTS in an abstract way
+- Focus on verifiable details, not metaphors or artistic descriptions
+- Should make people think, but still be solvable with logic and knowledge
 
 Phase 3 - Five categories (same for all difficulties):
 ${phase3Guidance}

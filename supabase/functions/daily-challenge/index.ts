@@ -150,8 +150,9 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const selectedPhase1Index = 1;
-    const selectedPhase2Index = 1;
+    // Randomly choose between medium (1) and hard (2) difficulty
+    const selectedPhase1Index = Math.random() < 0.5 ? 1 : 2;
+    const selectedPhase2Index = Math.random() < 0.5 ? 1 : 2;
 
     const { data: newChallenge, error: challengeInsertError } = await supabase
       .from("challenges")

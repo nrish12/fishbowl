@@ -111,6 +111,48 @@ export default function DevTools() {
     }
   };
 
+  const forceNewDailyChallenge = async () => {
+    if (confirm('Force generate a new daily challenge for today? This will replace the existing one.')) {
+      setLoading(true);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Delete today's daily challenge
+        const deleteResponse = await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!deleteResponse.ok) {
+          throw new Error('Failed to delete existing daily challenge');
+        }
+
+        // Generate new one
+        const createResponse = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        });
+
+        if (createResponse.ok) {
+          const data = await createResponse.json();
+          alert(`New daily challenge created: ${data.type} challenge`);
+          loadStats();
+        } else {
+          throw new Error('Failed to generate new daily challenge');
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -217,13 +259,21 @@ export default function DevTools() {
 
             <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
               <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
-              <div className="grid md:grid-cols-3 gap-3">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <button
                   onClick={clearCache}
                   className="px-4 py-3 bg-red-900/20 hover:bg-red-900/30 border border-red-700 rounded-lg flex items-center justify-center gap-2 transition-colors"
                 >
                   <Trash2 size={16} />
                   Clear API Cache
+                </button>
+                <button
+                  onClick={forceNewDailyChallenge}
+                  disabled={loading}
+                  className="px-4 py-3 bg-green-900/20 hover:bg-green-900/30 border border-green-700 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                  Force New Daily
                 </button>
                 <Link
                   to="/create"
