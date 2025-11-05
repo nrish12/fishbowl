@@ -1,30 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:4173",
-  "https://clueladder.com",
-];
-
-function getCorsHeaders(origin: string | null) {
-  const corsHeaders = {
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-    "Access-Control-Max-Age": "86400",
-  };
-
-  if (origin && allowedOrigins.includes(origin)) {
-    return {
-      ...corsHeaders,
-      "Access-Control-Allow-Origin": origin,
-    };
-  }
-
-  return {
-    ...corsHeaders,
-    "Access-Control-Allow-Origin": allowedOrigins[0],
-  };
-}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Max-Age": "86400",
+};
 
 function extractJSON(text: string): any {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -103,8 +84,6 @@ Respond with ONLY a JSON object:
 }
 
 Deno.serve(async (req: Request) => {
-  const origin = req.headers.get("origin");
-  const corsHeaders = getCorsHeaders(origin);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
