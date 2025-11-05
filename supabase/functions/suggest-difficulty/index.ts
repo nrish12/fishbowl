@@ -45,14 +45,16 @@ Deno.serve(async (req: Request) => {
       .limit(20);
 
     if (!perfData || perfData.length === 0) {
-      const defaultDifficulty = fame_score >= 4 ? 1 : 0;
+      // Randomly choose between medium (1) and hard (2)
+      const phase1Difficulty = Math.random() < 0.5 ? 1 : 2;
+      const phase2Difficulty = Math.random() < 0.5 ? 1 : 2;
 
       return new Response(
         JSON.stringify({
-          recommended_phase1_index: defaultDifficulty,
-          recommended_phase2_index: defaultDifficulty,
+          recommended_phase1_index: phase1Difficulty,
+          recommended_phase2_index: phase2Difficulty,
           confidence_score: 0.3,
-          reasoning: "Using default difficulty (no historical data yet)",
+          reasoning: "Using medium-hard difficulty (no historical data yet)",
           data_points: 0,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -73,7 +75,10 @@ Deno.serve(async (req: Request) => {
       const silverRatio = total > 0 ? perf.silver_completions / total : 0;
       const balanceScore = 1 - Math.abs(silverRatio - 0.6);
 
-      const finalScore = (completionScore * 0.5) + (timeScore * 0.3) + (balanceScore * 0.2);
+      // Bias towards medium (1) and hard (2) difficulty
+      const difficultyBonus = (perf.selected_phase1_index >= 1 && perf.selected_phase2_index >= 1) ? 0.15 : 0;
+
+      const finalScore = (completionScore * 0.5) + (timeScore * 0.3) + (balanceScore * 0.2) + difficultyBonus;
 
       return {
         ...perf,
