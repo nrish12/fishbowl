@@ -63,8 +63,8 @@ export default function Home() {
           </h3>
           <div className="flex items-center justify-center gap-8 text-sm text-neutral-700">
             <div className="flex flex-col items-center">
-              <span className="font-serif text-2xl text-gold">5</span>
-              <span>Categories</span>
+              <span className="font-serif text-2xl text-gold">1</span>
+              <span>Category</span>
             </div>
             <div className="w-8 h-px bg-neutral-300" />
             <div className="flex flex-col items-center">
