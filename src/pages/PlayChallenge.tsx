@@ -246,7 +246,6 @@ export default function PlayChallenge() {
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
-    setPhase(2);
   };
 
   if (gameState === 'loading') {
@@ -301,7 +300,17 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {phase === 1 && !selectedCategory && (
+            <PhaseChips words={hints.phase1} revealed={true} />
+
+            {phase >= 2 && (
+              <SentenceCard
+                sentence={hints.phase2}
+                revealed={true}
+                onReveal={undefined}
+              />
+            )}
+
+            {phase >= 3 && !selectedCategory && (
               <CategoryPicker
                 categories={hints.phase3}
                 revealed={false}
@@ -310,23 +319,13 @@ export default function PlayChallenge() {
               />
             )}
 
-            {selectedCategory && (
+            {phase >= 3 && selectedCategory && (
               <CategoryPicker
                 categories={hints.phase3}
                 revealed={true}
                 selectedCategory={selectedCategory}
               />
             )}
-
-            {phase >= 2 && (
-              <SentenceCard
-                sentence={hints.phase2}
-                revealed={phase >= 2}
-                onReveal={undefined}
-              />
-            )}
-
-            <PhaseChips words={hints.phase1} revealed={phase >= 3} />
 
             {isThinking && (
               <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
