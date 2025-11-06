@@ -31,6 +31,13 @@ const FAMOUS_SUBJECTS = {
   ]
 };
 
+function base64UrlEncode(str: string): string {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const base64 = btoa(String.fromCharCode(...data));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
 async function createToken(challenge: any): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const expiresIn = 7 * 24 * 60 * 60;
@@ -62,8 +69,8 @@ async function createToken(challenge: any): Promise<string> {
   );
 
   const header = { alg: "HS256", typ: "JWT" };
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, "");
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, "");
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
   const signatureData = encoder.encode(`${encodedHeader}.${encodedPayload}`);
   const signature = await crypto.subtle.sign("HMAC", key, signatureData);
   const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
@@ -150,7 +157,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Randomly choose between medium (1) and hard (2) difficulty
     const selectedPhase1Index = Math.random() < 0.5 ? 1 : 2;
     const selectedPhase2Index = Math.random() < 0.5 ? 1 : 2;
 
