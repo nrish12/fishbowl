@@ -361,7 +361,7 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {selectedCategory && (
+            {(phase < 3 || selectedCategory) && (
               <div className="space-y-4">
                 <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
                 <div className="text-center text-sm text-neutral-500">
