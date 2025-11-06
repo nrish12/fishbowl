@@ -9,39 +9,54 @@ const corsHeaders = {
 };
 
 async function generateRandomSubject(type: string, previousTarget: string | null, openaiKey: string): Promise<string> {
-  const prompt = `Generate a random famous ${type} for a deduction-based guessing game where players get progressive hints.
+  const prompt = `Generate a random famous ${type} for a mainstream guessing game played by average adults.
 
-CRITICAL REQUIREMENTS:
-- Fame level: 3.5-4 out of 5 (recognizable to most educated adults, but not the first name everyone thinks of)
-- Must be REASONABLY GUESSABLE - if someone gets good hints, they should be able to figure it out
-- NOT too niche or specialized (avoid deep-cut art history, obscure figures, etc.)
-- Appropriate for a public game (no controversial/sensitive figures)
+CRITICAL - READ THIS CAREFULLY:
+- Must be recognizable to the GENERAL PUBLIC, not just educated/art enthusiasts
+- Fame level: 4 out of 5 minimum - if 100 random Americans were surveyed, at least 60-70 would recognize the name
+- Think "Family Feud survey says" or "Trivial Pursuit" level - NOT academic Jeopardy
 - ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
 
-THE SWEET SPOT - Pick subjects that are:
-✓ Famous enough that most adults have heard of them
-✓ Interesting and varied (not the same predictable choices)
-✓ Solvable with good deductive hints
-✗ NOT instant guesses (avoid Einstein, Mona Lisa level obvious)
-✗ NOT too obscure (avoid niche academic knowledge)
+THE TEST: Would your parents/grandparents know this? Would it be in a high school history/culture textbook?
+✓ YES = Good choice
+✗ NO = Too obscure, pick something else
 
 ${type === 'person' ? `
-GOOD examples: Cleopatra, Rosa Parks, Leonardo da Vinci, Martin Luther King Jr., Marie Curie, Beethoven, Vincent van Gogh, Serena Williams, Nelson Mandela, Abraham Lincoln
-AVOID TOO OBVIOUS: Albert Einstein, George Washington, Jesus, Shakespeare
-AVOID TOO OBSCURE: Ada Lovelace, Emmy Noether, obscure historical figures
-- Mix eras and fields, but keep them recognizable` : ''}
-${type === 'place' ? `
-GOOD examples: Grand Canyon, Big Ben, Mount Rushmore, Niagara Falls, Stonehenge, Sydney Opera House, Taj Mahal, Golden Gate Bridge, Machu Picchu, Great Barrier Reef
-AVOID TOO OBVIOUS: Eiffel Tower, Statue of Liberty
-AVOID TOO OBSCURE: Lesser-known temples, obscure monuments
-- Mix natural and man-made, but keep them recognizable` : ''}
-${type === 'thing' ? `
-GOOD examples: Statue of David, Golden Gate Bridge, Hubble Telescope, Super Bowl Trophy, Oscar Statuette, Liberty Bell, Coca-Cola, Nike Swoosh, Hollywood Sign, Monopoly
-AVOID TOO OBVIOUS: iPhone, Mona Lisa, Bitcoin
-AVOID TOO OBSCURE: "The Great Wave off Kanagawa", niche artworks, academic objects
-- Mix art, brands, inventions, and cultural icons - but keep them mainstream recognizable` : ''}
+GOOD examples:
+- Historical: Cleopatra, Abraham Lincoln, Julius Caesar, Queen Elizabeth I, Napoleon, Christopher Columbus
+- Artists: Leonardo da Vinci, Vincent van Gogh, Pablo Picasso, Michelangelo (STOP at these famous ones!)
+- Modern: Martin Luther King Jr., Rosa Parks, Muhammad Ali, Oprah Winfrey, Michael Jackson
+- Scientists: Marie Curie, Isaac Newton, Charles Darwin, Thomas Edison
 
-Pick something in that sweet spot: famous enough to be fair, interesting enough to not be boring.
+ABSOLUTELY AVOID:
+- Contemporary/modern artists: Yayoi Kusama, Banksy, Ai Weiwei, Marina Abramović, Jeff Koons
+- Niche historical figures: Ada Lovelace, Emmy Noether, lesser-known inventors
+- Academic figures unless VERY famous (Einstein level)
+- Anyone from art galleries/museums that isn't Leonardo/Van Gogh/Picasso/Michelangelo tier` : ''}
+${type === 'place' ? `
+GOOD examples:
+- Landmarks: Big Ben, Taj Mahal, Sydney Opera House, Golden Gate Bridge, Mount Rushmore, Hollywood Sign
+- Natural: Grand Canyon, Niagara Falls, Mount Everest, Great Barrier Reef, Yellowstone
+- Historical: Stonehenge, Colosseum, Parthenon, Machu Picchu
+
+ABSOLUTELY AVOID:
+- Lesser-known temples/shrines
+- Regional landmarks most Americans haven't heard of
+- Contemporary architecture unless iconic` : ''}
+${type === 'thing' ? `
+GOOD examples:
+- Art: Statue of David, The Last Supper, The Thinker (stick to the MOST famous)
+- Brands: Coca-Cola, Nike Swoosh, McDonald's Golden Arches, Disney
+- Icons: Liberty Bell, Olympic Rings, Hollywood Sign, Super Bowl Trophy, Oscar Statuette
+- Inventions: Light Bulb, Telephone, Television, Airplane
+
+ABSOLUTELY AVOID:
+- "The Great Wave off Kanagawa" or any Japanese prints
+- Contemporary art pieces
+- Obscure paintings/sculptures
+- Academic/niche objects` : ''}
+
+IMPORTANT: If you're even SLIGHTLY unsure if the average person would know it, pick something more mainstream!
 
 Respond with ONLY a JSON object:
 {
@@ -59,11 +74,11 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are a puzzle designer for a mainstream guessing game. Pick subjects that are famous and recognizable to most educated adults - not too obvious, but definitely not obscure. Think 'Jeopardy' level knowledge, not art history PhD."
+          content: "You are selecting subjects for a MAINSTREAM guessing game. Your audience is average American adults watching game shows, NOT art students or academics. Think 'Family Feud' level recognition - would 60+ out of 100 random people recognize this name? If not, pick something more famous. Avoid contemporary artists and niche academic subjects completely."
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.95,
+      temperature: 0.8,
       response_format: { type: "json_object" },
     }),
   });
