@@ -50,6 +50,7 @@ export default function PlayChallenge() {
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
 
   const STORAGE_KEY_PREFIX = 'clueladder_progress_';
+  const DAILY_CHALLENGE_DATE_KEY = 'clueladder_daily_date';
 
   const saveProgress = () => {
     if (!token) return;
@@ -62,6 +63,7 @@ export default function PlayChallenge() {
       startTime,
       selectedCategory,
       timestamp: Date.now(),
+      challengeId,
     };
 
     try {
@@ -102,6 +104,21 @@ export default function PlayChallenge() {
     localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
   };
 
+  const checkAndClearDailyChallenge = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastDaily = localStorage.getItem(DAILY_CHALLENGE_DATE_KEY);
+
+    if (lastDaily !== today) {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(STORAGE_KEY_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem(DAILY_CHALLENGE_DATE_KEY, today);
+    }
+  };
+
   useEffect(() => {
     if (!token) {
       setError('No challenge token provided');
@@ -109,6 +126,7 @@ export default function PlayChallenge() {
       return;
     }
 
+    checkAndClearDailyChallenge();
     loadChallenge();
   }, [token]);
 
@@ -300,9 +318,9 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            <PhaseChips words={hints.phase1} revealed={true} />
+            {phase >= 3 && <PhaseChips words={hints.phase1} revealed={true} />}
 
-            {phase >= 2 && (
+            {phase === 2 && (
               <SentenceCard
                 sentence={hints.phase2}
                 revealed={true}
@@ -310,7 +328,7 @@ export default function PlayChallenge() {
               />
             )}
 
-            {phase >= 3 && !selectedCategory && (
+            {phase === 1 && !selectedCategory && (
               <CategoryPicker
                 categories={hints.phase3}
                 revealed={false}
@@ -319,7 +337,7 @@ export default function PlayChallenge() {
               />
             )}
 
-            {phase >= 3 && selectedCategory && (
+            {phase === 1 && selectedCategory && (
               <CategoryPicker
                 categories={hints.phase3}
                 revealed={true}
@@ -361,7 +379,7 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {(phase < 3 || selectedCategory) && (
+            {((phase === 1 && selectedCategory) || phase > 1) && (
               <div className="space-y-4">
                 <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
                 <div className="text-center text-sm text-neutral-500">
