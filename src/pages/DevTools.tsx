@@ -117,18 +117,37 @@ export default function DevTools() {
       try {
         const today = new Date().toISOString().split('T')[0];
 
-        // Delete today's daily challenge
-        const deleteResponse = await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}`, {
-          method: 'DELETE',
+        // First get the existing daily challenge to find the challenge_id
+        const getResponse = await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}&select=challenge_id`, {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
           },
         });
 
-        if (!deleteResponse.ok) {
-          throw new Error('Failed to delete existing daily challenge');
+        if (getResponse.ok) {
+          const existingData = await getResponse.json();
+          if (existingData && existingData.length > 0) {
+            const challengeId = existingData[0].challenge_id;
+
+            // Delete from daily_challenges first
+            await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}`, {
+              method: 'DELETE',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              },
+            });
+
+            // Then delete the actual challenge
+            await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${challengeId}`, {
+              method: 'DELETE',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              },
+            });
+          }
         }
 
         // Generate new one
@@ -140,10 +159,11 @@ export default function DevTools() {
 
         if (createResponse.ok) {
           const data = await createResponse.json();
-          alert(`New daily challenge created: ${data.type} challenge`);
+          alert(`New daily challenge created!\nType: ${data.type}\nTarget: ${data.message}`);
           loadStats();
         } else {
-          throw new Error('Failed to generate new daily challenge');
+          const errorData = await createResponse.json();
+          throw new Error(errorData.error || 'Failed to generate new daily challenge');
         }
       } catch (error) {
         alert(`Error: ${error.message}`);
