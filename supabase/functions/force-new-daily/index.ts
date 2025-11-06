@@ -134,7 +134,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
         }
         // Try a different target
-        const newTarget = await generateRandomSubject(type, target, openaiKey);
+        target = await generateRandomSubject(type, target, openaiKey);
       }
     }
 
