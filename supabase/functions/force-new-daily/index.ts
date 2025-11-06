@@ -7,28 +7,49 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const FAMOUS_SUBJECTS = {
-  person: [
-    "Albert Einstein", "Leonardo da Vinci", "Marie Curie", "William Shakespeare",
-    "Cleopatra", "Napoleon Bonaparte", "Nelson Mandela", "Martin Luther King Jr.",
-    "Frida Kahlo", "Pablo Picasso", "Mozart", "Beethoven", "Elvis Presley",
-    "Michael Jordan", "Muhammad Ali", "Serena Williams", "Oprah Winfrey",
-    "Steve Jobs", "Bill Gates", "Elon Musk", "Barack Obama", "Queen Elizabeth II"
-  ],
-  place: [
-    "Eiffel Tower", "Great Wall of China", "Taj Mahal", "Grand Canyon",
-    "Mount Everest", "Statue of Liberty", "Colosseum", "Machu Picchu",
-    "Pyramids of Giza", "Stonehenge", "Niagara Falls", "Amazon Rainforest",
-    "Sahara Desert", "Great Barrier Reef", "Antarctica", "Yellowstone",
-    "Venice", "Tokyo", "Paris", "New York City", "London", "Sydney Opera House"
-  ],
-  thing: [
-    "Mona Lisa", "iPhone", "Coca-Cola", "Tesla", "Nike shoes", "Lego",
-    "Harry Potter books", "Star Wars", "Bitcoin", "Internet", "Wheel",
-    "Light bulb", "Airplane", "Telescope", "Microscope", "Bicycle",
-    "Piano", "Guitar", "Camera", "Television", "Smartphone", "Computer"
-  ]
-};
+async function generateRandomSubject(type: string, previousTarget: string | null, openaiKey: string): Promise<string> {
+  const prompt = `Generate a random famous ${type} for a guessing game.
+
+Requirements:
+- Must be globally famous (fame score 4-5)
+- Must be appropriate for a public game
+- ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
+
+Examples of suitable ${type}s:
+${type === 'person' ? '- Historical figures, celebrities, world leaders, athletes, artists' : ''}
+${type === 'place' ? '- Famous landmarks, cities, natural wonders, monuments' : ''}
+${type === 'thing' ? '- Iconic inventions, brands, cultural phenomena, famous objects' : ''}
+
+Respond with ONLY a JSON object:
+{
+  "target": "the famous ${type} name"
+}`;
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a helpful assistant that responds in JSON format." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 1.0,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate random subject");
+  }
+
+  const data = await response.json();
+  const result = JSON.parse(data.choices[0].message.content);
+  return result.target;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -44,18 +65,26 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiKey) {
+      throw new Error("OpenAI API key not configured");
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
-    // Get existing daily challenge to find what we had before
+    // Get existing daily challenge
     const { data: existing } = await supabase
       .from("daily_challenges")
-      .select("challenge_id, challenges(target)")
+      .select("challenge_id, challenges(target, type)")
       .eq("challenge_date", today)
       .maybeSingle();
 
     let previousTarget = null;
+    let previousType = null;
     if (existing) {
-      previousTarget = (existing.challenges as any)?.target;
+      const challenge = existing.challenges as any;
+      previousTarget = challenge?.target;
+      previousType = challenge?.type;
       
       // Delete from daily_challenges
       await supabase
@@ -70,26 +99,20 @@ Deno.serve(async (req: Request) => {
         .eq("id", existing.challenge_id);
     }
 
-    // Determine type based on day
+    // Randomly pick type
     const types = ["person", "place", "thing"] as const;
-    const typeIndex = new Date().getDate() % 3;
-    const type = types[typeIndex];
-    const subjects = FAMOUS_SUBJECTS[type];
+    const type = types[Math.floor(Math.random() * types.length)];
 
-    // Filter out the previous target to ensure we get something different
-    const availableSubjects = previousTarget 
-      ? subjects.filter(s => s !== previousTarget)
-      : subjects;
+    // Generate random subject using AI
+    const target = await generateRandomSubject(type, previousTarget, openaiKey);
 
-    // Try up to 5 times to generate a new challenge
+    // Try to create challenge
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
     let challengeData = null;
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 3;
 
     while (!challengeData && attempts < maxAttempts) {
-      const subjectIndex = Math.floor(Math.random() * availableSubjects.length);
-      const target = availableSubjects[subjectIndex];
       attempts++;
 
       const createResponse = await fetch(createUrl, {
@@ -105,16 +128,19 @@ Deno.serve(async (req: Request) => {
         challengeData = await createResponse.json();
         break;
       } else {
-        console.log(`Attempt ${attempts} failed for ${target}`);
+        const errorData = await createResponse.json();
+        console.log(`Attempt ${attempts} failed for ${target}:`, errorData);
         if (attempts >= maxAttempts) {
-          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts`);
+          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
         }
+        // Try a different target
+        const newTarget = await generateRandomSubject(type, target, openaiKey);
       }
     }
 
     // Randomly choose difficulty
-    const selectedPhase1Index = Math.random() < 0.5 ? 1 : 2;
-    const selectedPhase2Index = Math.random() < 0.5 ? 1 : 2;
+    const selectedPhase1Index = Math.floor(Math.random() * 3);
+    const selectedPhase2Index = Math.floor(Math.random() * 3);
 
     // Insert the challenge
     const { data: newChallenge, error: challengeInsertError } = await supabase
