@@ -12,33 +12,36 @@ async function generateRandomSubject(type: string, previousTarget: string | null
   const prompt = `Generate a random famous ${type} for a deduction-based guessing game where players get progressive hints.
 
 CRITICAL REQUIREMENTS:
-- Fame level: 3-4 out of 5 (well-known but NOT the most obvious household name)
-- Must be guessable with good hints, but not instantly obvious
+- Fame level: 3.5-4 out of 5 (recognizable to most educated adults, but not the first name everyone thinks of)
+- Must be REASONABLY GUESSABLE - if someone gets good hints, they should be able to figure it out
+- NOT too niche or specialized (avoid deep-cut art history, obscure figures, etc.)
 - Appropriate for a public game (no controversial/sensitive figures)
 - ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
 
-VARIETY INSTRUCTIONS - Actively avoid the "first thought" famous options:
-${type === 'person' ? `
-- Mix eras: ancient, medieval, renaissance, modern, contemporary
-- Vary fields: science, arts, sports, politics, entertainment, literature, philosophy
-- Include different regions: European, Asian, African, American, Middle Eastern
-- Balance genders and avoid only Western figures
-- Examples of GOOD variety: Ada Lovelace, Genghis Khan, Frida Kahlo, Bruce Lee, Jane Austen, Nikola Tesla
-- AVOID the most obvious: Einstein, Shakespeare, Lincoln, Gandhi, etc.` : ''}
-${type === 'place' ? `
-- Mix types: cities, natural wonders, buildings, monuments, regions
-- Vary locations: all continents, famous and interesting but not just the "big 7"
-- Include: ancient sites, modern cities, natural formations, cultural landmarks
-- Examples of GOOD variety: Angkor Wat, The Colosseum, Mount Fuji, Petra, Venice, Santorini
-- AVOID the most obvious: Eiffel Tower, Statue of Liberty, Great Wall, Pyramids, etc.` : ''}
-${type === 'thing' ? `
-- Mix categories: inventions, artworks, brands, cultural phenomena, historical objects
-- Vary time periods: ancient artifacts, classic art, modern tech, pop culture
-- Include: famous paintings, iconic products, scientific tools, cultural symbols
-- Examples of GOOD variety: The Thinker, Rubik's Cube, Starry Night, Coca-Cola, The Declaration of Independence
-- AVOID the most obvious: Mona Lisa, iPhone, Bitcoin, etc.` : ''}
+THE SWEET SPOT - Pick subjects that are:
+✓ Famous enough that most adults have heard of them
+✓ Interesting and varied (not the same predictable choices)
+✓ Solvable with good deductive hints
+✗ NOT instant guesses (avoid Einstein, Mona Lisa level obvious)
+✗ NOT too obscure (avoid niche academic knowledge)
 
-The goal is to make players think and deduce, not guess in 1 second. Pick something INTERESTING and VARIED.
+${type === 'person' ? `
+GOOD examples: Cleopatra, Rosa Parks, Leonardo da Vinci, Martin Luther King Jr., Marie Curie, Beethoven, Vincent van Gogh, Serena Williams, Nelson Mandela, Abraham Lincoln
+AVOID TOO OBVIOUS: Albert Einstein, George Washington, Jesus, Shakespeare
+AVOID TOO OBSCURE: Ada Lovelace, Emmy Noether, obscure historical figures
+- Mix eras and fields, but keep them recognizable` : ''}
+${type === 'place' ? `
+GOOD examples: Grand Canyon, Big Ben, Mount Rushmore, Niagara Falls, Stonehenge, Sydney Opera House, Taj Mahal, Golden Gate Bridge, Machu Picchu, Great Barrier Reef
+AVOID TOO OBVIOUS: Eiffel Tower, Statue of Liberty
+AVOID TOO OBSCURE: Lesser-known temples, obscure monuments
+- Mix natural and man-made, but keep them recognizable` : ''}
+${type === 'thing' ? `
+GOOD examples: Statue of David, Golden Gate Bridge, Hubble Telescope, Super Bowl Trophy, Oscar Statuette, Liberty Bell, Coca-Cola, Nike Swoosh, Hollywood Sign, Monopoly
+AVOID TOO OBVIOUS: iPhone, Mona Lisa, Bitcoin
+AVOID TOO OBSCURE: "The Great Wave off Kanagawa", niche artworks, academic objects
+- Mix art, brands, inventions, and cultural icons - but keep them mainstream recognizable` : ''}
+
+Pick something in that sweet spot: famous enough to be fair, interesting enough to not be boring.
 
 Respond with ONLY a JSON object:
 {
@@ -56,11 +59,11 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are a creative puzzle designer who specializes in picking interesting, varied, and engaging subjects for guessing games. Avoid clichés and the most obvious choices. Surprise the player with variety while keeping subjects recognizable to educated audiences."
+          content: "You are a puzzle designer for a mainstream guessing game. Pick subjects that are famous and recognizable to most educated adults - not too obvious, but definitely not obscure. Think 'Jeopardy' level knowledge, not art history PhD."
         },
         { role: "user", content: prompt }
       ],
-      temperature: 1.2,
+      temperature: 0.95,
       response_format: { type: "json_object" },
     }),
   });
