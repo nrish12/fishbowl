@@ -115,51 +115,18 @@ export default function DevTools() {
     if (confirm('Force generate a new daily challenge for today? This will replace the existing one.')) {
       setLoading(true);
       try {
-        const today = new Date().toISOString().split('T')[0];
-
-        // First get the existing daily challenge to find the challenge_id
-        const getResponse = await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}&select=challenge_id`, {
+        // Call force-new-daily function which handles deletion and AI generation
+        const createResponse = await fetch(`${SUPABASE_URL}/functions/v1/force-new-daily`, {
+          method: 'POST',
           headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        });
-
-        if (getResponse.ok) {
-          const existingData = await getResponse.json();
-          if (existingData && existingData.length > 0) {
-            const challengeId = existingData[0].challenge_id;
-
-            // Delete from daily_challenges first
-            await fetch(`${SUPABASE_URL}/rest/v1/daily_challenges?challenge_date=eq.${today}`, {
-              method: 'DELETE',
-              headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              },
-            });
-
-            // Then delete the actual challenge
-            await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${challengeId}`, {
-              method: 'DELETE',
-              headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              },
-            });
-          }
-        }
-
-        // Generate new one
-        const createResponse = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
-          headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           },
         });
 
         if (createResponse.ok) {
           const data = await createResponse.json();
-          alert(`New daily challenge created!\nType: ${data.type}\nTarget: ${data.message}`);
+          alert(`New daily challenge created!\nType: ${data.type}\nTarget: ${data.target}`);
           loadStats();
         } else {
           const errorData = await createResponse.json();
