@@ -8,28 +8,49 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-const FAMOUS_SUBJECTS = {
-  person: [
-    "Albert Einstein", "Leonardo da Vinci", "Marie Curie", "William Shakespeare",
-    "Cleopatra", "Napoleon Bonaparte", "Nelson Mandela", "Martin Luther King Jr.",
-    "Frida Kahlo", "Pablo Picasso", "Mozart", "Beethoven", "Elvis Presley",
-    "Michael Jordan", "Muhammad Ali", "Serena Williams", "Oprah Winfrey",
-    "Steve Jobs", "Bill Gates", "Elon Musk", "Barack Obama", "Queen Elizabeth II"
-  ],
-  place: [
-    "Eiffel Tower", "Great Wall of China", "Taj Mahal", "Grand Canyon",
-    "Mount Everest", "Statue of Liberty", "Colosseum", "Machu Picchu",
-    "Pyramids of Giza", "Stonehenge", "Niagara Falls", "Amazon Rainforest",
-    "Sahara Desert", "Great Barrier Reef", "Antarctica", "Yellowstone",
-    "Venice", "Tokyo", "Paris", "New York City", "London", "Sydney Opera House"
-  ],
-  thing: [
-    "Mona Lisa", "iPhone", "Coca-Cola", "Tesla", "Nike shoes", "Lego",
-    "Harry Potter books", "Star Wars", "Bitcoin", "Internet", "Wheel",
-    "Light bulb", "Airplane", "Telescope", "Microscope", "Bicycle",
-    "Piano", "Guitar", "Camera", "Television", "Smartphone", "Computer"
-  ]
-};
+async function generateRandomSubject(type: string, previousTarget: string | null, openaiKey: string): Promise<string> {
+  const prompt = `Generate a random famous ${type} for a guessing game.
+
+Requirements:
+- Must be globally famous (fame score 4-5)
+- Must be appropriate for a public game
+- ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
+
+Examples of suitable ${type}s:
+${type === 'person' ? '- Historical figures, celebrities, world leaders, athletes, artists' : ''}
+${type === 'place' ? '- Famous landmarks, cities, natural wonders, monuments' : ''}
+${type === 'thing' ? '- Iconic inventions, brands, cultural phenomena, famous objects' : ''}
+
+Respond with ONLY a JSON object:
+{
+  "target": "the famous ${type} name"
+}`;
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a helpful assistant that responds in JSON format." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 1.0,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate random subject");
+  }
+
+  const data = await response.json();
+  const result = JSON.parse(data.choices[0].message.content);
+  return result.target;
+}
 
 function base64UrlEncode(str: string): string {
   const encoder = new TextEncoder();
@@ -93,6 +114,11 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiKey) {
+      throw new Error("OpenAI API key not configured");
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     const { data: existing, error: fetchError } = await supabase
@@ -121,19 +147,20 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Randomly pick type
     const types = ["person", "place", "thing"] as const;
-    const typeIndex = new Date().getDate() % 3;
-    const type = types[typeIndex];
-    const subjects = FAMOUS_SUBJECTS[type];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    // Generate random subject using AI
+    const target = await generateRandomSubject(type, null, openaiKey);
 
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
     let challengeData = null;
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 3;
+    let currentTarget = target;
 
     while (!challengeData && attempts < maxAttempts) {
-      const subjectIndex = Math.floor(Math.random() * subjects.length);
-      const target = subjects[subjectIndex];
       attempts++;
 
       const createResponse = await fetch(createUrl, {
@@ -142,7 +169,7 @@ Deno.serve(async (req: Request) => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
         },
-        body: JSON.stringify({ type, target }),
+        body: JSON.stringify({ type, target: currentTarget }),
       });
 
       if (createResponse.ok) {
@@ -150,10 +177,12 @@ Deno.serve(async (req: Request) => {
         break;
       } else {
         const errorData = await createResponse.json();
-        console.log(`Attempt ${attempts} failed for ${target}:`, errorData.error || errorData.reason);
+        console.log(`Attempt ${attempts} failed for ${currentTarget}:`, errorData.error || errorData.reason);
         if (attempts >= maxAttempts) {
-          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts`);
+          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
         }
+        // Try a different target
+        currentTarget = await generateRandomSubject(type, currentTarget, openaiKey);
       }
     }
 
