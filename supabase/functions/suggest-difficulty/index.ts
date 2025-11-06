@@ -45,16 +45,18 @@ Deno.serve(async (req: Request) => {
       .limit(20);
 
     if (!perfData || perfData.length === 0) {
-      // Randomly choose between medium (1) and hard (2)
-      const phase1Difficulty = Math.random() < 0.5 ? 1 : 2;
-      const phase2Difficulty = Math.random() < 0.5 ? 1 : 2;
+      // Randomly choose difficulty, with slight bias towards medium/hard
+      const random1 = Math.random();
+      const random2 = Math.random();
+      const phase1Difficulty = random1 < 0.2 ? 0 : random1 < 0.6 ? 1 : 2; // 20% easy, 40% medium, 40% hard
+      const phase2Difficulty = random2 < 0.2 ? 0 : random2 < 0.6 ? 1 : 2;
 
       return new Response(
         JSON.stringify({
           recommended_phase1_index: phase1Difficulty,
           recommended_phase2_index: phase2Difficulty,
           confidence_score: 0.3,
-          reasoning: "Using medium-hard difficulty (no historical data yet)",
+          reasoning: "Using varied difficulty with medium-hard bias (no historical data yet)",
           data_points: 0,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -75,8 +77,8 @@ Deno.serve(async (req: Request) => {
       const silverRatio = total > 0 ? perf.silver_completions / total : 0;
       const balanceScore = 1 - Math.abs(silverRatio - 0.6);
 
-      // Bias towards medium (1) and hard (2) difficulty
-      const difficultyBonus = (perf.selected_phase1_index >= 1 && perf.selected_phase2_index >= 1) ? 0.15 : 0;
+      // Slight bias towards medium+ difficulty for more engaging gameplay
+      const difficultyBonus = (perf.selected_phase1_index >= 1 && perf.selected_phase2_index >= 1) ? 0.1 : 0;
 
       const finalScore = (completionScore * 0.5) + (timeScore * 0.3) + (balanceScore * 0.2) + difficultyBonus;
 

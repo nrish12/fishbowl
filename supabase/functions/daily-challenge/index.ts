@@ -9,17 +9,36 @@ const corsHeaders = {
 };
 
 async function generateRandomSubject(type: string, previousTarget: string | null, openaiKey: string): Promise<string> {
-  const prompt = `Generate a random famous ${type} for a guessing game.
+  const prompt = `Generate a random famous ${type} for a deduction-based guessing game where players get progressive hints.
 
-Requirements:
-- Must be globally famous (fame score 4-5)
-- Must be appropriate for a public game
+CRITICAL REQUIREMENTS:
+- Fame level: 3-4 out of 5 (well-known but NOT the most obvious household name)
+- Must be guessable with good hints, but not instantly obvious
+- Appropriate for a public game (no controversial/sensitive figures)
 - ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
 
-Examples of suitable ${type}s:
-${type === 'person' ? '- Historical figures, celebrities, world leaders, athletes, artists' : ''}
-${type === 'place' ? '- Famous landmarks, cities, natural wonders, monuments' : ''}
-${type === 'thing' ? '- Iconic inventions, brands, cultural phenomena, famous objects' : ''}
+VARIETY INSTRUCTIONS - Actively avoid the "first thought" famous options:
+${type === 'person' ? `
+- Mix eras: ancient, medieval, renaissance, modern, contemporary
+- Vary fields: science, arts, sports, politics, entertainment, literature, philosophy
+- Include different regions: European, Asian, African, American, Middle Eastern
+- Balance genders and avoid only Western figures
+- Examples of GOOD variety: Ada Lovelace, Genghis Khan, Frida Kahlo, Bruce Lee, Jane Austen, Nikola Tesla
+- AVOID the most obvious: Einstein, Shakespeare, Lincoln, Gandhi, etc.` : ''}
+${type === 'place' ? `
+- Mix types: cities, natural wonders, buildings, monuments, regions
+- Vary locations: all continents, famous and interesting but not just the "big 7"
+- Include: ancient sites, modern cities, natural formations, cultural landmarks
+- Examples of GOOD variety: Angkor Wat, The Colosseum, Mount Fuji, Petra, Venice, Santorini
+- AVOID the most obvious: Eiffel Tower, Statue of Liberty, Great Wall, Pyramids, etc.` : ''}
+${type === 'thing' ? `
+- Mix categories: inventions, artworks, brands, cultural phenomena, historical objects
+- Vary time periods: ancient artifacts, classic art, modern tech, pop culture
+- Include: famous paintings, iconic products, scientific tools, cultural symbols
+- Examples of GOOD variety: The Thinker, Rubik's Cube, Starry Night, Coca-Cola, The Declaration of Independence
+- AVOID the most obvious: Mona Lisa, iPhone, Bitcoin, etc.` : ''}
+
+The goal is to make players think and deduce, not guess in 1 second. Pick something INTERESTING and VARIED.
 
 Respond with ONLY a JSON object:
 {
@@ -35,10 +54,13 @@ Respond with ONLY a JSON object:
     body: JSON.stringify({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are a helpful assistant that responds in JSON format." },
+        {
+          role: "system",
+          content: "You are a creative puzzle designer who specializes in picking interesting, varied, and engaging subjects for guessing games. Avoid clichés and the most obvious choices. Surprise the player with variety while keeping subjects recognizable to educated audiences."
+        },
         { role: "user", content: prompt }
       ],
-      temperature: 1.0,
+      temperature: 1.2,
       response_format: { type: "json_object" },
     }),
   });
@@ -186,8 +208,9 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const selectedPhase1Index = Math.random() < 0.5 ? 1 : 2;
-    const selectedPhase2Index = Math.random() < 0.5 ? 1 : 2;
+    // Randomly select difficulty levels (0 = easier, 1 = medium, 2 = harder)
+    const selectedPhase1Index = Math.floor(Math.random() * 3);
+    const selectedPhase2Index = Math.floor(Math.random() * 3);
 
     const { data: newChallenge, error: challengeInsertError } = await supabase
       .from("challenges")
