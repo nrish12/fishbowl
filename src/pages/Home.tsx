@@ -4,30 +4,25 @@ import Logo from '../components/Logo';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full space-y-12">
-        <div className="text-center space-y-6">
-          <Logo size="lg" showTagline />
-          <p className="text-lg text-forest/80 leading-relaxed max-w-xl mx-auto">
-            Deduce the answer through progressive hints.
-            <br />
-            Three phases. One chance per phase.
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full space-y-8">
+        <div className="text-center">
+          <Logo size="lg" showTagline={false} />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-5">
           <Link
             to="/daily"
-            className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-gold"
+            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-gold"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
-                <Calendar size={28} className="text-gold" />
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                <Calendar size={26} className="text-gold" />
               </div>
-              <h2 className="text-2xl font-serif font-semibold text-forest">
+              <h2 className="text-xl font-serif font-semibold text-forest">
                 Daily Challenge
               </h2>
-              <p className="text-forest/70 leading-relaxed">
+              <p className="text-sm text-forest/70 leading-relaxed">
                 Today's puzzle for everyone. Compete on the same mystery each day.
               </p>
               <span className="inline-block px-4 py-2 bg-forest text-white rounded-full text-sm font-medium group-hover:bg-gold group-hover:text-forest transition-colors">
@@ -38,16 +33,16 @@ export default function Home() {
 
           <Link
             to="/create"
-            className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-forest"
+            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-forest"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-forest/10 flex items-center justify-center group-hover:bg-forest/20 transition-colors">
-                <Users size={28} className="text-forest" />
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-14 h-14 rounded-full bg-forest/10 flex items-center justify-center group-hover:bg-forest/20 transition-colors">
+                <Users size={26} className="text-forest" />
               </div>
-              <h2 className="text-2xl font-serif font-semibold text-forest">
+              <h2 className="text-xl font-serif font-semibold text-forest">
                 Custom Challenge
               </h2>
-              <p className="text-forest/70 leading-relaxed">
+              <p className="text-sm text-forest/70 leading-relaxed">
                 Create your own mystery. Share with friends. Challenge anyone.
               </p>
               <span className="inline-block px-4 py-2 bg-cream text-forest border-2 border-forest/20 rounded-full text-sm font-medium group-hover:bg-forest group-hover:text-white group-hover:border-forest transition-colors">
@@ -57,33 +52,33 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="text-center space-y-3">
-          <h3 className="text-sm font-semibold text-forest/60 uppercase tracking-wider">
+        <div className="text-center space-y-2">
+          <h3 className="text-xs font-semibold text-forest/60 uppercase tracking-wider">
             How to Play
           </h3>
-          <div className="flex items-center justify-center gap-8 text-sm text-forest/80">
+          <div className="flex items-center justify-center gap-6 text-sm text-forest/80">
             <div className="flex flex-col items-center">
-              <span className="font-serif text-4xl font-bold text-gold">1</span>
-              <span className="font-medium">Category</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="text-xs font-medium">Category</span>
             </div>
-            <svg width="60" height="24" viewBox="0 0 60 24" className="text-forest" fill="none">
-              <path d="M4 12 L56 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M48 6 L56 12 L48 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="50" height="20" viewBox="0 0 50 20" className="text-forest" fill="none">
+              <path d="M4 10 L46 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M40 5 L46 10 L40 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-4xl font-bold text-gold">1</span>
-              <span className="font-medium">Sentence</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="text-xs font-medium">Sentence</span>
             </div>
-            <svg width="60" height="24" viewBox="0 0 60 24" className="text-forest" fill="none">
-              <path d="M4 12 L56 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M48 6 L56 12 L48 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="50" height="20" viewBox="0 0 50 20" className="text-forest" fill="none">
+              <path d="M4 10 L46 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M40 5 L46 10 L40 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-4xl font-bold text-gold">5</span>
-              <span className="font-medium">Words</span>
+              <span className="font-serif text-3xl font-bold text-gold">5</span>
+              <span className="text-xs font-medium">Words</span>
             </div>
           </div>
-          <p className="text-xs text-forest/60 max-w-md mx-auto pt-2">
+          <p className="text-xs text-forest/60 max-w-md mx-auto pt-1">
             One guess per phase <span className="text-forest font-semibold">unlocks</span> the next. Gold, Silver, or Bronze rank based on when you solve it.
           </p>
         </div>
