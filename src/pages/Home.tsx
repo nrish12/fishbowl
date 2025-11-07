@@ -4,10 +4,10 @@ import Logo from '../components/Logo';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6">
-      <div className="max-w-3xl w-full space-y-10">
-        <div className="text-center space-y-4">
-          <Logo size="lg" showTagline={false} />
+    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6 py-12">
+      <div className="max-w-4xl w-full space-y-16">
+        <div className="text-center py-8">
+          <Logo size="lg" showTagline={true} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -52,7 +52,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-6">
           <h3 className="text-sm font-semibold text-forest/60 uppercase tracking-wider">
             How to Play
           </h3>
