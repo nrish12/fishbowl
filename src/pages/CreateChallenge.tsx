@@ -244,10 +244,10 @@ export default function CreateChallenge() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8 px-6">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 py-8 px-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-forest/60 hover:text-forest transition-colors">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -256,8 +256,8 @@ export default function CreateChallenge() {
         </div>
 
         <div className="text-center space-y-3">
-          <h1 className="text-4xl font-serif font-bold text-neutral-900">Create Challenge</h1>
-          <p className="text-neutral-600 max-w-xl mx-auto">
+          <h1 className="text-4xl font-serif font-bold text-forest">Create Challenge</h1>
+          <p className="text-forest/70 max-w-xl mx-auto">
             Choose a famous person, place, or thing. AI will validate and create hints for your custom challenge.
           </p>
         </div>
@@ -265,7 +265,7 @@ export default function CreateChallenge() {
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-6">
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-semibold text-neutral-700 uppercase tracking-wider">Type</span>
+              <span className="text-sm font-semibold text-forest/80 uppercase tracking-wider">Type</span>
               <div className="grid grid-cols-3 gap-3 mt-2">
                 {(['person', 'place', 'thing'] as ChallengeType[]).map((t) => (
                   <button
@@ -273,8 +273,8 @@ export default function CreateChallenge() {
                     onClick={() => setType(t)}
                     className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                       type === t
-                        ? 'bg-neutral-900 text-white'
-                        : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                        ? 'bg-forest text-white'
+                        : 'bg-white text-forest border border-forest/20 hover:bg-forest/5'
                     }`}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -284,7 +284,7 @@ export default function CreateChallenge() {
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-neutral-700 uppercase tracking-wider">Target</span>
+              <span className="text-sm font-semibold text-forest/80 uppercase tracking-wider">Target</span>
               <input
                 type="text"
                 value={target}
@@ -373,7 +373,7 @@ export default function CreateChallenge() {
           <button
             onClick={handleGenerate}
             disabled={loading || !target.trim()}
-            className="w-full px-6 py-4 bg-neutral-900 text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full px-6 py-4 bg-forest text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-forest disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -389,8 +389,8 @@ export default function CreateChallenge() {
         {challengeData && !shareUrl && (
           <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
             <div className="text-center">
-              <h2 className="text-2xl font-serif font-bold text-neutral-900">Customize Your Challenge</h2>
-              <p className="text-sm text-neutral-600 mt-1">Choose the difficulty level for each hint type</p>
+              <h2 className="text-2xl font-serif font-bold text-forest">Customize Your Challenge</h2>
+              <p className="text-sm text-forest/70 mt-1">Choose the difficulty level for each hint type</p>
             </div>
 
             {difficultyReasoning && (
@@ -490,7 +490,7 @@ export default function CreateChallenge() {
               <button
                 onClick={handleFinalize}
                 disabled={finalizing}
-                className="w-full px-6 py-4 bg-neutral-900 text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-forest text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-forest disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 {finalizing ? (
                   <>
@@ -509,8 +509,8 @@ export default function CreateChallenge() {
           <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-gold space-y-4">
             <div className="text-center space-y-2">
               <div className="text-4xl">🎉</div>
-              <h3 className="text-2xl font-serif font-bold text-neutral-900">Challenge Ready!</h3>
-              <p className="text-neutral-600">Share this link with friends</p>
+              <h3 className="text-2xl font-serif font-bold text-forest">Challenge Ready!</h3>
+              <p className="text-forest/70">Share this link with friends</p>
             </div>
 
             <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
@@ -522,7 +522,7 @@ export default function CreateChallenge() {
               />
               <button
                 onClick={handleCopyLink}
-                className="px-6 py-2 bg-neutral-900 text-white rounded-full font-medium hover:bg-gold hover:text-neutral-900 transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-forest text-white rounded-full font-medium hover:bg-gold hover:text-forest transition-colors flex items-center gap-2"
               >
                 {copied ? (
                   <>

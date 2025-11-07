@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-neutral-50 text-neutral-900 font-sans;
+    @apply bg-cream text-neutral-900 font-sans;
   }
 }
 
@@ -29,6 +29,22 @@
 
   .border-gold {
     border-color: #C9A961;
+  }
+
+  .text-forest {
+    color: #1A4D3C;
+  }
+
+  .bg-forest {
+    background-color: #1A4D3C;
+  }
+
+  .border-forest {
+    border-color: #1A4D3C;
+  }
+
+  .bg-cream {
+    background-color: #F5F1E8;
   }
 
   @keyframes fadeIn {

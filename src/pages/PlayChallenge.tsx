@@ -271,7 +271,7 @@ export default function PlayChallenge() {
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-gold mx-auto" />
-          <p className="text-neutral-600">Loading challenge...</p>
+          <p className="text-forest/70">Loading challenge...</p>
         </div>
       </div>
     );
@@ -282,11 +282,11 @@ export default function PlayChallenge() {
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200 text-center space-y-4">
           <div className="text-5xl">❌</div>
-          <h2 className="text-2xl font-serif font-bold text-neutral-900">Challenge Error</h2>
-          <p className="text-neutral-600">{error}</p>
+          <h2 className="text-2xl font-serif font-bold text-forest">Challenge Error</h2>
+          <p className="text-forest/70">{error}</p>
           <Link
             to="/"
-            className="inline-block px-6 py-3 bg-neutral-900 text-white rounded-full font-medium hover:bg-gold hover:text-neutral-900 transition-colors"
+            className="inline-block px-6 py-3 bg-forest text-white rounded-full font-medium hover:bg-gold hover:text-forest transition-colors"
           >
             Back Home
           </Link>
@@ -299,7 +299,7 @@ export default function PlayChallenge() {
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8 px-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-forest/60 hover:text-forest transition-colors">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -311,8 +311,8 @@ export default function PlayChallenge() {
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <div className="inline-block px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 rounded-2xl shadow-lg">
-                <p className="text-xs font-semibold text-neutral-900 uppercase tracking-wider mb-1">You're guessing a</p>
-                <p className="text-3xl font-serif font-bold text-neutral-900">
+                <p className="text-xs font-semibold text-forest/80 uppercase tracking-wider mb-1">You're guessing a</p>
+                <p className="text-3xl font-serif font-bold text-forest">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
@@ -368,10 +368,10 @@ export default function PlayChallenge() {
 
             {wrongGuesses.length > 0 && (
               <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider mb-2">Your Previous Guesses:</p>
+                <p className="text-xs font-semibold text-forest/70 uppercase tracking-wider mb-2">Your Previous Guesses:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-sm">
+                    <span key={idx} className="px-3 py-1 bg-cream text-forest rounded-full text-sm border border-forest/20">
                       {guess}
                     </span>
                   ))}
