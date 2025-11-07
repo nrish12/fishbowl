@@ -4,9 +4,9 @@ import Logo from '../components/Logo';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6 py-12">
-      <div className="max-w-4xl w-full space-y-16">
-        <div className="text-center py-8">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6">
+      <div className="max-w-4xl w-full space-y-8">
+        <div className="text-center">
           <Logo size="lg" showTagline={true} />
         </div>
 
@@ -15,11 +15,11 @@ export default function Home() {
             to="/daily"
             className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-gold"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex flex-col items-center text-center space-y-3">
               <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
                 <Calendar size={28} className="text-gold" />
               </div>
-              <h2 className="text-2xl font-serif font-semibold text-forest">
+              <h2 className="text-xl font-serif font-semibold text-forest">
                 Daily Challenge
               </h2>
               <p className="text-forest/70 leading-relaxed">
@@ -35,11 +35,11 @@ export default function Home() {
             to="/create"
             className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-forest"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex flex-col items-center text-center space-y-3">
               <div className="w-16 h-16 rounded-full bg-forest/10 flex items-center justify-center group-hover:bg-forest/20 transition-colors">
                 <Users size={28} className="text-forest" />
               </div>
-              <h2 className="text-2xl font-serif font-semibold text-forest">
+              <h2 className="text-xl font-serif font-semibold text-forest">
                 Custom Challenge
               </h2>
               <p className="text-forest/70 leading-relaxed">
@@ -52,13 +52,13 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="text-center space-y-6">
+        <div className="text-center space-y-3">
           <h3 className="text-sm font-semibold text-forest/60 uppercase tracking-wider">
             How to Play
           </h3>
-          <div className="flex items-center justify-center gap-8 text-sm text-forest/80">
+          <div className="flex items-center justify-center gap-6 text-sm text-forest/80">
             <div className="flex flex-col items-center gap-1">
-              <span className="font-serif text-4xl font-bold text-gold">1</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
               <span className="font-medium">Category</span>
             </div>
             <svg width="50" height="24" viewBox="0 0 50 24" className="text-forest" fill="none">
@@ -66,7 +66,7 @@ export default function Home() {
               <path d="M40 6 L46 12 L40 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center gap-1">
-              <span className="font-serif text-4xl font-bold text-gold">1</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
               <span className="font-medium">Sentence</span>
             </div>
             <svg width="50" height="24" viewBox="0 0 50 24" className="text-forest" fill="none">
@@ -74,7 +74,7 @@ export default function Home() {
               <path d="M40 6 L46 12 L40 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center gap-1">
-              <span className="font-serif text-4xl font-bold text-gold">5</span>
+              <span className="font-serif text-3xl font-bold text-gold">5</span>
               <span className="font-medium">Words</span>
             </div>
           </div>

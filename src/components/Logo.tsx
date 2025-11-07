@@ -7,13 +7,13 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
   const sizes = {
     sm: { img: 90, tagline: 'text-sm' },
     md: { img: 130, tagline: 'text-base' },
-    lg: { img: 240, tagline: 'text-lg' },
+    lg: { img: 200, tagline: 'text-base' },
   };
 
   const current = sizes[size];
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-3">
       <img
         src="/Adobe Express - file.png"
         alt="Five Fold Logo"
