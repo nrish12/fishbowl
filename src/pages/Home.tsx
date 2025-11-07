@@ -66,7 +66,7 @@ export default function Home() {
               <span className="font-serif text-3xl font-bold text-gold">1</span>
               <span className="font-medium">Category</span>
             </div>
-            <svg width="40" height="24" viewBox="0 0 40 24" className="text-gold" fill="none">
+            <svg width="40" height="24" viewBox="0 0 40 24" className="text-forest" fill="none">
               <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -74,7 +74,7 @@ export default function Home() {
               <span className="font-serif text-3xl font-bold text-gold">1</span>
               <span className="font-medium">Sentence</span>
             </div>
-            <svg width="40" height="24" viewBox="0 0 40 24" className="text-gold" fill="none">
+            <svg width="40" height="24" viewBox="0 0 40 24" className="text-forest" fill="none">
               <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
