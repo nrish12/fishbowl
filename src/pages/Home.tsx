@@ -61,24 +61,30 @@ export default function Home() {
           <h3 className="text-sm font-semibold text-forest/60 uppercase tracking-wider">
             How to Play
           </h3>
-          <div className="flex items-center justify-center gap-8 text-sm text-forest/80">
+          <div className="flex items-center justify-center gap-6 text-sm text-forest/80">
             <div className="flex flex-col items-center">
-              <span className="font-serif text-2xl text-gold">1</span>
-              <span>Category</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="font-medium">Category</span>
             </div>
-            <div className="w-8 h-px bg-forest/30" />
+            <svg width="40" height="24" viewBox="0 0 40 24" className="text-gold" fill="none">
+              <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-2xl text-gold">1</span>
-              <span>Sentence</span>
+              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="font-medium">Sentence</span>
             </div>
-            <div className="w-8 h-px bg-forest/30" />
+            <svg width="40" height="24" viewBox="0 0 40 24" className="text-gold" fill="none">
+              <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-2xl text-gold">5</span>
-              <span>Words</span>
+              <span className="font-serif text-3xl font-bold text-gold">5</span>
+              <span className="font-medium">Words</span>
             </div>
           </div>
           <p className="text-xs text-forest/60 max-w-md mx-auto pt-2">
-            One guess per phase unlocks the next. Gold, Silver, or Bronze rank based on when you solve it.
+            One guess per phase <span className="text-gold font-semibold">unlocks</span> the next. Gold, Silver, or Bronze rank based on when you solve it.
           </p>
         </div>
 
