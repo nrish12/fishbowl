@@ -13,7 +13,7 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
   const current = sizes[size];
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-4">
       <img
         src="/Adobe Express - file.png"
         alt="Five Fold Logo"
@@ -21,8 +21,8 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
         className="object-contain"
       />
       {showTagline && (
-        <p className={`${current.tagline} text-forest/70 tracking-wide font-medium`}>
-          Unlock the mystery in 5 clues
+        <p className="text-xl text-forest/80 tracking-wide font-medium">
+          Five clues. One answer.
         </p>
       )}
     </div>
