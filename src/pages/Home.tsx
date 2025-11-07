@@ -61,30 +61,30 @@ export default function Home() {
           <h3 className="text-sm font-semibold text-forest/60 uppercase tracking-wider">
             How to Play
           </h3>
-          <div className="flex items-center justify-center gap-6 text-sm text-forest/80">
+          <div className="flex items-center justify-center gap-8 text-sm text-forest/80">
             <div className="flex flex-col items-center">
-              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="font-serif text-4xl font-bold text-gold">1</span>
               <span className="font-medium">Category</span>
             </div>
-            <svg width="40" height="24" viewBox="0 0 40 24" className="text-forest" fill="none">
-              <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="60" height="24" viewBox="0 0 60 24" className="text-forest" fill="none">
+              <path d="M4 12 L56 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M48 6 L56 12 L48 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-3xl font-bold text-gold">1</span>
+              <span className="font-serif text-4xl font-bold text-gold">1</span>
               <span className="font-medium">Sentence</span>
             </div>
-            <svg width="40" height="24" viewBox="0 0 40 24" className="text-forest" fill="none">
-              <path d="M2 12 L38 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M32 6 L38 12 L32 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="60" height="24" viewBox="0 0 60 24" className="text-forest" fill="none">
+              <path d="M4 12 L56 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M48 6 L56 12 L48 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <div className="flex flex-col items-center">
-              <span className="font-serif text-3xl font-bold text-gold">5</span>
+              <span className="font-serif text-4xl font-bold text-gold">5</span>
               <span className="font-medium">Words</span>
             </div>
           </div>
           <p className="text-xs text-forest/60 max-w-md mx-auto pt-2">
-            One guess per phase <span className="text-gold font-semibold">unlocks</span> the next. Gold, Silver, or Bronze rank based on when you solve it.
+            One guess per phase <span className="text-forest font-semibold">unlocks</span> the next. Gold, Silver, or Bronze rank based on when you solve it.
           </p>
         </div>
 
