@@ -33,11 +33,11 @@ export default function Home() {
 
           <Link
             to="/create"
-            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-forest"
+            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-forest/20 hover:border-gold"
           >
             <div className="flex flex-col items-center text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-forest/10 flex items-center justify-center group-hover:bg-forest/20 transition-colors">
-                <Users size={28} className="text-forest" />
+              <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                <Users size={28} className="text-gold" />
               </div>
               <h2 className="text-xl font-serif font-semibold text-forest">
                 Custom Challenge
@@ -45,7 +45,7 @@ export default function Home() {
               <p className="text-forest/70 leading-relaxed">
                 Create your own mystery. Share with friends. Challenge anyone.
               </p>
-              <span className="inline-block px-5 py-2.5 bg-cream text-forest border-2 border-forest/20 rounded-full text-sm font-medium group-hover:bg-forest group-hover:text-white group-hover:border-forest transition-colors">
+              <span className="inline-block px-5 py-2.5 bg-forest text-white rounded-full text-sm font-medium group-hover:bg-gold group-hover:text-forest transition-colors">
                 Create Puzzle
               </span>
             </div>
