@@ -5,9 +5,9 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
   const sizes = {
-    sm: { img: 70, tagline: 'text-xs' },
-    md: { img: 100, tagline: 'text-sm' },
-    lg: { img: 140, tagline: 'text-base' },
+    sm: { img: 80, tagline: 'text-xs' },
+    md: { img: 110, tagline: 'text-sm' },
+    lg: { img: 160, tagline: 'text-base' },
   };
 
   const current = sizes[size];
@@ -15,7 +15,7 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
   return (
     <div className="flex flex-col items-center">
       <img
-        src="/image.png"
+        src="/Adobe Express - file.png"
         alt="Five Fold Logo"
         style={{ width: current.img, height: current.img }}
         className="object-contain"
