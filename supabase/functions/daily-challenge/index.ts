@@ -12,51 +12,57 @@ async function generateRandomSubject(type: string, previousTarget: string | null
   const prompt = `Generate a random famous ${type} for a mainstream guessing game played by average adults.
 
 CRITICAL - READ THIS CAREFULLY:
-- Must be recognizable to the GENERAL PUBLIC, not just educated/art enthusiasts
-- Fame level: 4 out of 5 minimum - if 100 random Americans were surveyed, at least 60-70 would recognize the name
-- Think "Family Feud survey says" or "Trivial Pursuit" level - NOT academic Jeopardy
+- Must be recognizable to the GENERAL PUBLIC (60-70% of random Americans would know the name)
+- Think "Family Feud survey says" or "Trivial Pursuit" level
 - ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
 
-THE TEST: Would your parents/grandparents know this? Would it be in a high school history/culture textbook?
-✓ YES = Good choice
-✗ NO = Too obscure, pick something else
+THE SWEET SPOT: Recognizable but not the FIRST name everyone thinks of.
+
+THE TEST: Would it appear in a middle school textbook? Would your parents know it? Then it's good!
 
 ${type === 'person' ? `
-GOOD examples:
-- Historical: Cleopatra, Abraham Lincoln, Julius Caesar, Queen Elizabeth I, Napoleon, Christopher Columbus
-- Artists: Leonardo da Vinci, Vincent van Gogh, Pablo Picasso, Michelangelo (STOP at these famous ones!)
-- Modern: Martin Luther King Jr., Rosa Parks, Muhammad Ali, Oprah Winfrey, Michael Jackson
-- Scientists: Marie Curie, Isaac Newton, Charles Darwin, Thomas Edison
+GOOD examples (pick from these types):
+- Historical Leaders: Cleopatra, Julius Caesar, Queen Elizabeth I, Napoleon, Christopher Columbus
+- Civil Rights: Martin Luther King Jr., Rosa Parks, Harriet Tubman, Gandhi
+- Artists (classical only): Leonardo da Vinci, Vincent van Gogh, Pablo Picasso, Michelangelo, Frida Kahlo
+- Scientists: Marie Curie, Isaac Newton, Charles Darwin, Galileo, Thomas Edison, Alexander Graham Bell
+- Modern Icons: Muhammad Ali, Oprah Winfrey, Michael Jackson, Elvis Presley, Walt Disney
 
-ABSOLUTELY AVOID:
-- Contemporary/modern artists: Yayoi Kusama, Banksy, Ai Weiwei, Marina Abramović, Jeff Koons
-- Niche historical figures: Ada Lovelace, Emmy Noether, lesser-known inventors
-- Academic figures unless VERY famous (Einstein level)
-- Anyone from art galleries/museums that isn't Leonardo/Van Gogh/Picasso/Michelangelo tier` : ''}
+ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
+- Albert Einstein (TOO common in trivia)
+- George Washington, Abraham Lincoln (TOO obvious for Americans)
+- Jesus, Moses, Buddha (too obvious)
+- Shakespeare (TOO common)
+- Any contemporary artists (Yayoi Kusama, Banksy, etc.)` : ''}
 ${type === 'place' ? `
-GOOD examples:
-- Landmarks: Big Ben, Taj Mahal, Sydney Opera House, Golden Gate Bridge, Mount Rushmore, Hollywood Sign
-- Natural: Grand Canyon, Niagara Falls, Mount Everest, Great Barrier Reef, Yellowstone
-- Historical: Stonehenge, Colosseum, Parthenon, Machu Picchu
+GOOD examples (pick from these types):
+- Landmarks: Big Ben, Taj Mahal, Sydney Opera House, Golden Gate Bridge, Mount Rushmore, Hollywood Sign, Leaning Tower of Pisa
+- Natural: Grand Canyon, Niagara Falls, Mount Everest, Great Barrier Reef, Yellowstone, Victoria Falls, Amazon Rainforest
+- Ancient/Historical: Stonehenge, Colosseum, Parthenon, Roman Forum, Acropolis
 
-ABSOLUTELY AVOID:
-- Lesser-known temples/shrines
-- Regional landmarks most Americans haven't heard of
-- Contemporary architecture unless iconic` : ''}
+ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
+- Eiffel Tower (TOO obvious)
+- Statue of Liberty (TOO obvious)
+- Great Wall of China (TOO obvious)
+- Pyramids of Giza (TOO obvious)
+- Machu Picchu (OVERUSED in this game)
+- Any obscure temples or regional sites` : ''}
 ${type === 'thing' ? `
-GOOD examples:
-- Art: Statue of David, The Last Supper, The Thinker (stick to the MOST famous)
-- Brands: Coca-Cola, Nike Swoosh, McDonald's Golden Arches, Disney
-- Icons: Liberty Bell, Olympic Rings, Hollywood Sign, Super Bowl Trophy, Oscar Statuette
-- Inventions: Light Bulb, Telephone, Television, Airplane
+GOOD examples (pick from these types):
+- Classic Art: Statue of David, The Last Supper, The Thinker, The Scream
+- Famous Brands: Coca-Cola, Nike Swoosh, McDonald's Golden Arches, Disney, Lego
+- Icons: Liberty Bell, Olympic Rings, Hollywood Sign, Super Bowl Trophy, Oscar Statuette, Grammy
+- Historical Objects: Declaration of Independence, Rosetta Stone, Dead Sea Scrolls
+- Inventions: Light Bulb, Telephone, Television, Airplane, Automobile, Printing Press
 
-ABSOLUTELY AVOID:
-- "The Great Wave off Kanagawa" or any Japanese prints
-- Contemporary art pieces
-- Obscure paintings/sculptures
-- Academic/niche objects` : ''}
+ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
+- Mona Lisa (TOO obvious)
+- iPhone (TOO obvious/modern)
+- Bitcoin (TOO obvious/modern)
+- "The Great Wave off Kanagawa" (too obscure)
+- Any contemporary art or niche objects` : ''}
 
-IMPORTANT: If you're even SLIGHTLY unsure if the average person would know it, pick something more mainstream!
+IMPORTANT: Pick something VARIED. Don't just pick the most famous - pick from the SECOND tier of fame that's still very recognizable!
 
 Respond with ONLY a JSON object:
 {
@@ -74,11 +80,11 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are selecting subjects for a MAINSTREAM guessing game. Your audience is average American adults watching game shows, NOT art students or academics. Think 'Family Feud' level recognition - would 60+ out of 100 random people recognize this name? If not, pick something more famous. Avoid contemporary artists and niche academic subjects completely."
+          content: "You are selecting subjects for a MAINSTREAM guessing game. Your audience is average American adults. Pick subjects that are famous and recognizable, but NOT the most overused trivia answers. Avoid Einstein, Eiffel Tower, Mona Lisa, etc. - pick the SECOND tier of fame that's still very recognizable. Think variety and interest, not just the most obvious."
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.8,
+      temperature: 0.85,
       response_format: { type: "json_object" },
     }),
   });
