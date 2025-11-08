@@ -10,58 +10,55 @@ const corsHeaders = {
 async function generateRandomSubject(type: string, previousTarget: string | null, openaiKey: string): Promise<string> {
   const prompt = `Generate a random famous ${type} for a mainstream guessing game played by average adults.
 
-CRITICAL - READ THIS CAREFULLY:
-- Must be recognizable to the GENERAL PUBLIC (60-70% of random Americans would know the name)
-- Think "Family Feud survey says" or "Trivial Pursuit" level
+CRITICAL - TRUE RANDOMNESS REQUIRED:
+- Must be recognizable to the GENERAL PUBLIC (60-70% of random Americans would know it)
+- Think "Family Feud" or "Trivial Pursuit" level recognition
 - ${previousTarget ? `DO NOT suggest: ${previousTarget}` : ''}
 
-THE SWEET SPOT: Recognizable but not the FIRST name everyone thinks of.
+VARIETY IS KEY - DO NOT DEFAULT TO THE SAME SAFE CHOICES:
+This is for a DAILY challenge that changes every day. Players should see DIFFERENT subjects regularly.
 
-THE TEST: Would it appear in a middle school textbook? Would your parents know it? Then it's good!
+Your thought process:
+1. Think of 5-7 different options in the ${type} category
+2. Pick one that is NOT the most obvious/overused trivia answer
+3. Rotate between different eras, fields, and regions
+4. Avoid picking the same "safe" choices every time
 
 ${type === 'person' ? `
-GOOD examples (pick from these types):
-- Historical Leaders: Cleopatra, Julius Caesar, Queen Elizabeth I, Napoleon, Christopher Columbus
-- Civil Rights: Martin Luther King Jr., Rosa Parks, Harriet Tubman, Gandhi
-- Artists (classical only): Leonardo da Vinci, Vincent van Gogh, Pablo Picasso, Michelangelo, Frida Kahlo
-- Scientists: Marie Curie, Isaac Newton, Charles Darwin, Galileo, Thomas Edison, Alexander Graham Bell
-- Modern Icons: Muhammad Ali, Oprah Winfrey, Michael Jackson, Elvis Presley, Walt Disney
+Good variety pool (rotate between these types):
+- Ancient Leaders: Cleopatra, Julius Caesar, Alexander the Great
+- Renaissance: Leonardo da Vinci, Michelangelo, Galileo
+- Scientists: Marie Curie, Isaac Newton, Charles Darwin, Nikola Tesla, Thomas Edison, Alexander Graham Bell
+- US Presidents: George Washington, Abraham Lincoln, Theodore Roosevelt, Franklin D. Roosevelt
+- Civil Rights: Martin Luther King Jr., Rosa Parks, Harriet Tubman, Gandhi, Nelson Mandela
+- Artists: Vincent van Gogh, Pablo Picasso, Frida Kahlo, Rembrandt, Monet
+- Modern Icons: Albert Einstein, Muhammad Ali, Oprah Winfrey, Michael Jackson, Elvis Presley, Walt Disney, Steve Jobs
+- Religious: Jesus, Moses, Buddha, Muhammad
+- Writers: Shakespeare, Mark Twain, Jane Austen, Ernest Hemingway
+- Explorers: Christopher Columbus, Marco Polo, Amelia Earhart
 
-ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
-- Albert Einstein (TOO common in trivia)
-- George Washington, Abraham Lincoln (TOO obvious for Americans)
-- Jesus, Moses, Buddha (too obvious)
-- Shakespeare (TOO common)
-- Any contemporary artists (Yayoi Kusama, Banksy, etc.)` : ''}
+Don't always pick Einstein or Shakespeare - rotate through ALL of these equally!` : ''}
 ${type === 'place' ? `
-GOOD examples (pick from these types):
-- Landmarks: Big Ben, Taj Mahal, Sydney Opera House, Golden Gate Bridge, Mount Rushmore, Hollywood Sign, Leaning Tower of Pisa
-- Natural: Grand Canyon, Niagara Falls, Mount Everest, Great Barrier Reef, Yellowstone, Victoria Falls, Amazon Rainforest
-- Ancient/Historical: Stonehenge, Colosseum, Parthenon, Roman Forum, Acropolis
+Good variety pool (rotate between these types):
+- European Icons: Eiffel Tower, Big Ben, Colosseum, Stonehenge, Leaning Tower of Pisa, Parthenon
+- World Landmarks: Taj Mahal, Great Wall of China, Pyramids of Giza, Statue of Liberty, Sydney Opera House, Christ the Redeemer
+- Natural Wonders: Grand Canyon, Mount Everest, Niagara Falls, Great Barrier Reef, Victoria Falls, Amazon Rainforest, Yellowstone
+- Ancient Sites: Machu Picchu, Petra, Angkor Wat, Roman Forum, Acropolis
+- Modern: Golden Gate Bridge, Mount Rushmore, Hollywood Sign, Space Needle, CN Tower
 
-ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
-- Eiffel Tower (TOO obvious)
-- Statue of Liberty (TOO obvious)
-- Great Wall of China (TOO obvious)
-- Pyramids of Giza (TOO obvious)
-- Machu Picchu (OVERUSED in this game)
-- Any obscure temples or regional sites` : ''}
+Don't always pick Eiffel Tower or Machu Picchu - rotate through ALL of these equally!` : ''}
 ${type === 'thing' ? `
-GOOD examples (pick from these types):
-- Classic Art: Statue of David, The Last Supper, The Thinker, The Scream
-- Famous Brands: Coca-Cola, Nike Swoosh, McDonald's Golden Arches, Disney, Lego
-- Icons: Liberty Bell, Olympic Rings, Hollywood Sign, Super Bowl Trophy, Oscar Statuette, Grammy
-- Historical Objects: Declaration of Independence, Rosetta Stone, Dead Sea Scrolls
-- Inventions: Light Bulb, Telephone, Television, Airplane, Automobile, Printing Press
+Good variety pool (rotate between these types):
+- Classic Art: Mona Lisa, Statue of David, The Last Supper, The Thinker, The Scream, Starry Night
+- Brands: Coca-Cola, Nike Swoosh, McDonald's Golden Arches, Disney, Apple logo, Lego, Starbucks
+- Icons: Liberty Bell, Olympic Rings, Hollywood Sign, Super Bowl Trophy, Oscar Statuette, Grammy, Nobel Prize
+- Historical: Declaration of Independence, Constitution, Rosetta Stone, Dead Sea Scrolls, Magna Carta
+- Inventions: Light Bulb, Telephone, Television, Airplane, Automobile, Printing Press, Internet, Wheel
+- Modern Tech: iPhone, Computer, Laptop, Bitcoin, GPS
 
-ABSOLUTELY DO NOT USE - TOO OBVIOUS/OVERUSED:
-- Mona Lisa (TOO obvious)
-- iPhone (TOO obvious/modern)
-- Bitcoin (TOO obvious/modern)
-- "The Great Wave off Kanagawa" (too obscure)
-- Any contemporary art or niche objects` : ''}
+Don't always pick Mona Lisa or iPhone - rotate through ALL of these equally!` : ''}
 
-IMPORTANT: Pick something VARIED. Don't just pick the most famous - pick from the SECOND tier of fame that's still very recognizable!
+IMPORTANT: Think of this as a rotation system. Pick something different from what you'd normally default to!
 
 Respond with ONLY a JSON object:
 {
@@ -79,11 +76,11 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are selecting subjects for a MAINSTREAM guessing game. Your audience is average American adults. Pick subjects that are famous and recognizable, but NOT the most overused trivia answers. Avoid Einstein, Eiffel Tower, Mona Lisa, etc. - pick the SECOND tier of fame that's still very recognizable. Think variety and interest, not just the most obvious."
+          content: "You are selecting subjects for a DAILY guessing game that changes every day. Your goal is TRUE RANDOMNESS and VARIETY. Don't default to the same 'safe' choices like Einstein or Eiffel Tower every time. Think of 5 options and pick one that's NOT the most obvious. Rotate between different eras, regions, and fields. Make each day feel fresh and different!"
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.85,
+      temperature: 1.0,
       response_format: { type: "json_object" },
     }),
   });
