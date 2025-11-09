@@ -15,6 +15,83 @@ function extractJSON(text: string): any {
   return JSON.parse(text);
 }
 
+function enhanceAliases(target: string, aiAliases: string[], type: string): string[] {
+  const aliases = new Set<string>();
+
+  // Always include the target
+  aliases.add(target);
+
+  // Include AI-generated aliases
+  aiAliases.forEach(alias => aliases.add(alias));
+
+  const words = target.split(" ");
+  const targetLower = target.toLowerCase();
+
+  // Common abbreviations for people
+  if (type === "person") {
+    // Add initials (e.g., "MLK" for "Martin Luther King")
+    if (words.length >= 2) {
+      const initials = words.map(w => w[0]).join("");
+      if (initials.length >= 2) aliases.add(initials);
+    }
+
+    // Add first name only if unique enough
+    if (words.length >= 2) {
+      aliases.add(words[0]);
+    }
+
+    // Add last name only
+    if (words.length >= 2) {
+      aliases.add(words[words.length - 1]);
+    }
+
+    // Common nicknames
+    if (targetLower.includes("william")) aliases.add(target.replace(/william/i, "Bill"));
+    if (targetLower.includes("robert")) aliases.add(target.replace(/robert/i, "Bob"));
+    if (targetLower.includes("elizabeth")) aliases.add(target.replace(/elizabeth/i, "Liz"));
+    if (targetLower.includes("alexander")) aliases.add(target.replace(/alexander/i, "Alex"));
+    if (targetLower.includes("benjamin")) aliases.add(target.replace(/benjamin/i, "Ben"));
+  }
+
+  // Common abbreviations for places
+  if (type === "place") {
+    // Add "the" prefix variations
+    if (!targetLower.startsWith("the ")) {
+      aliases.add(`The ${target}`);
+    } else {
+      aliases.add(target.substring(4)); // Remove "the "
+    }
+
+    // Common place abbreviations
+    if (targetLower.includes("mount ")) aliases.add(target.replace(/mount /i, "Mt. "));
+    if (targetLower.includes("mt. ")) aliases.add(target.replace(/mt\. /i, "Mount "));
+    if (targetLower.includes("saint ")) aliases.add(target.replace(/saint /i, "St. "));
+    if (targetLower.includes("st. ")) aliases.add(target.replace(/st\. /i, "Saint "));
+  }
+
+  // Common abbreviations for things
+  if (type === "thing") {
+    // Add "the" prefix variations
+    if (!targetLower.startsWith("the ")) {
+      aliases.add(`The ${target}`);
+    } else {
+      aliases.add(target.substring(4));
+    }
+  }
+
+  // Remove any that are just the target again
+  const finalAliases = Array.from(aliases).filter(a => a && a.trim().length > 0);
+
+  // Remove duplicates when lowercased
+  const seen = new Set<string>();
+  return finalAliases.filter(alias => {
+    const lower = alias.toLowerCase().trim();
+    if (seen.has(lower)) return false;
+    seen.add(lower);
+    return true;
+  });
+}
+
 interface ValidationResult {
   status: "APPROVED" | "REJECTED" | "NEEDS_CLARIFICATION" | "NEEDS_DISAMBIGUATION";
   fame_score: number;
@@ -220,21 +297,23 @@ MEDIUM Version:
 - NO poetic language - stick to concrete details
 
 HARDER Version:
-- Be CRYPTIC but FACTUAL - absolutely NO poetic or flowery language
-- Use indirect language and lateral thinking
-- Describe SPECIFIC CONCRETE FACTS in an abstract way
-- Focus on verifiable details, not metaphors or artistic descriptions
-- Should make people think, but still be solvable with logic and knowledge
+- Be CHALLENGING BUT FAIR - make them think hard, but it should be solvable
+- Use indirect but FACTUAL descriptions - avoid obvious connections
+- Describe SPECIFIC CONCRETE FACTS from an unexpected angle
+- Focus on lesser-known but verifiable details
+- Test their knowledge, but don't make it impossible
+- NO cryptic wordplay or overly abstract metaphors
 
 Phase 3 - Five categories (same for all difficulties):
 ${phase3Guidance}
 
-Generate aliases/variations for matching guesses.
+Generate basic aliases/variations for matching guesses (common spellings, abbreviations).
 
 CRITICAL REMINDERS:
 - Phase 1 variations must use COMPLETELY DIFFERENT WORDS from each other
 - Phase 2 variations must approach the subject from DIFFERENT ANGLES
 - NO word or concept should appear in multiple difficulty levels
+- Aliases should include common variations, misspellings, abbreviations
 
 Respond with ONLY valid JSON:
 {
@@ -367,6 +446,9 @@ Respond with ONLY valid JSON:
     const hintContent = hintData.choices[0].message.content;
     const hints = extractJSON(hintContent);
 
+    // Enhance aliases with common variations
+    const enhancedAliases = enhanceAliases(target, hints.aliases || [], type);
+
     const qualityScore = await scoreHintQuality(hints, target, type, openaiKey);
 
     console.log(`Quality score for "${target}": ${qualityScore.score}/100`);
@@ -403,7 +485,7 @@ Respond with ONLY valid JSON:
         phase1_options: hints.phase1_options,
         phase2_options: hints.phase2_options,
         phase3: hints.phase3,
-        aliases: hints.aliases || [target],
+        aliases: enhancedAliases,
         quality_score: qualityScore.score,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
