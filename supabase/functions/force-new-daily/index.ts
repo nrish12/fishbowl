@@ -144,7 +144,7 @@ Deno.serve(async (req: Request) => {
     const type = types[Math.floor(Math.random() * types.length)];
 
     // Generate random subject using AI
-    const target = await generateRandomSubject(type, previousTarget, openaiKey);
+    let currentTarget = await generateRandomSubject(type, previousTarget, openaiKey);
 
     // Try to create challenge
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
@@ -161,7 +161,7 @@ Deno.serve(async (req: Request) => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
         },
-        body: JSON.stringify({ type, target }),
+        body: JSON.stringify({ type, target: currentTarget }),
       });
 
       if (createResponse.ok) {
@@ -169,12 +169,12 @@ Deno.serve(async (req: Request) => {
         break;
       } else {
         const errorData = await createResponse.json();
-        console.log(`Attempt ${attempts} failed for ${target}:`, errorData);
+        console.log(`Attempt ${attempts} failed for ${currentTarget}:`, errorData);
         if (attempts >= maxAttempts) {
           throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
         }
         // Try a different target
-        target = await generateRandomSubject(type, target, openaiKey);
+        currentTarget = await generateRandomSubject(type, currentTarget, openaiKey);
       }
     }
 

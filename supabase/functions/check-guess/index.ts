@@ -83,25 +83,41 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (guess === '__reveal__') {
-      return new Response(
-        JSON.stringify({
-          result: "reveal",
-          canonical: payload.target,
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      if (guess === "__reveal__") {
+        return new Response(
+          JSON.stringify({
+            result: "reveal",
+            canonical: payload.target,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    const normalizedGuess = normalizeGuess(guess);
-    const normalizedTarget = normalizeGuess(payload.target);
-    const normalizedAliases = (payload.aliases || []).map(normalizeGuess);
+      const normalizedGuess = normalizeGuess(guess);
+      const normalizedTarget = normalizeGuess(payload.target);
+      const normalizedAliases = (payload.aliases || []).map(normalizeGuess);
 
-    let isCorrect =
-      normalizedGuess === normalizedTarget ||
-      normalizedAliases.includes(normalizedGuess) ||
-      normalizedGuess.includes(normalizedTarget) ||
-      normalizedTarget.includes(normalizedGuess);
+      let isCorrect =
+        normalizedGuess === normalizedTarget ||
+        normalizedAliases.includes(normalizedGuess);
+
+      if (!isCorrect) {
+        const guessWords = normalizedGuess.split(" ").filter(Boolean);
+        if (guessWords.length > 1) {
+          const comparisonSets = [normalizedTarget, ...normalizedAliases]
+            .map((value) => value.split(" ").filter(Boolean));
+
+          const meaningfulGuessWords = guessWords.filter((word) => word.length > 3);
+          if (meaningfulGuessWords.length) {
+            isCorrect = comparisonSets.some((words) => {
+              if (!words.length) return false;
+              const meaningfulTargetWords = words.filter((word) => word.length > 3);
+              if (!meaningfulTargetWords.length) return false;
+              return meaningfulGuessWords.every((word) => meaningfulTargetWords.includes(word));
+            });
+          }
+        }
+      }
 
     if (!isCorrect && guess.length >= 3) {
       const openaiKey = Deno.env.get("OPENAI_API_KEY");
