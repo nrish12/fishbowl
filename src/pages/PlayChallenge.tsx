@@ -9,7 +9,7 @@ import CategoryPicker from '../components/CategoryPicker';
 import GuessBar from '../components/GuessBar';
 import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
-import { trackEvent } from '../utils/tracking';
+import { getSessionId, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -48,6 +48,13 @@ export default function PlayChallenge() {
   const [isThinking, setIsThinking] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
+  const [playerFingerprint] = useState(() => {
+    try {
+      return getSessionId();
+    } catch {
+      return `session_${Math.random().toString(36).slice(2)}`;
+    }
+  });
 
   const STORAGE_KEY_PREFIX = 'clueladder_progress_';
   const DAILY_CHALLENGE_DATE_KEY = 'clueladder_daily_date';
@@ -186,15 +193,11 @@ export default function PlayChallenge() {
   const handleGuess = async (guess: string) => {
     if (!token || !hints || !challengeId) return;
 
+    const updatedGuessCount = guesses + 1;
+
     setIsThinking(true);
     setLastGuessResult(null);
     setGuesses(prev => prev + 1);
-
-    await trackEvent('attempt', challengeId, {
-      guess_text: guess,
-      phase_revealed: phase,
-      is_correct: false,
-    });
 
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
@@ -207,13 +210,25 @@ export default function PlayChallenge() {
           token,
           guess,
           phase,
-          player_fingerprint: `player_${Date.now()}`,
+          player_fingerprint: playerFingerprint,
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to validate guess');
+      }
 
-      if (data.result === 'correct') {
+      const data = await response.json();
+      const isCorrect = data.result === 'correct';
+
+      await trackEvent('attempt', challengeId, {
+        guess_text: guess,
+        phase_revealed: phase,
+        is_correct: isCorrect,
+      });
+
+      if (isCorrect) {
         setLastGuessResult('correct');
         setAnswer(data.canonical);
         setRank(phase === 1 ? 'Gold' : phase === 2 ? 'Silver' : 'Bronze');
@@ -222,15 +237,16 @@ export default function PlayChallenge() {
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
         await trackEvent('completion', challengeId, {
           completed_phase: phase,
-          total_attempts: guesses + 1,
+          total_attempts: updatedGuessCount,
           time_taken_seconds: timeElapsed,
         });
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
+        const remainingLives = lives - 1;
         setLives(prev => prev - 1);
 
-        if (lives - 1 <= 0) {
+        if (remainingLives <= 0) {
           const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
             method: 'POST',
             headers: {
@@ -246,10 +262,8 @@ export default function PlayChallenge() {
           const answerData = await answerResponse.json();
           setAnswer(answerData.canonical || 'Unknown');
           setGameState('failed');
-        } else {
-          if (phase < 3) {
-            setPhase(prev => (prev + 1) as Phase);
-          }
+        } else if (phase < 3) {
+          setPhase(prev => (prev + 1) as Phase);
         }
       }
     } catch (err) {
