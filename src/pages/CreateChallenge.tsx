@@ -256,9 +256,9 @@ export default function CreateChallenge() {
         </div>
 
         <div className="text-center space-y-3">
-          <h1 className="text-4xl font-serif font-bold text-forest">Create Challenge</h1>
+          <h1 className="text-4xl font-serif font-bold text-forest">Craft Your Note</h1>
           <p className="text-forest/70 max-w-xl mx-auto">
-            Choose a famous person, place, or thing. AI will validate and create hints for your custom challenge.
+            Pick someone or something fascinating. Our AI crafts clues that unfold like a secret message—ready to challenge a friend.
           </p>
         </div>
 
@@ -378,10 +378,10 @@ export default function CreateChallenge() {
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={20} />
-                Validating & Generating...
+                Crafting Your Note...
               </>
             ) : (
-              'Generate Challenge'
+              'Start Crafting'
             )}
           </button>
         </div>
@@ -389,8 +389,8 @@ export default function CreateChallenge() {
         {challengeData && !shareUrl && (
           <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
             <div className="text-center">
-              <h2 className="text-2xl font-serif font-bold text-forest">Customize Your Challenge</h2>
-              <p className="text-sm text-forest/70 mt-1">Choose the difficulty level for each hint type</p>
+              <h2 className="text-2xl font-serif font-bold text-forest">Fold Your Note</h2>
+              <p className="text-sm text-forest/70 mt-1">Choose how cryptic each layer of clues should be</p>
             </div>
 
             {difficultyReasoning && (
@@ -495,10 +495,10 @@ export default function CreateChallenge() {
                 {finalizing ? (
                   <>
                     <Loader2 className="animate-spin" size={20} />
-                    Finalizing Challenge...
+                    Sealing Your Note...
                   </>
                 ) : (
-                  'Create Challenge'
+                  'Seal & Share'
                 )}
               </button>
             </div>
@@ -508,9 +508,9 @@ export default function CreateChallenge() {
         {shareUrl && (
           <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-gold space-y-4">
             <div className="text-center space-y-2">
-              <div className="text-4xl">🎉</div>
-              <h3 className="text-2xl font-serif font-bold text-forest">Challenge Ready!</h3>
-              <p className="text-forest/70">Share this link with friends</p>
+              <div className="text-4xl">✉️</div>
+              <h3 className="text-2xl font-serif font-bold text-forest">Your Note Is Ready!</h3>
+              <p className="text-forest/70">Pass it along—let them unfold the mystery</p>
             </div>
 
             <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-200">

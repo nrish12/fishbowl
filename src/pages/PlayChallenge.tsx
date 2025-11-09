@@ -9,6 +9,8 @@ import CategoryPicker from '../components/CategoryPicker';
 import GuessBar from '../components/GuessBar';
 import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
+import Phase4Nudge from '../components/Phase4Nudge';
+import Phase5Visual from '../components/Phase5Visual';
 import { getSessionId, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -24,10 +26,27 @@ interface Hints {
     stats: string;
     visual: string;
   };
+  phase4_nudge?: string;
+}
+
+interface Phase5Data {
+  semantic_scores: Array<{
+    guess: string;
+    score: number;
+    reason: string;
+  }>;
+  connections: Array<{
+    guess: string;
+    hint: string;
+    pattern: string;
+  }>;
+  synthesis: string;
+  themes_identified: string[];
+  themes_missing: string[];
 }
 
 type GameState = 'loading' | 'playing' | 'solved' | 'failed';
-type Phase = 1 | 2 | 3;
+type Phase = 1 | 2 | 3 | 4 | 5;
 
 export default function PlayChallenge() {
   const [searchParams] = useSearchParams();
@@ -36,7 +55,7 @@ export default function PlayChallenge() {
   const [gameState, setGameState] = useState<GameState>('loading');
   const [hints, setHints] = useState<Hints | null>(null);
   const [challengeType, setChallengeType] = useState<string>('');
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(5);
   const [phase, setPhase] = useState<Phase>(1);
   const [guesses, setGuesses] = useState(0);
   const [answer, setAnswer] = useState('');
@@ -48,6 +67,8 @@ export default function PlayChallenge() {
   const [isThinking, setIsThinking] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
+  const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
+  const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -69,6 +90,8 @@ export default function PlayChallenge() {
       wrongGuesses,
       startTime,
       selectedCategory,
+      phase4Nudge,
+      phase5Data,
       timestamp: Date.now(),
       challengeId,
     };
@@ -147,6 +170,8 @@ export default function PlayChallenge() {
         setWrongGuesses(progress.wrongGuesses);
         setStartTime(progress.startTime);
         setSelectedCategory(progress.selectedCategory);
+        if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
+        if (progress.phase5Data) setPhase5Data(progress.phase5Data);
       }
     }
   }, [challengeId]);
@@ -157,7 +182,7 @@ export default function PlayChallenge() {
     } else if (gameState === 'solved' || gameState === 'failed') {
       clearProgress();
     }
-  }, [gameState, phase, lives, guesses, wrongGuesses, selectedCategory]);
+  }, [gameState, phase, lives, guesses, wrongGuesses, selectedCategory, phase4Nudge, phase5Data]);
 
   const loadChallenge = async () => {
     try {
@@ -247,21 +272,111 @@ export default function PlayChallenge() {
         setLives(prev => prev - 1);
 
         if (remainingLives <= 0) {
-          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({
-              token,
-              guess: '__reveal__',
-              phase,
-            }),
-          });
-          const answerData = await answerResponse.json();
-          setAnswer(answerData.canonical || 'Unknown');
-          setGameState('failed');
+          if (phase === 3) {
+            try {
+              const phase4Response = await fetch(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({
+                  token,
+                  guesses: wrongGuesses,
+                }),
+              });
+
+              if (phase4Response.ok) {
+                const nudgeData = await phase4Response.json();
+                setPhase4Nudge(nudgeData.nudge);
+                setPhase(4);
+                setLives(1);
+              } else {
+                const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                  },
+                  body: JSON.stringify({ token, guess: '__reveal__', phase }),
+                });
+                const answerData = await answerResponse.json();
+                setAnswer(answerData.canonical || 'Unknown');
+                setGameState('failed');
+              }
+            } catch (err) {
+              console.error('Phase 4 fetch error:', err);
+              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({ token, guess: '__reveal__', phase }),
+              });
+              const answerData = await answerResponse.json();
+              setAnswer(answerData.canonical || 'Unknown');
+              setGameState('failed');
+            }
+          } else if (phase === 4) {
+            try {
+              const phase5Response = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({
+                  token,
+                  guesses: wrongGuesses,
+                }),
+              });
+
+              if (phase5Response.ok) {
+                const visualData = await phase5Response.json();
+                setPhase5Data(visualData);
+                setPhase(5);
+                setLives(1);
+              } else {
+                const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                  },
+                  body: JSON.stringify({ token, guess: '__reveal__', phase }),
+                });
+                const answerData = await answerResponse.json();
+                setAnswer(answerData.canonical || 'Unknown');
+                setGameState('failed');
+              }
+            } catch (err) {
+              console.error('Phase 5 fetch error:', err);
+              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({ token, guess: '__reveal__', phase }),
+              });
+              const answerData = await answerResponse.json();
+              setAnswer(answerData.canonical || 'Unknown');
+              setGameState('failed');
+            }
+          } else {
+            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({ token, guess: '__reveal__', phase }),
+            });
+            const answerData = await answerResponse.json();
+            setAnswer(answerData.canonical || 'Unknown');
+            setGameState('failed');
+          }
         } else if (phase < 3) {
           setPhase(prev => (prev + 1) as Phase);
         }
@@ -318,21 +433,24 @@ export default function PlayChallenge() {
             <span>Back</span>
           </Link>
           <Logo size="sm" />
-          <Lives current={lives} total={3} />
+          <Lives current={lives} total={5} />
         </div>
 
         {gameState === 'playing' && hints && (
           <div className="space-y-8">
             <div className="text-center space-y-3">
-              <div className="inline-block px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 rounded-2xl shadow-lg">
-                <p className="text-xs font-semibold text-forest/80 uppercase tracking-wider mb-1">You're guessing a</p>
+              <div className="inline-block px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 rounded-2xl shadow-lg animate-[fadeIn_0.5s_ease-out]">
+                <p className="text-xs font-semibold text-forest/80 uppercase tracking-wider mb-1">The mystery is a</p>
                 <p className="text-3xl font-serif font-bold text-forest">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
+              <p className="text-sm text-forest/60">
+                Each guess unfolds another clue...
+              </p>
             </div>
 
-            {phase >= 3 && <PhaseChips words={hints.phase1} revealed={true} />}
+            {phase >= 3 && phase < 4 && <PhaseChips words={hints.phase1} revealed={true} />}
 
             {phase === 2 && (
               <SentenceCard
@@ -359,6 +477,14 @@ export default function PlayChallenge() {
               />
             )}
 
+            {phase === 4 && phase4Nudge && (
+              <Phase4Nudge nudge={phase4Nudge} keywords={[]} />
+            )}
+
+            {phase === 5 && phase5Data && (
+              <Phase5Visual data={phase5Data} />
+            )}
+
             {isThinking && (
               <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
                 <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
@@ -381,11 +507,11 @@ export default function PlayChallenge() {
             )}
 
             {wrongGuesses.length > 0 && (
-              <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <p className="text-xs font-semibold text-forest/70 uppercase tracking-wider mb-2">Your Previous Guesses:</p>
+              <div className="bg-gradient-to-br from-white to-cream rounded-xl p-5 border-2 border-neutral-200 shadow-sm">
+                <p className="text-xs font-semibold text-forest/70 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-cream text-forest rounded-full text-sm border border-forest/20">
+                    <span key={idx} className="px-4 py-2 bg-white text-forest rounded-full text-sm border-2 border-neutral-300/50 shadow-sm">
                       {guess}
                     </span>
                   ))}
@@ -397,7 +523,7 @@ export default function PlayChallenge() {
               <div className="space-y-4">
                 <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
                 <div className="text-center text-sm text-neutral-500">
-                  Phase {phase} of 3 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+                  Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
                 </div>
               </div>
             )}
