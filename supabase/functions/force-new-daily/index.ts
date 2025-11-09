@@ -32,212 +32,78 @@ async function generateRandomSubject(
 ): Promise<string> {
   const excludeList = [previousTarget, ...recentSubjects].filter(Boolean).join(", ");
 
-  const prompt = `You are picking a random famous ${type} for a mainstream guessing game.
+  const prompt = `You are an AI picking a random famous ${type} for a daily guessing game. This is an AI-POWERED game where you bring creativity and variety to each day's challenge.
 
-CRITICAL INSTRUCTION - ONLY PICK FROM THE LIST BELOW:
-You MUST select ONE subject from the list provided. Do NOT create new subjects.
-The list contains 60-80 mainstream subjects that average Americans would recognize.
+YOUR ROLE: Pick something that feels right for TODAY. Use your AI judgment to select subjects that are:
+
+THE SWEET SPOT (Your Target Zone):
+- Fame Level: 60-75% recognition among general public
+- NOT the most obvious choices everyone picks (Einstein, Eiffel Tower, Mona Lisa)
+- NOT too obscure (Hedy Lamarr, Yayoi Kusama, Great Wave off Kanagawa)
+- JUST RIGHT: Interesting, recognizable, but makes players think
 
 ${excludeList ? `EXCLUSIONS - Do NOT pick any of these (used recently): ${excludeList}` : ''}
 
-${type === 'person' ? `
-SELECT ONE from this COMPLETE LIST (no other options allowed):
-- Cleopatra
-- Julius Caesar
-- Alexander the Great
-- Tutankhamun
-- Leonardo da Vinci
-- Michelangelo
-- Galileo
-- Copernicus
-- Marie Curie
-- Isaac Newton
-- Charles Darwin
-- Nikola Tesla
-- Thomas Edison
-- Alexander Graham Bell
-- Albert Einstein
-- Stephen Hawking
-- George Washington
-- Abraham Lincoln
-- Theodore Roosevelt
-- Franklin D. Roosevelt
-- John F. Kennedy
-- Thomas Jefferson
-- Winston Churchill
-- Napoleon Bonaparte
-- Queen Elizabeth I
-- Queen Victoria
-- Catherine the Great
-- Martin Luther King Jr.
-- Rosa Parks
-- Harriet Tubman
-- Gandhi
-- Nelson Mandela
-- Malcolm X
-- Vincent van Gogh
-- Pablo Picasso
-- Frida Kahlo
-- Rembrandt
-- Monet
-- Andy Warhol
-- Muhammad Ali
-- Oprah Winfrey
-- Michael Jackson
-- Elvis Presley
-- Walt Disney
-- Steve Jobs
-- Princess Diana
-- Jesus Christ
-- Moses
-- Buddha
-- Muhammad
-- Confucius
-- Shakespeare
-- Mark Twain
-- Jane Austen
-- Ernest Hemingway
-- Charles Dickens
-- Maya Angelou
-- Christopher Columbus
-- Marco Polo
-- Amelia Earhart
-- Ferdinand Magellan
-- Beethoven
-- Mozart
-- Bach
-- Louis Armstrong
-- Bob Marley
-- Babe Ruth
-- Michael Jordan
-- Serena Williams
-- Pele
-- Jesse Owens
-- Marilyn Monroe
-- Albert Schweitzer
-- Helen Keller
-- Anne Frank` : ''}
-${type === 'place' ? `
-SELECT ONE from this COMPLETE LIST (no other options allowed):
-- Eiffel Tower
-- Big Ben
-- Colosseum
-- Stonehenge
-- Leaning Tower of Pisa
-- Parthenon
-- Notre Dame
-- Arc de Triomphe
-- Taj Mahal
-- Great Wall of China
-- Forbidden City
-- Angkor Wat
-- Mount Fuji
-- Petra
-- Statue of Liberty
-- Golden Gate Bridge
-- Mount Rushmore
-- Hollywood Sign
-- Christ the Redeemer
-- Chichen Itza
-- Grand Canyon
-- Mount Everest
-- Niagara Falls
-- Great Barrier Reef
-- Victoria Falls
-- Amazon Rainforest
-- Yellowstone
-- Sahara Desert
-- Pyramids of Giza
-- Machu Picchu
-- Roman Forum
-- Acropolis
-- Easter Island
-- Sydney Opera House
-- Burj Khalifa
-- Space Needle
-- CN Tower
-- Gateway Arch
-- Vatican City
-- Mecca
-- Jerusalem
-- Varanasi
-- Buckingham Palace
-- White House
-- Times Square
-- Central Park
-- Disneyland
-- Niagara Falls
-- Yosemite
-- Rocky Mountains` : ''}
-${type === 'thing' ? `
-SELECT ONE from this COMPLETE LIST (no other options allowed):
-- Mona Lisa
-- Statue of David
-- The Last Supper
-- The Thinker
-- The Scream
-- Starry Night
-- Girl with a Pearl Earring
-- Coca-Cola
-- Nike Swoosh
-- McDonald's Golden Arches
-- Disney
-- Apple Logo
-- Lego
-- Starbucks
-- Adidas
-- Olympic Rings
-- Super Bowl Trophy
-- World Cup
-- Stanley Cup
-- Wimbledon Trophy
-- NBA Championship Trophy
-- Liberty Bell
-- Hollywood Sign
-- Oscar Statuette
-- Grammy
-- Emmy
-- Nobel Prize
-- Declaration of Independence
-- US Constitution
-- Rosetta Stone
-- Dead Sea Scrolls
-- Magna Carta
-- Bill of Rights
-- Light Bulb
-- Telephone
-- Television
-- Airplane
-- Automobile
-- Printing Press
-- Internet
-- Wheel
-- Steam Engine
-- iPhone
-- Computer
-- Laptop
-- Bitcoin
-- GPS
-- Wi-Fi
-- Monopoly
-- Rubik's Cube
-- Barbie
-- Pac-Man
-- Guitar
-- Piano
-- American Flag
-- Bicycle
-- Camera` : ''}
+VARIETY PHILOSOPHY:
+This is a DAILY game. Show your range! Don't default to "safe" picks.
+- Rotate through different eras (ancient, medieval, modern, contemporary)
+- Rotate through different regions (Europe, Asia, Americas, Africa, Middle East)
+- Rotate through different fields (science, arts, politics, sports, culture)
+- Make each day feel fresh and different
 
-SELECTION PROCESS:
-1. Remove any excluded subjects from your consideration
-2. Pick a RANDOM subject from the remaining options
-3. Ensure variety - don't favor any particular category
-4. Return EXACTLY as it appears in the list above
+${type === 'person' ? `
+PERSON EXAMPLES (use these as inspiration, not a limit):
+Sweet Spot Range:
+- Historical: Cleopatra, Genghis Khan, Queen Victoria, Joan of Arc, Frederick Douglass
+- Scientists: Marie Curie, Nikola Tesla, Jane Goodall, Carl Sagan, Rachel Carson
+- Artists: Frida Kahlo, Salvador Dali, Georgia O'Keeffe, Banksy, Bob Ross
+- Writers: Maya Angelou, Edgar Allan Poe, J.K. Rowling, Dr. Seuss, Roald Dahl
+- Musicians: Louis Armstrong, Jimi Hendrix, Ella Fitzgerald, David Bowie, Freddie Mercury
+- Athletes: Jackie Robinson, Usain Bolt, Simone Biles, Bruce Lee, Tony Hawk
+- Leaders: Dalai Lama, Malala Yousafzai, Cesar Chavez, Susan B. Anthony
+- Entertainers: Charlie Chaplin, Lucille Ball, Robin Williams, Mr. Rogers, Betty White
+
+TOO OBVIOUS (avoid these defaults): Einstein, Washington, Lincoln, Shakespeare, Jesus
+TOO OBSCURE (avoid these): Obscure PhDs, niche artists, regional-only figures` : ''}
+
+${type === 'place' ? `
+PLACE EXAMPLES (use these as inspiration, not a limit):
+Sweet Spot Range:
+- Ancient Sites: Angkor Wat, Petra, Mesa Verde, Teotihuacan, Pompeii
+- Natural Wonders: Victoria Falls, Giant's Causeway, Aurora Borealis, Dead Sea, Galapagos Islands
+- Modern Landmarks: Space Needle, Gateway Arch, CN Tower, Burj Khalifa, Opera House
+- Historic Sites: Alcatraz, Pearl Harbor, Berlin Wall, Gettysburg, Chernobyl
+- Cultural: Hollywood Walk of Fame, Bourbon Street, Abbey Road, Times Square, Red Square
+- Unique: Area 51, Loch Ness, Bermuda Triangle, Route 66, Silk Road
+
+TOO OBVIOUS (avoid these defaults): Eiffel Tower, Statue of Liberty, Great Wall, Pyramids
+TOO OBSCURE (avoid these): Regional parks, small monuments, local landmarks` : ''}
+
+${type === 'thing' ? `
+THING EXAMPLES (use these as inspiration, not a limit):
+Sweet Spot Range:
+- Art: The Scream, American Gothic, The Thinker, Venus de Milo, Nighthawks
+- Inventions: Microwave, Post-it Notes, Velcro, Zipper, Safety Pin, Lightbulb
+- Cultural Icons: Barbie, Rubik's Cube, Slinky, Etch A Sketch, Smiley Face, Pac-Man
+- Symbols: Peace Sign, Yin Yang, Recycling Symbol, Caduceus, Ampersand
+- Historic Objects: Liberty Bell, Hope Diamond, Rosetta Stone, Magna Carta
+- Modern Tech: USB Drive, QR Code, Hashtag, Bluetooth, WiFi, Emoji
+
+TOO OBVIOUS (avoid these defaults): Mona Lisa, iPhone, Coca-Cola, McDonald's Logo
+TOO OBSCURE (avoid these): Niche artifacts, regional items, insider references` : ''}
+
+YOUR AI DECISION PROCESS:
+1. Consider what day it is, what you've generated recently
+2. Think about variety - balance eras, regions, fields
+3. Pick something in the SWEET SPOT range
+4. Avoid both extremes (too obvious AND too obscure)
+5. Trust your AI judgment to select something interesting
+
+CRITICAL: You are FREE to pick ANY subject in the sweet spot range. The examples above are inspiration, not limitations. Use your creativity!
 
 Respond with ONLY a JSON object:
 {
-  "target": "exact name from list"
+  "target": "the ${type} you've chosen"
 }`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -251,11 +117,11 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are selecting subjects for a DAILY guessing game with TRUE RANDOMNESS. Your goal is maximum variety - don't default to safe choices. Consider 7-10 options from across different eras, regions, and categories, then pick one that provides good variety. The entire pool should be used equally over time. Think variety, not just fame."
+          content: "You are an AI curator for a daily guessing game. Your superpower is finding the SWEET SPOT: subjects that are recognizable but not obvious. Avoid both extremes - no Einstein/Eiffel Tower defaults, but also no obscure academics. Think '60-75% of people would know this' - interesting enough to be engaging, known enough to be fair. Embrace your creativity and variety. Each day should feel fresh and different."
         },
         { role: "user", content: prompt }
       ],
-      temperature: 1.0,
+      temperature: 1.1,
       response_format: { type: "json_object" },
     }),
   });
