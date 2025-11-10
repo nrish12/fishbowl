@@ -4,40 +4,39 @@ interface SentenceCardProps {
   onReveal?: () => void;
 }
 
-export default function SentenceCard({ sentence, revealed, onReveal }: SentenceCardProps) {
-  if (!revealed && !onReveal) return null;
-
-  if (!revealed && onReveal) {
-    return (
-      <div className="text-center space-y-3">
-        <p className="text-sm text-neutral-600">Need more context?</p>
-        <button
-          onClick={onReveal}
-          className="px-6 py-3 bg-neutral-900 text-white rounded-full font-medium hover:bg-gold hover:text-neutral-900 transition-colors duration-200"
-        >
-          Reveal Sentence
-        </button>
-      </div>
-    );
-  }
+export default function SentenceCard({ sentence, revealed }: SentenceCardProps) {
+  if (!revealed) return null;
 
   return (
-    <div className="space-y-5 animate-[unfoldNote_0.6s_ease-out]">
+    <div className="space-y-6 animate-paper-unfold">
       <div className="text-center space-y-2">
-        <h2 className="text-xl font-serif font-bold text-forest/90">
-          Another Layer Unfolds
+        <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
+          <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 2</span>
+        </div>
+        <h2 className="text-2xl font-serif font-bold text-ink-500">
+          The Second Fold Opens
         </h2>
-        <p className="text-sm text-forest/60">One revealing sentence</p>
+        <p className="text-sm text-ink-300">One revealing sentence</p>
       </div>
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-yellow-100/30 rounded-2xl blur-xl" />
-        <div className="relative bg-gradient-to-br from-white to-cream border-2 border-gold/40 rounded-2xl p-8 shadow-lg">
-          <div className="absolute top-4 left-4 w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-gold" />
+
+      <div className="relative max-w-2xl mx-auto">
+        <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl" />
+
+        <div className="relative bg-white rounded-2xl p-8 paper-shadow paper-texture">
+          <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+          <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+          <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+          <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+
+          <div className="fold-crease absolute top-0 bottom-0 left-2/3 w-px" />
+
+          <div className="relative">
+            <div className="absolute -left-3 -top-2 text-5xl text-fold-indigo/20 font-serif leading-none select-none">"</div>
+            <p className="text-xl text-ink-500 leading-relaxed font-medium text-center px-6">
+              {sentence}
+            </p>
+            <div className="absolute -right-3 -bottom-2 text-5xl text-fold-indigo/20 font-serif leading-none select-none">"</div>
           </div>
-          <p className="text-lg text-forest leading-relaxed text-center font-medium">
-            {sentence}
-          </p>
         </div>
       </div>
     </div>

@@ -31,13 +31,16 @@ export default function CategoryPicker({
 
   if (!revealed && onSelectCategory) {
     return (
-      <div className="space-y-5 animate-[unfoldNote_0.6s_ease-out]">
+      <div className="space-y-6 animate-fold-open">
         <div className="text-center space-y-2">
-          <h2 className="text-xl font-serif font-bold text-forest/90">
-            Peek at the First Clue
+          <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
+            <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 1</span>
+          </div>
+          <h2 className="text-2xl font-serif font-bold text-ink-500">
+            Choose Your First Fold
           </h2>
-          <p className="text-sm text-forest/60">
-            Choose one category to unfold
+          <p className="text-sm text-ink-300">
+            Pick one category to reveal
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -47,11 +50,18 @@ export default function CategoryPicker({
               <button
                 key={key}
                 onClick={() => onSelectCategory(key)}
-                className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-white to-cream border-2 border-neutral-200 rounded-xl hover:border-gold hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                className="group relative bg-white rounded-xl p-4 paper-shadow hover:shadow-xl transition-all duration-300 transform hover:scale-105 paper-texture"
               >
-                <Icon size={24} className="text-forest/60 group-hover:text-gold transition-colors" />
-                <span className="text-sm font-semibold text-forest">{config.label}</span>
-                <span className="text-xs text-forest/50">{config.description}</span>
+                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-fold-indigo/20" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-fold-indigo/20" />
+
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <Icon size={20} className="text-white" />
+                  </div>
+                  <span className="text-sm font-bold text-ink-500">{config.label}</span>
+                  <span className="text-xs text-ink-300">{config.description}</span>
+                </div>
               </button>
             );
           })}
@@ -65,23 +75,38 @@ export default function CategoryPicker({
     const Icon = config.icon;
 
     return (
-      <div className="space-y-5 animate-[unfoldNote_0.6s_ease-out]">
+      <div className="space-y-6 animate-paper-unfold">
         <div className="text-center space-y-2">
-          <h2 className="text-xl font-serif font-bold text-forest/90">
+          <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
+            <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 1 • {config.label}</span>
+          </div>
+          <h2 className="text-2xl font-serif font-bold text-ink-500">
             The First Fold Opens
           </h2>
-          <p className="text-sm text-forest/60">{config.label} clue revealed</p>
         </div>
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-yellow-100/30 rounded-2xl blur-xl" />
-          <div className="relative bg-gradient-to-br from-white to-cream border-2 border-gold/40 rounded-2xl p-8 shadow-lg">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-yellow-400 flex items-center justify-center flex-shrink-0 shadow-md">
-                <Icon size={20} className="text-white" />
+
+        <div className="relative max-w-2xl mx-auto">
+          <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl" />
+
+          <div className="relative bg-white rounded-2xl p-8 paper-shadow paper-texture">
+            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+
+            <div className="fold-crease absolute top-0 bottom-0 left-1/3 w-px" />
+
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-lg">
+                  <Icon size={28} className="text-white" />
+                </div>
               </div>
-              <p className="text-lg text-forest leading-relaxed font-medium flex-1 pt-2">
-                {categories[selectedCategory as keyof typeof categories]}
-              </p>
+              <div className="flex-1 pt-3">
+                <p className="text-lg text-ink-500 leading-relaxed font-medium">
+                  {categories[selectedCategory as keyof typeof categories]}
+                </p>
+              </div>
             </div>
           </div>
         </div>
