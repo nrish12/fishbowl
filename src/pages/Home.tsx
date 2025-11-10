@@ -1,143 +1,242 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Calendar, Users, Sparkles } from 'lucide-react';
 import Logo from '../components/Logo';
+import PaperSurface from '../components/paper/PaperSurface';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-paper-100 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
-      <div className="absolute inset-0 paper-texture opacity-40" />
+    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 paper-texture opacity-30" />
 
-      <div className="max-w-4xl w-full relative z-10 py-8">
-        <div className="text-center space-y-6 mb-8">
-          <Logo size="md" showTagline={false} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl w-full relative z-10"
+      >
+        <div className="text-center mb-12 space-y-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <Logo size="lg" showTagline={false} />
+          </motion.div>
 
-          <div className="space-y-2">
-            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-forest-800 tracking-tight">
-              Five Fold
-            </h1>
-            <p className="text-lg sm:text-xl text-forest-600 font-medium italic">
-              Each clue unfolds like a secret note
-            </p>
-            <p className="text-sm sm:text-base text-ink-300 max-w-md mx-auto">
-              A daily puzzle where AI guides your thinking—one fold at a time.
-            </p>
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-5xl md:text-6xl font-serif font-bold text-forest-800 tracking-tight"
+          >
+            Five Fold
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-xl md:text-2xl text-forest-600 italic font-medium"
+          >
+            Each clue unfolds like a secret note
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-base text-ink-muted max-w-2xl mx-auto leading-relaxed"
+          >
+            A daily puzzle where AI guides your thinking—one fold at a time
+          </motion.p>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto mb-16">
+          <div className="absolute -inset-8 bg-gradient-to-br from-forest-500/10 via-gold-500/5 to-forest-500/10 blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+
+          <div className="relative perspective-1200">
+            <motion.div
+              initial={{ rotateX: 10, scale: 0.95 }}
+              animate={{ rotateX: 0, scale: 1 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="transform-gpu"
+            >
+              <PaperSurface className="relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-forest-500/20 to-transparent" />
+                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-forest-500/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-forest-50/30 to-gold-50/30" />
+
+                <div className="fold-crease absolute top-1/2 left-12 right-12 h-px opacity-40" />
+                <div className="fold-crease absolute left-1/2 top-12 bottom-12 w-px opacity-40" />
+
+                <div className="relative grid md:grid-cols-2 gap-8 p-8">
+                  <Link
+                    to="/daily"
+                    className="group relative"
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <PaperSurface variant="lifted" className="h-full hover:shadow-[var(--shadow-envelope)] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-forest-500/0 to-forest-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        <div className="relative flex flex-col items-center text-center space-y-6 p-4">
+                          <motion.div
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.6 }}
+                            className="w-20 h-20 rounded-full bg-gradient-to-br from-forest-500 to-forest-700 flex items-center justify-center shadow-lg relative"
+                          >
+                            <div className="absolute inset-0 rounded-full bg-forest-300/30 animate-ping" style={{ animationDuration: '3s' }} />
+                            <Calendar size={32} className="text-gold-50 relative z-10" strokeWidth={2.5} />
+                          </motion.div>
+
+                          <div className="space-y-3">
+                            <h2 className="text-2xl font-serif font-bold text-forest-800">
+                              Daily Challenge
+                            </h2>
+                            <p className="text-sm text-forest-600 leading-relaxed">
+                              A fresh mystery unfolds each day. Five phases, five chances to solve it. Can you unfold the answer?
+                            </p>
+                          </div>
+
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-bold shadow-lg group-hover:shadow-xl transition-all"
+                          >
+                            <Sparkles size={16} />
+                            Unfold Today's Mystery
+                          </motion.div>
+                        </div>
+                      </PaperSurface>
+                    </motion.div>
+                  </Link>
+
+                  <Link
+                    to="/create"
+                    className="group relative"
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <PaperSurface variant="lifted" className="h-full hover:shadow-[var(--shadow-envelope)] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/0 to-gold-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        <div className="relative flex flex-col items-center text-center space-y-6 p-4">
+                          <motion.div
+                            whileHover={{ rotate: -360 }}
+                            transition={{ duration: 0.6 }}
+                            className="w-20 h-20 rounded-full bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center shadow-lg relative"
+                          >
+                            <div className="absolute inset-0 rounded-full bg-gold-300/30 animate-ping" style={{ animationDuration: '3s', animationDelay: '1.5s' }} />
+                            <Users size={32} className="text-forest-800 relative z-10" strokeWidth={2.5} />
+                          </motion.div>
+
+                          <div className="space-y-3">
+                            <h2 className="text-2xl font-serif font-bold text-forest-800">
+                              Custom Challenge
+                            </h2>
+                            <p className="text-sm text-forest-600 leading-relaxed">
+                              Craft a mystery note for someone special. Watch as they piece together your secret.
+                            </p>
+                          </div>
+
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-900 rounded-full text-sm font-bold shadow-lg group-hover:shadow-xl transition-all"
+                          >
+                            <Sparkles size={16} />
+                            Fold Your Own Note
+                          </motion.div>
+                        </div>
+                      </PaperSurface>
+                    </motion.div>
+                  </Link>
+                </div>
+              </PaperSurface>
+            </motion.div>
           </div>
         </div>
 
-        <div className="relative max-w-2xl mx-auto mb-10">
-          <div className="absolute -inset-6 bg-gradient-to-br from-forest-300/20 to-gold-300/20 blur-2xl" />
-
-          <div className="relative bg-paper-cream rounded-3xl p-6 sm:p-8 secret-note-shadow border-2 border-forest-400/20 paper-texture">
-            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
-            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-gold-500/40" />
-            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-gold-500/40" />
-            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
-
-            <div className="fold-crease absolute top-1/2 left-8 right-8 h-px" />
-            <div className="fold-crease absolute left-1/2 top-8 bottom-8 w-px" />
-
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-              <Link
-                to="/daily"
-                className="group relative bg-gradient-to-br from-forest-50 to-forest-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-forest-300/30 hover:scale-105 transform"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-forest-500/0 to-forest-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div className="relative flex flex-col items-center text-center space-y-3">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-7 h-7 text-gold-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-
-                  <div>
-                    <h2 className="text-xl font-serif font-bold text-forest-800 mb-1">
-                      Daily Challenge
-                    </h2>
-                    <p className="text-sm text-forest-600 leading-snug">
-                      A fresh mystery unfolds each day. Five phases, five chances to solve it.
-                    </p>
-                  </div>
-
-                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
-                    Unfold Today
-                  </span>
-                </div>
-              </Link>
-
-              <Link
-                to="/create"
-                className="group relative bg-gradient-to-br from-gold-50 to-gold-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gold-300/40 hover:scale-105 transform"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-gold-500/0 to-gold-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div className="relative flex flex-col items-center text-center space-y-3">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-7 h-7 text-forest-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-
-                  <div>
-                    <h2 className="text-xl font-serif font-bold text-forest-800 mb-1">
-                      Custom Challenge
-                    </h2>
-                    <p className="text-sm text-forest-600 leading-snug">
-                      Craft a mystery note for someone special. Watch them piece it together.
-                    </p>
-                  </div>
-
-                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-800 rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
-                    Fold Your Own
-                  </span>
-                </div>
-              </Link>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="max-w-3xl mx-auto"
+        >
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-4 mb-6">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent via-forest-400 to-transparent" />
+              <h3 className="text-xs font-bold text-forest-600 uppercase tracking-[0.3em]">
+                How It Unfolds
+              </h3>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent via-forest-400 to-transparent" />
             </div>
           </div>
-        </div>
 
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent via-forest-300 to-transparent" />
-            <h3 className="text-xs font-bold text-forest-600 uppercase tracking-widest">
-              How It Unfolds
-            </h3>
-            <div className="h-px w-12 bg-gradient-to-r from-transparent via-forest-300 to-transparent" />
-          </div>
-
-          <div className="flex justify-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex justify-center gap-3 flex-wrap mb-6">
             {[
-              { num: 1, label: 'Category' },
-              { num: 2, label: 'Sentence' },
-              { num: 3, label: 'Words' },
-              { num: 4, label: 'Nudge' },
-              { num: 5, label: 'View' },
+              { num: 1, label: 'Category', color: 'forest' },
+              { num: 2, label: 'Sentence', color: 'forest' },
+              { num: 3, label: 'Five Words', color: 'forest' },
+              { num: 4, label: 'AI Nudge', color: 'gold' },
+              { num: 5, label: 'Visual', color: 'gold' },
             ].map((phase, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-1">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${idx < 3 ? 'bg-gradient-to-br from-forest-500 to-forest-600' : 'bg-gradient-to-br from-gold-500 to-gold-600'} flex items-center justify-center shadow-md`}>
-                  <span className="font-serif text-base sm:text-lg font-bold text-white">{phase.num}</span>
+              <motion.div
+                key={idx}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 1.1 + idx * 0.1, duration: 0.4, type: 'spring' }}
+                className="flex flex-col items-center gap-2"
+              >
+                <div
+                  className={`w-14 h-14 rounded-full ${
+                    phase.color === 'forest'
+                      ? 'bg-gradient-to-br from-forest-500 to-forest-700 shadow-lg shadow-forest-500/30'
+                      : 'bg-gradient-to-br from-gold-500 to-gold-700 shadow-lg shadow-gold-500/30'
+                  } flex items-center justify-center transform hover:scale-110 hover:rotate-12 transition-all cursor-default`}
+                >
+                  <span className="font-serif text-xl font-bold text-white">{phase.num}</span>
                 </div>
-                <span className="text-xs font-medium text-forest-700">{phase.label}</span>
-              </div>
+                <span className="text-xs font-bold text-forest-700">{phase.label}</span>
+              </motion.div>
             ))}
           </div>
 
-          <p className="text-xs sm:text-sm text-ink-300 mt-4 leading-relaxed max-w-lg mx-auto">
-            Each wrong guess <span className="font-semibold text-forest-600">unfolds another clue</span>.
-            The AI watches your thinking. Earn <span className="font-semibold text-gold-600">Gold, Silver, or Bronze</span>.
-          </p>
-        </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.6 }}
+            className="text-sm text-center text-ink-muted leading-relaxed max-w-xl mx-auto"
+          >
+            Each wrong guess <span className="font-bold text-forest-600">unfolds another clue</span>.
+            The AI watches your thinking and guides you closer.
+            Earn <span className="font-bold text-gold-600">Gold</span>, <span className="font-bold text-ink-light">Silver</span>, or <span className="font-bold text-amber-700">Bronze</span> based on how quickly you solve it.
+          </motion.p>
+        </motion.div>
 
         {import.meta.env.MODE === 'development' && (
-          <div className="text-center mt-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+            className="text-center mt-12"
+          >
             <Link
               to="/dev"
-              className="inline-block px-4 py-2 bg-ink-400 text-white text-xs rounded-lg hover:bg-ink-500 transition-colors"
+              className="inline-block px-4 py-2 bg-ink-muted/20 hover:bg-ink-muted/30 text-ink-primary text-xs rounded-lg transition-colors backdrop-blur-sm border border-ink-muted/20"
             >
-              Dev Tools
+              Developer Tools
             </Link>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

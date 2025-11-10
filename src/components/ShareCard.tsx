@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { trackEvent } from '../utils/tracking';
 import { shareResults } from '../utils/shareResults';
-import { Share2, Check, Copy } from 'lucide-react';
+import { Share2, Check, Copy, Sparkles, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import EnvelopePanel from './paper/EnvelopePanel';
+import StickyNote from './paper/StickyNote';
 
 interface ShareCardProps {
   rank: 'Gold' | 'Silver' | 'Bronze' | null;
@@ -18,10 +21,22 @@ interface ShareCardProps {
 export default function ShareCard({ rank, solved, answer, guesses, phase, shareUrl, challengeId, isDaily = false }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
-  const rankColors = {
-    Gold: 'from-yellow-400 to-yellow-600',
-    Silver: 'from-gray-300 to-gray-500',
-    Bronze: 'from-orange-400 to-orange-600',
+  const rankConfig = {
+    Gold: {
+      gradient: 'from-gold-500 to-gold-700',
+      shadow: 'shadow-gold-500/40',
+      emoji: '🥇',
+    },
+    Silver: {
+      gradient: 'from-gray-300 to-gray-500',
+      shadow: 'shadow-gray-500/40',
+      emoji: '🥈',
+    },
+    Bronze: {
+      gradient: 'from-amber-600 to-amber-800',
+      shadow: 'shadow-amber-600/40',
+      emoji: '🥉',
+    },
   };
 
   const handleShare = async () => {
@@ -42,70 +57,106 @@ export default function ShareCard({ rank, solved, answer, guesses, phase, shareU
   };
 
   return (
-    <div className="space-y-6 animate-paper-unfold">
-      <div className="relative">
-        <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/20 to-fold-purple/20 rounded-3xl blur-xl" />
-        <div className="relative bg-white rounded-3xl p-10 paper-shadow paper-texture border border-ink-200/30">
-          <div className="absolute top-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-          <div className="absolute top-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-          <div className="absolute bottom-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-          <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-        {solved ? (
-          <div className="space-y-6 text-center">
-            {rank && (
-              <div className={`inline-block px-10 py-4 bg-gradient-to-r ${rankColors[rank]} text-white rounded-full font-serif text-3xl font-bold shadow-xl relative`}>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent" />
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.3, duration: 0.5 }}
+      className="space-y-6"
+    >
+      <EnvelopePanel title={solved ? "🎉 You Solved It!" : "💭 So Close!"} delay={0.2}>
+        <div className="space-y-8">
+          {solved && rank && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.6, type: 'spring', bounce: 0.5 }}
+              className="flex flex-col items-center gap-3"
+            >
+              <div className="text-6xl">{rankConfig[rank].emoji}</div>
+              <div className={`inline-block px-8 py-3 bg-gradient-to-r ${rankConfig[rank].gradient} text-white rounded-full font-serif text-2xl font-bold shadow-xl ${rankConfig[rank].shadow}`}>
                 <span className="relative z-10">{rank} Rank</span>
               </div>
+            </motion.div>
+          )}
+
+          <div className="text-center space-y-3">
+            <p className="text-xs text-forest-600 uppercase tracking-[0.2em] font-bold">
+              {solved ? 'The Answer Was' : 'You Were Looking For'}
+            </p>
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="text-4xl md:text-5xl font-serif font-bold text-forest-800"
+            >
+              {answer}
+            </motion.h2>
+          </div>
+
+          <div className="flex justify-center gap-3 flex-wrap">
+            <StickyNote color="yellow" size="md">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-forest-800">{guesses}</div>
+                <div className="text-xs text-ink-muted">{guesses === 1 ? 'guess' : 'guesses'}</div>
+              </div>
+            </StickyNote>
+
+            <StickyNote color="green" size="md">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-forest-800">{phase}</div>
+                <div className="text-xs text-ink-muted">phase{phase !== 1 ? 's' : ''}</div>
+              </div>
+            </StickyNote>
+
+            {rank && (
+              <StickyNote color={rank === 'Gold' ? 'yellow' : 'blue'} size="md">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-forest-800">{rankConfig[rank].emoji}</div>
+                  <div className="text-xs text-ink-muted">{rank}</div>
+                </div>
+              </StickyNote>
             )}
-            <div>
-              <p className="text-sm text-ink-300 uppercase tracking-wider font-bold mb-2">The Answer</p>
-              <h2 className="text-5xl font-serif font-bold text-ink-500">{answer}</h2>
-            </div>
-            <p className="text-ink-400 text-lg">
-              Solved in <span className="font-bold text-fold-indigo">{guesses}</span> {guesses === 1 ? 'guess' : 'guesses'}
-            </p>
           </div>
-        ) : (
-          <div className="space-y-4 text-center">
-            <div className="text-6xl">💭</div>
-            <h2 className="text-3xl font-serif font-bold text-ink-500">Almost there!</h2>
-            <div>
-              <p className="text-sm text-ink-300 uppercase tracking-wider font-bold mb-2">The Answer Was</p>
-              <p className="text-4xl font-serif font-bold text-ink-500">{answer}</p>
-            </div>
-            <p className="text-ink-400 text-lg">
-              {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+
+          {!solved && (
+            <p className="text-sm text-center text-ink-muted leading-relaxed">
+              Great effort! Every guess brings you closer to mastering the game.
             </p>
-          </div>
-        )}
+          )}
         </div>
-      </div>
+      </EnvelopePanel>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <button
+        <motion.button
           onClick={handleShare}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-fold-indigo to-fold-purple text-white rounded-full font-semibold hover:shadow-xl transition-all duration-200 transform hover:scale-105 paper-shadow"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-2xl font-bold hover:shadow-xl transition-all duration-200 shadow-lg"
         >
           {copied ? (
             <>
-              <Check size={18} />
-              Copied!
+              <Check size={20} />
+              Copied to Clipboard!
             </>
           ) : (
             <>
-              {navigator.share ? <Share2 size={18} /> : <Copy size={18} />}
+              {navigator.share ? <Share2 size={20} /> : <Copy size={20} />}
               {navigator.share ? 'Share Result' : 'Copy Result'}
             </>
           )}
-        </button>
-        <Link
-          to="/"
-          className="flex-1 flex items-center justify-center px-6 py-3 bg-neutral-100 text-neutral-900 rounded-full font-medium hover:bg-neutral-200 transition-colors duration-200"
-        >
-          Back Home
+        </motion.button>
+
+        <Link to="/" className="flex-1">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center justify-center gap-2 px-6 py-4 bg-paper-cream border-2 border-forest-300/30 text-forest-800 rounded-2xl font-bold hover:bg-paper-200 transition-all duration-200 shadow-md h-full"
+          >
+            <Home size={20} />
+            Back Home
+          </motion.div>
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 }
