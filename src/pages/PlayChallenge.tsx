@@ -272,10 +272,30 @@ export default function PlayChallenge() {
         const remainingLives = lives - 1;
         setLives(prev => prev - 1);
 
+        console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Lives remaining:', remainingLives);
+
         if (remainingLives <= 0) {
-          console.log('[Phase Logic] Out of lives. Current phase:', phase);
-          if (phase === 3) {
-            console.log('[Phase 4] Attempting to fetch Phase 4 nudge...');
+          console.log('[Game Over] Out of lives');
+          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({ token, guess: '__reveal__', phase }),
+          });
+          const answerData = await answerResponse.json();
+          setAnswer(answerData.canonical || 'Unknown');
+          setGameState('failed');
+        } else {
+          if (phase === 1) {
+            console.log('[Advancing] Phase 1 → Phase 2');
+            setPhase(2);
+          } else if (phase === 2) {
+            console.log('[Advancing] Phase 2 → Phase 3');
+            setPhase(3);
+          } else if (phase === 3) {
+            console.log('[Advancing] Phase 3 → Phase 4 (Fetching AI nudge...)');
             try {
               const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
                 method: 'POST',
@@ -308,37 +328,17 @@ export default function PlayChallenge() {
                 setPhase4Nudge(nudgeData.nudge);
                 setPhase4Keywords(nudgeData.keywords || []);
                 setPhase(4);
-                setLives(1);
               } else {
-                const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                  },
-                  body: JSON.stringify({ token, guess: '__reveal__', phase }),
-                });
-                const answerData = await answerResponse.json();
-                setAnswer(answerData.canonical || 'Unknown');
-                setGameState('failed');
+                console.error('[Phase 4] Failed to fetch nudge');
+                setPhase(4);
               }
             } catch (err) {
-              console.error('Phase 4 fetch error:', err);
-              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({ token, guess: '__reveal__', phase }),
-              });
-              const answerData = await answerResponse.json();
-              setAnswer(answerData.canonical || 'Unknown');
-              setGameState('failed');
+              console.error('[Phase 4] Error:', err);
+              setPhase(4);
             }
           } else if (phase === 4) {
-            console.log('[Phase 5] Attempting to fetch Phase 5 visual...');
-            try{
+            console.log('[Advancing] Phase 4 → Phase 5 (Fetching visual...)');
+            try {
               const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
                 method: 'POST',
                 headers: {
@@ -372,50 +372,15 @@ export default function PlayChallenge() {
                 console.log('[Phase 5] Success! Visual data:', visualData);
                 setPhase5Data(visualData);
                 setPhase(5);
-                setLives(1);
               } else {
-                const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                  },
-                  body: JSON.stringify({ token, guess: '__reveal__', phase }),
-                });
-                const answerData = await answerResponse.json();
-                setAnswer(answerData.canonical || 'Unknown');
-                setGameState('failed');
+                console.error('[Phase 5] Failed to fetch visual');
+                setPhase(5);
               }
             } catch (err) {
-              console.error('Phase 5 fetch error:', err);
-              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({ token, guess: '__reveal__', phase }),
-              });
-              const answerData = await answerResponse.json();
-              setAnswer(answerData.canonical || 'Unknown');
-              setGameState('failed');
+              console.error('[Phase 5] Error:', err);
+              setPhase(5);
             }
-          } else {
-            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({ token, guess: '__reveal__', phase }),
-            });
-            const answerData = await answerResponse.json();
-            setAnswer(answerData.canonical || 'Unknown');
-            setGameState('failed');
           }
-        } else if (phase < 3) {
-          setPhase(prev => (prev + 1) as Phase);
-          setLives(5);
         }
       }
     } catch (err) {
