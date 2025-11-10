@@ -329,7 +329,8 @@ export default function PlayChallenge() {
                 setPhase4Keywords(nudgeData.keywords || []);
                 setPhase(4);
               } else {
-                console.error('[Phase 4] Failed to fetch nudge');
+                const errorText = await phase4Response.text();
+                console.error('[Phase 4] Failed to fetch nudge. Status:', phase4Response.status, 'Response:', errorText);
                 setPhase(4);
               }
             } catch (err) {
@@ -373,7 +374,8 @@ export default function PlayChallenge() {
                 setPhase5Data(visualData);
                 setPhase(5);
               } else {
-                console.error('[Phase 5] Failed to fetch visual');
+                const errorText = await phase5Response.text();
+                console.error('[Phase 5] Failed to fetch visual. Status:', phase5Response.status, 'Response:', errorText);
                 setPhase(5);
               }
             } catch (err) {
@@ -493,15 +495,31 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {phase === 4 && phase4Nudge && (
+            {phase === 4 && (
               <div className="animate-paper-unfold">
-                <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+                {phase4Nudge ? (
+                  <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+                ) : (
+                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                    <div className="text-5xl">💡</div>
+                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
+                    <p className="text-ink-400">Loading personalized nudge...</p>
+                  </div>
+                )}
               </div>
             )}
 
-            {phase === 5 && phase5Data && (
+            {phase === 5 && (
               <div className="animate-paper-unfold">
-                <Phase5Visual data={phase5Data} />
+                {phase5Data ? (
+                  <Phase5Visual data={phase5Data} />
+                ) : (
+                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                    <div className="text-5xl">🔮</div>
+                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
+                    <p className="text-ink-400">Loading complete visual breakdown...</p>
+                  </div>
+                )}
               </div>
             )}
 
