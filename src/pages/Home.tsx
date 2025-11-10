@@ -1,161 +1,139 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { Calendar, Users } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function Home() {
-  const [isEnvelopeOpening, setIsEnvelopeOpening] = useState(false);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute inset-0 paper-texture opacity-30" />
+    <div className="min-h-screen bg-paper-100 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+      <div className="absolute inset-0 paper-texture opacity-40" />
 
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-10" preserveAspectRatio="none">
-        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="currentColor" strokeWidth="1" strokeDasharray="4,8" className="text-ink-200" />
-        <line x1="50%" y1="0" x2="50%" y2="100%" stroke="currentColor" strokeWidth="1" strokeDasharray="4,8" className="text-ink-200" />
-      </svg>
+      <div className="max-w-4xl w-full relative z-10 py-8">
+        <div className="text-center space-y-6 mb-8">
+          <Logo size="md" showTagline={false} />
 
-      <div className="max-w-5xl w-full space-y-12 relative z-10">
-        <div className="text-center space-y-6 animate-[fadeIn_0.8s_ease-out]">
-          <Logo size="lg" showTagline={false} />
-
-          <div className="max-w-2xl mx-auto space-y-3">
-            <h1 className="text-5xl md:text-6xl font-serif font-bold text-ink-500 tracking-tight">
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-forest-800 tracking-tight">
               Five Fold
             </h1>
-            <p className="text-xl text-ink-300 font-medium">
+            <p className="text-lg sm:text-xl text-forest-600 font-medium italic">
               Each clue unfolds like a secret note
             </p>
-            <p className="text-base text-ink-200 max-w-lg mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-ink-300 max-w-md mx-auto">
               A daily puzzle where AI guides your thinking—one fold at a time.
             </p>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          <Link
-            to="/daily"
-            className="group relative perspective-1200"
-            onMouseEnter={() => setIsEnvelopeOpening(true)}
-            onMouseLeave={() => setIsEnvelopeOpening(false)}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+        <div className="relative max-w-2xl mx-auto mb-10">
+          <div className="absolute -inset-6 bg-gradient-to-br from-forest-300/20 to-gold-300/20 blur-2xl" />
 
-            <div className="relative bg-white rounded-2xl p-8 paper-shadow hover:shadow-2xl transition-all duration-500 transform group-hover:scale-[1.02] paper-texture">
-              <div className="absolute top-6 left-6 w-3 h-3 rounded-full bg-fold-indigo/20" />
-              <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-fold-indigo/20" />
-              <div className="absolute bottom-6 left-6 w-3 h-3 rounded-full bg-fold-indigo/20" />
-              <div className="absolute bottom-6 right-6 w-3 h-3 rounded-full bg-fold-indigo/20" />
+          <div className="relative bg-paper-cream rounded-3xl p-6 sm:p-8 secret-note-shadow border-2 border-forest-400/20 paper-texture">
+            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
+            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-gold-500/40" />
+            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-gold-500/40" />
+            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
 
-              <div className="fold-crease absolute top-1/2 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="fold-crease absolute top-1/2 left-8 right-8 h-px" />
+            <div className="fold-crease absolute left-1/2 top-8 bottom-8 w-px" />
 
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-500">
-                  <Calendar size={28} className="text-white" />
-                </div>
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+              <Link
+                to="/daily"
+                className="group relative bg-gradient-to-br from-forest-50 to-forest-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-forest-300/30 hover:scale-105 transform"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-forest-500/0 to-forest-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-serif font-bold text-ink-500">
-                    Daily Challenge
-                  </h2>
-                  <p className="text-ink-300 leading-relaxed text-sm">
-                    A fresh mystery unfolds each day. Five phases, five chances to solve it.
-                  </p>
-                </div>
+                <div className="relative flex flex-col items-center text-center space-y-3">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-gold-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
 
-                <div className="pt-2">
-                  <span className="inline-block px-6 py-2.5 bg-gradient-to-r from-fold-indigo to-fold-purple text-white rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
-                    Unfold Today's Note
+                  <div>
+                    <h2 className="text-xl font-serif font-bold text-forest-800 mb-1">
+                      Daily Challenge
+                    </h2>
+                    <p className="text-sm text-forest-600 leading-snug">
+                      A fresh mystery unfolds each day. Five phases, five chances to solve it.
+                    </p>
+                  </div>
+
+                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
+                    Unfold Today
                   </span>
                 </div>
-              </div>
-            </div>
-          </Link>
+              </Link>
 
-          <Link
-            to="/create"
-            className="group relative perspective-1200"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-echo-glow/10 to-echo-soft/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+              <Link
+                to="/create"
+                className="group relative bg-gradient-to-br from-gold-50 to-gold-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gold-300/40 hover:scale-105 transform"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-gold-500/0 to-gold-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            <div className="relative bg-white rounded-2xl p-8 paper-shadow hover:shadow-2xl transition-all duration-500 transform group-hover:scale-[1.02] paper-texture">
-              <div className="absolute top-6 left-6 w-3 h-3 rounded-full bg-echo-glow/20" />
-              <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-echo-glow/20" />
-              <div className="absolute bottom-6 left-6 w-3 h-3 rounded-full bg-echo-glow/20" />
-              <div className="absolute bottom-6 right-6 w-3 h-3 rounded-full bg-echo-glow/20" />
+                <div className="relative flex flex-col items-center text-center space-y-3">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-forest-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
 
-              <div className="fold-crease absolute left-1/2 top-0 bottom-0 w-px opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div>
+                    <h2 className="text-xl font-serif font-bold text-forest-800 mb-1">
+                      Custom Challenge
+                    </h2>
+                    <p className="text-sm text-forest-600 leading-snug">
+                      Craft a mystery note for someone special. Watch them piece it together.
+                    </p>
+                  </div>
 
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-echo-glow to-echo-soft flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-500">
-                  <Users size={28} className="text-white" />
-                </div>
-
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-serif font-bold text-ink-500">
-                    Custom Challenge
-                  </h2>
-                  <p className="text-ink-300 leading-relaxed text-sm">
-                    Craft a mystery note for someone special. Watch them piece it together.
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <span className="inline-block px-6 py-2.5 bg-gradient-to-r from-echo-glow to-echo-soft text-white rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
-                    Fold Your Own Note
+                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-800 rounded-full text-sm font-semibold shadow-md group-hover:shadow-lg transition-all">
+                    Fold Your Own
                   </span>
                 </div>
-              </div>
+              </Link>
             </div>
-          </Link>
+          </div>
         </div>
 
-        <div className="text-center space-y-6 max-w-3xl mx-auto animate-[fadeIn_1.2s_ease-out]">
-          <div className="inline-block">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent to-ink-200" />
-              <h3 className="text-sm font-bold text-ink-300 uppercase tracking-[0.2em]">
-                How It Unfolds
-              </h3>
-              <div className="h-px w-16 bg-gradient-to-l from-transparent to-ink-200" />
-            </div>
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="h-px w-12 bg-gradient-to-r from-transparent via-forest-300 to-transparent" />
+            <h3 className="text-xs font-bold text-forest-600 uppercase tracking-widest">
+              How It Unfolds
+            </h3>
+            <div className="h-px w-12 bg-gradient-to-r from-transparent via-forest-300 to-transparent" />
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 paper-shadow paper-texture">
-            <div className="grid grid-cols-5 gap-4 mb-6">
-              {[
-                { num: 1, label: 'Category', color: 'from-fold-indigo to-fold-purple' },
-                { num: 2, label: 'Sentence', color: 'from-fold-indigo to-fold-purple' },
-                { num: 3, label: 'Five Words', color: 'from-fold-indigo to-fold-purple' },
-                { num: 4, label: 'AI Nudge', color: 'from-echo-glow to-echo-soft' },
-                { num: 5, label: 'Full View', color: 'from-echo-glow to-echo-soft' },
-              ].map((phase, idx) => (
-                <div key={idx} className="flex flex-col items-center gap-2">
-                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${phase.color} flex items-center justify-center shadow-md transform hover:scale-110 transition-transform`}>
-                    <span className="font-serif text-xl font-bold text-white">{phase.num}</span>
-                  </div>
-                  <span className="text-xs font-semibold text-ink-300">{phase.label}</span>
+          <div className="flex justify-center gap-2 sm:gap-3 flex-wrap">
+            {[
+              { num: 1, label: 'Category' },
+              { num: 2, label: 'Sentence' },
+              { num: 3, label: 'Words' },
+              { num: 4, label: 'Nudge' },
+              { num: 5, label: 'View' },
+            ].map((phase, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-1">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${idx < 3 ? 'bg-gradient-to-br from-forest-500 to-forest-600' : 'bg-gradient-to-br from-gold-500 to-gold-600'} flex items-center justify-center shadow-md`}>
+                  <span className="font-serif text-base sm:text-lg font-bold text-white">{phase.num}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className="pt-6 border-t border-ink-200/30">
-              <p className="text-sm text-ink-300 leading-relaxed">
-                Each wrong guess <span className="font-semibold text-fold-indigo">unfolds another clue</span>.
-                The AI watches your thinking and guides you closer.
-                Earn <span className="font-semibold text-ink-400">Gold, Silver, or Bronze</span> based on when you solve it.
-              </p>
-            </div>
+                <span className="text-xs font-medium text-forest-700">{phase.label}</span>
+              </div>
+            ))}
           </div>
+
+          <p className="text-xs sm:text-sm text-ink-300 mt-4 leading-relaxed max-w-lg mx-auto">
+            Each wrong guess <span className="font-semibold text-forest-600">unfolds another clue</span>.
+            The AI watches your thinking. Earn <span className="font-semibold text-gold-600">Gold, Silver, or Bronze</span>.
+          </p>
         </div>
 
         {import.meta.env.MODE === 'development' && (
-          <div className="text-center animate-[fadeIn_1.4s_ease-out]">
+          <div className="text-center mt-6">
             <Link
               to="/dev"
-              className="inline-block px-4 py-2 bg-ink-400 text-white text-sm rounded-lg hover:bg-ink-500 transition-colors paper-shadow"
+              className="inline-block px-4 py-2 bg-ink-400 text-white text-xs rounded-lg hover:bg-ink-500 transition-colors"
             >
-              Developer Tools
+              Dev Tools
             </Link>
           </div>
         )}
