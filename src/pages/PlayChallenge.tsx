@@ -443,7 +443,7 @@ export default function PlayChallenge() {
         </div>
 
         {gameState === 'playing' && hints && (
-          <div className="space-y-8">
+          <div className="space-y-8 phase-container">
             <div className="text-center space-y-3 animate-paper-unfold">
               <div className="inline-block px-8 py-4 bg-gradient-to-r from-fold-indigo to-fold-purple rounded-2xl shadow-lg paper-texture relative">
                 <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-white/30" />
@@ -459,7 +459,7 @@ export default function PlayChallenge() {
             </div>
 
             {phase >= 1 && selectedCategory && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer">
                 <CategoryPicker
                   categories={hints.phase3}
                   revealed={true}
@@ -469,7 +469,7 @@ export default function PlayChallenge() {
             )}
 
             {phase === 1 && !selectedCategory && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer">
                 <CategoryPicker
                   categories={hints.phase3}
                   revealed={false}
@@ -480,7 +480,7 @@ export default function PlayChallenge() {
             )}
 
             {phase >= 2 && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer stagger-1">
                 <SentenceCard
                   sentence={hints.phase2}
                   revealed={true}
@@ -490,18 +490,18 @@ export default function PlayChallenge() {
             )}
 
             {phase >= 3 && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer stagger-2">
                 <PhaseChips words={hints.phase1} revealed={true} />
               </div>
             )}
 
             {phase === 4 && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer stagger-3">
                 {phase4Nudge ? (
                   <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
                 ) : (
                   <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
-                    <div className="text-5xl">💡</div>
+                    <div className="text-5xl animate-pulse">💡</div>
                     <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
                     <p className="text-ink-400">Loading personalized nudge...</p>
                   </div>
@@ -510,12 +510,12 @@ export default function PlayChallenge() {
             )}
 
             {phase === 5 && (
-              <div className="animate-paper-unfold">
+              <div className="animate-phase-reveal paper-fold-layer stagger-4">
                 {phase5Data ? (
                   <Phase5Visual data={phase5Data} />
                 ) : (
                   <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
-                    <div className="text-5xl">🔮</div>
+                    <div className="text-5xl animate-pulse">🔮</div>
                     <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
                     <p className="text-ink-400">Loading complete visual breakdown...</p>
                   </div>

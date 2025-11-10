@@ -8,8 +8,8 @@ export default function SentenceCard({ sentence, revealed }: SentenceCardProps) 
   if (!revealed) return null;
 
   return (
-    <div className="space-y-6 animate-paper-unfold">
-      <div className="text-center space-y-2">
+    <div className="space-y-6">
+      <div className="text-center space-y-2 animate-fade-in">
         <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
           <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 2</span>
         </div>
@@ -19,8 +19,8 @@ export default function SentenceCard({ sentence, revealed }: SentenceCardProps) 
         <p className="text-sm text-ink-300">One revealing sentence</p>
       </div>
 
-      <div className="relative max-w-2xl mx-auto">
-        <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl" />
+      <div className="relative max-w-2xl mx-auto animate-paper-settles">
+        <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl animate-pulse" style={{ animationDuration: '3s' }} />
 
         <div className="relative bg-white rounded-2xl p-8 paper-shadow paper-texture">
           <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />

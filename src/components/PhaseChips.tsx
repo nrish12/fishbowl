@@ -7,8 +7,8 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
   if (!revealed) return null;
 
   return (
-    <div className="space-y-6 animate-paper-unfold">
-      <div className="text-center space-y-2">
+    <div className="space-y-6">
+      <div className="text-center space-y-2 animate-fade-in">
         <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
           <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 3</span>
         </div>
@@ -22,8 +22,8 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
         {words.map((word, index) => (
           <div
             key={index}
-            className="relative group animate-[fadeIn_0.5s_ease-out]"
-            style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
+            className="relative group animate-[fadeInUp_0.7s_cubic-bezier(0.34,1.26,0.64,1)]"
+            style={{ animationDelay: `${index * 0.12 + 0.3}s`, animationFillMode: 'both' }}
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-fold-indigo to-fold-purple rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
 
