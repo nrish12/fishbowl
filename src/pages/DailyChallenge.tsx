@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calendar, Loader2, ArrowLeft } from 'lucide-react';
+import { Calendar, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -10,6 +10,7 @@ export default function DailyChallenge() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUnfolding, setIsUnfolding] = useState(false);
 
   useEffect(() => {
     loadDailyChallenge();
@@ -17,8 +18,6 @@ export default function DailyChallenge() {
 
   const loadDailyChallenge = async () => {
     try {
-      console.log('Fetching daily challenge from:', `${SUPABASE_URL}/functions/v1/daily-challenge`);
-
       const response = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
         method: 'GET',
         headers: {
@@ -27,19 +26,18 @@ export default function DailyChallenge() {
         },
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Failed to load daily challenge');
       }
 
       const data = await response.json();
-      console.log('Got daily challenge:', data);
 
       if (data.token) {
-        navigate(`/play?t=${data.token}`);
+        setIsUnfolding(true);
+        setTimeout(() => {
+          navigate(`/play?t=${data.token}`);
+        }, 1200);
       } else {
         throw new Error('No token received');
       }
@@ -50,15 +48,57 @@ export default function DailyChallenge() {
     }
   };
 
-  if (loading) {
+  if (loading && !isUnfolding) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center">
-        <div className="text-center space-y-6">
-          <Logo size="md" />
-          <div className="space-y-4">
-            <Calendar className="w-16 h-16 text-gold mx-auto animate-pulse" />
-            <p className="text-lg text-forest/70">Preparing today's challenge...</p>
-            <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto" />
+      <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute inset-0 paper-texture opacity-30" />
+
+        <div className="text-center space-y-8 relative z-10 animate-paper-unfold">
+          <Logo size="md" showTagline={false} />
+
+          <div className="relative perspective-1200">
+            <div className="absolute -inset-8 bg-gradient-to-br from-fold-indigo/20 to-fold-purple/20 rounded-3xl blur-2xl animate-pulse" />
+
+            <div className="relative bg-white rounded-3xl p-12 paper-shadow paper-texture">
+              <div className="absolute top-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
+              <div className="absolute top-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
+              <div className="absolute bottom-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
+              <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
+
+              <div className="space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-xl animate-echo-pulse">
+                  <Calendar className="w-10 h-10 text-white" />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xl font-serif font-bold text-ink-500">
+                    Unfolding Today's Mystery
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isUnfolding) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute inset-0 paper-texture opacity-30" />
+
+        <div className="relative z-10 w-full max-w-2xl animate-envelope-fold">
+          <div className="bg-white rounded-3xl p-16 paper-shadow paper-texture transform-gpu">
+            <div className="text-center space-y-4">
+              <div className="text-6xl animate-pulse">📜</div>
+              <p className="text-2xl font-script text-ink-500">Opening your note...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -67,19 +107,20 @@ export default function DailyChallenge() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full space-y-6">
-          <Link to="/" className="flex items-center gap-2 text-forest/60 hover:text-forest transition-colors">
+      <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6">
+        <div className="max-w-md w-full space-y-6 animate-paper-unfold">
+          <Link to="/" className="flex items-center gap-2 text-ink-300 hover:text-ink-500 transition-colors">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
-          <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200 text-center space-y-4">
+
+          <div className="bg-white rounded-2xl p-8 paper-shadow paper-texture text-center space-y-4 border-2 border-red-200">
             <div className="text-5xl">⚠️</div>
-            <h2 className="text-2xl font-serif font-bold text-forest">Unable to Load</h2>
-            <p className="text-forest/70">{error}</p>
+            <h2 className="text-2xl font-serif font-bold text-ink-500">Unable to Load</h2>
+            <p className="text-ink-300">{error}</p>
             <button
               onClick={loadDailyChallenge}
-              className="px-6 py-3 bg-neutral-900 text-white rounded-full font-medium hover:bg-gold hover:text-neutral-900 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-fold-indigo to-fold-purple text-white rounded-full font-semibold hover:shadow-lg transition-all transform hover:scale-105"
             >
               Try Again
             </button>

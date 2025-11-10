@@ -68,6 +68,7 @@ export default function PlayChallenge() {
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
   const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
+  const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
   const [playerFingerprint] = useState(() => {
     try {
@@ -302,6 +303,7 @@ export default function PlayChallenge() {
               if (phase4Response.ok) {
                 const nudgeData = await phase4Response.json();
                 setPhase4Nudge(nudgeData.nudge);
+                setPhase4Keywords(nudgeData.keywords || []);
                 setPhase(4);
                 setLives(1);
               } else {
@@ -454,93 +456,111 @@ export default function PlayChallenge() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 py-8 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 paper-texture opacity-30" />
+
+      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-forest/60 hover:text-forest transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-ink-300 hover:text-ink-500 transition-colors">
             <ArrowLeft size={20} />
-            <span>Back</span>
+            <span className="font-semibold">Back</span>
           </Link>
-          <Logo size="sm" />
+          <Logo size="sm" showTagline={false} />
           <Lives current={lives} total={5} />
         </div>
 
         {gameState === 'playing' && hints && (
           <div className="space-y-8">
-            <div className="text-center space-y-3">
-              <div className="inline-block px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 rounded-2xl shadow-lg animate-[fadeIn_0.5s_ease-out]">
-                <p className="text-xs font-semibold text-forest/80 uppercase tracking-wider mb-1">The mystery is a</p>
-                <p className="text-3xl font-serif font-bold text-forest">
+            <div className="text-center space-y-3 animate-paper-unfold">
+              <div className="inline-block px-8 py-4 bg-gradient-to-r from-fold-indigo to-fold-purple rounded-2xl shadow-lg paper-texture relative">
+                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-white/30" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white/30" />
+                <p className="text-xs font-semibold text-white/80 uppercase tracking-wider mb-1">The mystery is a</p>
+                <p className="text-3xl font-serif font-bold text-white">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
-              <p className="text-sm text-forest/60">
+              <p className="text-sm text-ink-300 font-medium">
                 Each guess unfolds another clue...
               </p>
             </div>
 
-            {phase >= 3 && phase < 4 && <PhaseChips words={hints.phase1} revealed={true} />}
-
-            {phase === 2 && (
-              <SentenceCard
-                sentence={hints.phase2}
-                revealed={true}
-                onReveal={undefined}
-              />
+            {phase >= 1 && selectedCategory && (
+              <div className="animate-paper-unfold">
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={true}
+                  selectedCategory={selectedCategory}
+                />
+              </div>
             )}
 
             {phase === 1 && !selectedCategory && (
-              <CategoryPicker
-                categories={hints.phase3}
-                revealed={false}
-                selectedCategory={selectedCategory}
-                onSelectCategory={handleSelectCategory}
-              />
+              <div className="animate-paper-unfold">
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={false}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={handleSelectCategory}
+                />
+              </div>
             )}
 
-            {phase === 1 && selectedCategory && (
-              <CategoryPicker
-                categories={hints.phase3}
-                revealed={true}
-                selectedCategory={selectedCategory}
-              />
+            {phase >= 2 && (
+              <div className="animate-paper-unfold">
+                <SentenceCard
+                  sentence={hints.phase2}
+                  revealed={true}
+                  onReveal={undefined}
+                />
+              </div>
+            )}
+
+            {phase >= 3 && (
+              <div className="animate-paper-unfold">
+                <PhaseChips words={hints.phase1} revealed={true} />
+              </div>
             )}
 
             {phase === 4 && phase4Nudge && (
-              <Phase4Nudge nudge={phase4Nudge} keywords={[]} />
+              <div className="animate-paper-unfold">
+                <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+              </div>
             )}
 
             {phase === 5 && phase5Data && (
-              <Phase5Visual data={phase5Data} />
+              <div className="animate-paper-unfold">
+                <Phase5Visual data={phase5Data} />
+              </div>
             )}
 
             {isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                <p className="text-sm font-medium text-blue-900">Checking your answer...</p>
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
+                <Loader2 className="w-5 h-5 animate-spin text-fold-indigo" />
+                <p className="text-sm font-bold text-ink-500">Checking your answer...</p>
               </div>
             )}
 
             {lastGuessResult === 'correct' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 rounded-lg border-2 border-green-200 animate-[fadeIn_0.3s_ease-in-out]">
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-green-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
                 <span className="text-2xl">✅</span>
-                <p className="text-sm font-bold text-green-900">Correct! Well done!</p>
+                <p className="text-sm font-bold text-green-700">Correct! Well done!</p>
               </div>
             )}
 
             {lastGuessResult === 'incorrect' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-red-50 rounded-lg border-2 border-red-200 animate-[fadeIn_0.3s_ease-in-out]">
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
                 <span className="text-2xl">❌</span>
-                <p className="text-sm font-bold text-red-900">Not quite! Try again</p>
+                <p className="text-sm font-bold text-red-700">Not quite! Try again</p>
               </div>
             )}
 
             {wrongGuesses.length > 0 && (
-              <div className="bg-gradient-to-br from-white to-cream rounded-xl p-5 border-2 border-neutral-200 shadow-sm">
-                <p className="text-xs font-semibold text-forest/70 uppercase tracking-wider mb-3">Previous Attempts:</p>
+              <div className="bg-white rounded-2xl p-5 paper-shadow paper-texture border border-ink-200/30">
+                <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
-                    <span key={idx} className="px-4 py-2 bg-white text-forest rounded-full text-sm border-2 border-neutral-300/50 shadow-sm">
+                    <span key={idx} className="px-4 py-2 bg-paper-100 text-ink-500 rounded-full text-sm font-medium border border-ink-200/50 shadow-sm">
                       {guess}
                     </span>
                   ))}
@@ -549,9 +569,9 @@ export default function PlayChallenge() {
             )}
 
             {((phase === 1 && selectedCategory) || phase > 1) && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-fold-open">
                 <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
-                <div className="text-center text-sm text-neutral-500">
+                <div className="text-center text-sm text-ink-300 font-medium">
                   Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
                 </div>
               </div>
