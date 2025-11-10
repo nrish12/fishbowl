@@ -33,13 +33,13 @@ export default function CategoryPicker({
     return (
       <div className="space-y-6 animate-fold-open">
         <div className="text-center space-y-2">
-          <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
-            <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 1</span>
+          <div className="inline-block px-4 py-1 bg-forest-100 border border-forest-300/30 rounded-full mb-2">
+            <span className="text-xs font-bold text-forest-700 uppercase tracking-widest">Phase 1</span>
           </div>
-          <h2 className="text-2xl font-serif font-bold text-ink-500">
+          <h2 className="text-2xl font-serif font-bold text-forest-800">
             Choose Your First Fold
           </h2>
-          <p className="text-sm text-ink-300">
+          <p className="text-sm text-forest-600">
             Pick one category to reveal
           </p>
         </div>
@@ -50,17 +50,17 @@ export default function CategoryPicker({
               <button
                 key={key}
                 onClick={() => onSelectCategory(key)}
-                className="group relative bg-white rounded-xl p-4 paper-shadow hover:shadow-xl transition-all duration-300 transform hover:scale-105 paper-texture"
+                className="group relative bg-paper-cream rounded-xl p-4 secret-note-shadow hover:shadow-xl transition-all duration-300 transform hover:scale-105 paper-texture"
               >
-                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-fold-indigo/20" />
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-fold-indigo/20" />
+                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-forest-500/30" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-forest-500/30" />
 
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                    <Icon size={20} className="text-white" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <Icon size={20} className="text-gold-100" />
                   </div>
-                  <span className="text-sm font-bold text-ink-500">{config.label}</span>
-                  <span className="text-xs text-ink-300">{config.description}</span>
+                  <span className="text-sm font-bold text-forest-800">{config.label}</span>
+                  <span className="text-xs text-forest-600">{config.description}</span>
                 </div>
               </button>
             );
@@ -77,33 +77,33 @@ export default function CategoryPicker({
     return (
       <div className="space-y-6 animate-paper-unfold">
         <div className="text-center space-y-2">
-          <div className="inline-block px-4 py-1 bg-fold-indigo/10 rounded-full mb-2">
-            <span className="text-xs font-bold text-fold-indigo uppercase tracking-widest">Phase 1 • {config.label}</span>
+          <div className="inline-block px-4 py-1 bg-forest-100 border border-forest-300/30 rounded-full mb-2">
+            <span className="text-xs font-bold text-forest-700 uppercase tracking-widest">Phase 1 • {config.label}</span>
           </div>
-          <h2 className="text-2xl font-serif font-bold text-ink-500">
+          <h2 className="text-2xl font-serif font-bold text-forest-800">
             The First Fold Opens
           </h2>
         </div>
 
         <div className="relative max-w-2xl mx-auto">
-          <div className="absolute -inset-4 bg-gradient-to-br from-fold-indigo/10 to-fold-purple/10 rounded-2xl blur-xl" />
+          <div className="absolute -inset-4 bg-gradient-to-br from-forest-200/40 to-gold-200/30 rounded-2xl blur-xl" />
 
-          <div className="relative bg-white rounded-2xl p-8 paper-shadow paper-texture">
-            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
-            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
-            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
-            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-fold-indigo/20" />
+          <div className="relative bg-paper-cream rounded-2xl p-8 secret-note-shadow paper-texture">
+            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
+            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
+            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
+            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
 
             <div className="fold-crease absolute top-0 bottom-0 left-1/3 w-px" />
 
             <div className="flex items-start gap-6">
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-lg">
-                  <Icon size={28} className="text-white" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-lg">
+                  <Icon size={28} className="text-gold-100" />
                 </div>
               </div>
               <div className="flex-1 pt-3">
-                <p className="text-lg text-ink-500 leading-relaxed font-medium">
+                <p className="text-lg text-forest-800 leading-relaxed font-medium">
                   {categories[selectedCategory as keyof typeof categories]}
                 </p>
               </div>

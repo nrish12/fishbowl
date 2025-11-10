@@ -6,7 +6,10 @@
 
 @layer base {
   body {
-    @apply bg-paper-50 text-ink-500 font-sans antialiased;
+    @apply bg-paper-100 text-ink-charcoal font-sans antialiased;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(45, 139, 95, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
   }
 }
 
@@ -255,27 +258,36 @@
         0deg,
         transparent,
         transparent 2px,
-        rgba(0,0,0,0.015) 2px,
-        rgba(0,0,0,0.015) 3px
-      );
+        rgba(45, 139, 95, 0.02) 2px,
+        rgba(45, 139, 95, 0.02) 3px
+      ),
+      radial-gradient(circle at 30% 40%, rgba(245, 158, 11, 0.03) 0%, transparent 60%);
   }
 
   .paper-shadow {
     box-shadow:
-      0 1px 3px rgba(0,0,0,0.08),
-      0 4px 12px rgba(0,0,0,0.05),
-      inset 0 1px 0 rgba(255,255,255,0.9);
+      0 2px 4px rgba(45, 139, 95, 0.08),
+      0 6px 16px rgba(45, 139, 95, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 0 60px rgba(245, 158, 11, 0.02);
   }
 
   .fold-crease {
     background: linear-gradient(
       to right,
       transparent,
-      rgba(0,0,0,0.03) 48%,
-      rgba(0,0,0,0.06) 50%,
-      rgba(0,0,0,0.03) 52%,
+      rgba(45, 139, 95, 0.04) 48%,
+      rgba(45, 139, 95, 0.08) 50%,
+      rgba(45, 139, 95, 0.04) 52%,
       transparent
     );
+  }
+
+  .secret-note-shadow {
+    box-shadow:
+      0 4px 8px rgba(45, 139, 95, 0.12),
+      0 8px 24px rgba(45, 139, 95, 0.08),
+      inset 0 2px 4px rgba(255, 248, 231, 0.5);
   }
 
   .stagger-1 {

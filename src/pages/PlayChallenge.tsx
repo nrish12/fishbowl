@@ -444,16 +444,21 @@ export default function PlayChallenge() {
 
         {gameState === 'playing' && hints && (
           <div className="space-y-8 phase-container">
-            <div className="text-center space-y-3 animate-paper-unfold">
-              <div className="inline-block px-8 py-4 bg-gradient-to-r from-fold-indigo to-fold-purple rounded-2xl shadow-lg paper-texture relative">
-                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-white/30" />
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white/30" />
-                <p className="text-xs font-semibold text-white/80 uppercase tracking-wider mb-1">The mystery is a</p>
-                <p className="text-3xl font-serif font-bold text-white">
+            <div className="text-center space-y-4 animate-phase-reveal paper-fold-layer">
+              <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
+                <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
+                <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
+                <div className="absolute bottom-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
+                <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
+
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
+
+                <p className="text-xs font-semibold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
+                <p className="text-4xl font-serif font-bold text-gold-50 drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
-              <p className="text-sm text-ink-300 font-medium">
+              <p className="text-base text-forest-700 font-medium italic">
                 Each guess unfolds another clue...
               </p>
             </div>
