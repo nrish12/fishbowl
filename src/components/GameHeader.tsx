@@ -14,12 +14,12 @@ export default function GameHeader({ lives, maxLives = 5 }: GameHeaderProps) {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 bg-paper-100/80 backdrop-blur-md border-b-2 border-forest-300/20"
+      className="sticky top-0 z-50 bg-paper-100/95 backdrop-blur-md border-b-2 border-forest-300/20 shadow-sm"
     >
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-3 items-center gap-4">
         <Link
           to="/"
-          className="flex items-center gap-2 text-forest-700 hover:text-forest-900 transition-colors group"
+          className="flex items-center gap-2 text-forest-700 hover:text-forest-900 transition-colors group justify-self-start"
         >
           <motion.div
             whileHover={{ x: -4 }}
@@ -30,9 +30,13 @@ export default function GameHeader({ lives, maxLives = 5 }: GameHeaderProps) {
           <span className="text-sm font-semibold hidden sm:inline">Back</span>
         </Link>
 
-        <Logo size="sm" showTagline={false} />
+        <div className="justify-self-center">
+          <Logo size="md" showTagline={false} />
+        </div>
 
-        <Lives lives={lives} maxLives={maxLives} />
+        <div className="justify-self-end">
+          <Lives lives={lives} maxLives={maxLives} />
+        </div>
       </div>
     </motion.header>
   );

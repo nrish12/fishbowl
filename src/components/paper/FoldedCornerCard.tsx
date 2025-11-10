@@ -51,10 +51,6 @@ export default function FoldedCornerCard({
             <div className="absolute right-0 top-0 h-8 w-8 -rotate-45 translate-x-3 -translate-y-3 bg-gradient-to-br from-forest-500 to-forest-600" />
           </div>
         )}
-
-        {/* Corner dots for visual interest */}
-        <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-forest-500/30" />
-        <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-gold-500/40" />
       </PaperSurface>
     </motion.div>
   );

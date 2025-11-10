@@ -23,12 +23,6 @@ export default function SentenceCard({ sentence, revealed }: SentenceCardProps) 
         <div className="absolute -inset-4 bg-gradient-to-br from-forest-200/40 to-gold-200/30 rounded-2xl blur-xl animate-pulse" style={{ animationDuration: '3s' }} />
 
         <div className="relative bg-paper-cream rounded-2xl p-8 secret-note-shadow paper-texture border border-gold-300/30">
-          <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-forest-400/30" />
-          <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-gold-400/40" />
-          <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-gold-400/40" />
-          <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-forest-400/30" />
-
-          <div className="fold-crease absolute top-0 bottom-0 left-2/3 w-px" />
 
           <div className="relative">
             <div className="absolute -left-3 -top-2 text-5xl text-forest-400/30 font-serif leading-none select-none">"</div>
