@@ -273,7 +273,9 @@ export default function PlayChallenge() {
         setLives(prev => prev - 1);
 
         if (remainingLives <= 0) {
+          console.log('[Phase Logic] Out of lives. Current phase:', phase);
           if (phase === 3) {
+            console.log('[Phase 4] Attempting to fetch Phase 4 nudge...');
             try {
               const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
                 method: 'POST',
@@ -302,6 +304,7 @@ export default function PlayChallenge() {
 
               if (phase4Response.ok) {
                 const nudgeData = await phase4Response.json();
+                console.log('[Phase 4] Success! Nudge data:', nudgeData);
                 setPhase4Nudge(nudgeData.nudge);
                 setPhase4Keywords(nudgeData.keywords || []);
                 setPhase(4);
@@ -334,7 +337,8 @@ export default function PlayChallenge() {
               setGameState('failed');
             }
           } else if (phase === 4) {
-            try {
+            console.log('[Phase 5] Attempting to fetch Phase 5 visual...');
+            try{
               const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
                 method: 'POST',
                 headers: {
@@ -365,6 +369,7 @@ export default function PlayChallenge() {
 
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
+                console.log('[Phase 5] Success! Visual data:', visualData);
                 setPhase5Data(visualData);
                 setPhase(5);
                 setLives(1);
@@ -410,6 +415,7 @@ export default function PlayChallenge() {
           }
         } else if (phase < 3) {
           setPhase(prev => (prev + 1) as Phase);
+          setLives(5);
         }
       }
     } catch (err) {
