@@ -13,13 +13,15 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
   const current = sizes[size];
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <img
-        src="/Adobe Express - file.png"
-        alt="Five Fold Logo"
-        style={{ width: current.img, height: current.img }}
-        className="object-contain"
-      />
+    <div className="flex flex-col items-center justify-center gap-4">
+      <div className="flex items-center justify-center" style={{ width: current.img, height: current.img }}>
+        <img
+          src="/Adobe Express - file.png"
+          alt="Five Fold Logo"
+          style={{ width: current.img, height: current.img }}
+          className="object-contain"
+        />
+      </div>
       {showTagline && (
         <p className="text-xl text-forest/80 tracking-wide font-medium">
           Five clues. One answer.

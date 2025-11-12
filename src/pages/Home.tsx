@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Sparkles } from 'lucide-react';
+import { Calendar, Users, Sparkles, Settings } from 'lucide-react';
 import Logo from '../components/Logo';
 import PaperSurface from '../components/paper/PaperSurface';
 
@@ -61,7 +61,7 @@ export default function Home() {
                         <Calendar size={28} className="text-gold-50" strokeWidth={2.5} />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-h-[100px] flex flex-col justify-center">
                         <h2 className="text-2xl font-serif font-bold text-forest-800">
                           Daily Challenge
                         </h2>
@@ -91,7 +91,7 @@ export default function Home() {
                         <Users size={28} className="text-forest-800" strokeWidth={2.5} />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-h-[100px] flex flex-col justify-center">
                         <h2 className="text-2xl font-serif font-bold text-forest-800">
                           Custom Challenge
                         </h2>
@@ -150,8 +150,9 @@ export default function Home() {
           >
             <Link
               to="/dev"
-              className="inline-block px-3 py-1.5 bg-ink-muted/20 hover:bg-ink-muted/30 text-ink-primary text-xs rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-ink-muted/20 hover:bg-ink-muted/30 text-ink-primary text-xs rounded-lg transition-colors"
             >
+              <Settings size={14} />
               Dev Tools
             </Link>
           </motion.div>
