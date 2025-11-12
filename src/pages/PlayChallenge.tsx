@@ -437,7 +437,7 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
@@ -504,10 +504,10 @@ export default function PlayChallenge() {
           <>
             {/* Header - compact */}
             <div className="text-center space-y-2 mb-4">
-              <div className="inline-block px-8 py-4 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
-                <p className="text-xs font-semibold text-gold-300 uppercase tracking-widest mb-1">The mystery is a</p>
-                <p className="text-3xl font-serif font-bold text-white drop-shadow-lg">
+              <div className="inline-block px-10 py-5 bg-forest-700 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                <p className="text-sm font-bold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
+                <p className="text-4xl font-serif font-bold text-white drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
