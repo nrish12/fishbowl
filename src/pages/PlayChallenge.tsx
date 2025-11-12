@@ -10,7 +10,7 @@ import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
 import Phase4Nudge from '../components/Phase4Nudge';
 import Phase5Visual from '../components/Phase5Visual';
-import AccordionFold from '../components/AccordionFold';
+import FoldedLetter from '../components/FoldedLetter';
 import Confetti from '../components/Confetti';
 import { getSessionId, trackEvent } from '../utils/tracking';
 
@@ -462,8 +462,8 @@ export default function PlayChallenge() {
               </p>
             </div>
 
-            {/* Accordion Fold Paper */}
-            <AccordionFold phase={selectedCategory ? phase : Math.max(1, phase)} wrongGuessShake={shouldShake}>
+            {/* Folded Letter Paper */}
+            <FoldedLetter phase={selectedCategory ? phase : Math.max(1, phase)} wrongGuessShake={shouldShake}>
               {/* Phase 1 Panel */}
               <div>
                 {selectedCategory ? (
@@ -521,7 +521,7 @@ export default function PlayChallenge() {
                   </div>
                 )}
               </div>
-            </AccordionFold>
+            </FoldedLetter>
 
             {/* Wrong guesses */}
             {wrongGuesses.length > 0 && (
