@@ -58,19 +58,36 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const validationPrompt = `You are a gatekeeper for a public guessing game. Your task is to evaluate whether the following ${type} is suitable for the game.
+    const validationPrompt = `You are a STRICT gatekeeper for a FAMILY FEUD style guessing game. Your task is to evaluate whether the following ${type} is suitable.
 
-Rejection criteria:
+THE FAMILY FEUD TEST:
+Would this answer appear on Family Feud? If 70%+ of random people wouldn't recognize it, REJECT IT.
+
+STRICT Rejection criteria:
 - Private individuals or non-public figures
 - Minors (under 18)
 - Hate speech, NSFW content, or doxxing
-- Extremely obscure subjects that a global audience wouldn't recognize
+- Academic or specialized knowledge required
+- Regional-only recognition (must be globally known)
+- Specific titles of art/books/movies unless TOP 5 globally famous
+- Historical figures unless TOP 20 most famous in history
+- Scientific terms unless household vocabulary
+- Brands/products unless globally ubiquitous (Coca-Cola, iPhone level)
 
-Fame score scale (0-5):
-- 0-2: Too obscure, reject
-- 3: Recognizable to informed audiences, minimum acceptable
-- 4: Well-known to general audiences
-- 5: Globally famous, household name
+Fame score scale (0-5) - BE HARSH:
+- 0-2: Too obscure, reject immediately
+- 3: Known to informed people, STILL REJECT (not Family Feud level)
+- 4: Well-known to general audiences, MINIMUM acceptable (just barely)
+- 5: Globally famous household name, preferred level
+
+EXAMPLES OF WHAT TO REJECT:
+- "The Great Wave off Kanagawa" → REJECT (specific art title, not household name)
+- "The Scream" → BORDERLINE (might accept as it's iconic)
+- "Mona Lisa" → APPROVE (everyone knows this)
+- "Benjamin Franklin" → APPROVE (globally famous)
+- "Millard Fillmore" → REJECT (obscure president)
+- "Eiffel Tower" → APPROVE (instantly recognizable)
+- "Brandenburg Gate" → REJECT (not globally famous enough)
 
 Input target: ${type}:${target}
 
@@ -160,12 +177,12 @@ For normal approval/rejection:
       );
     }
 
-    if (validationResult.status === "REJECTED" || validationResult.fame_score < 3) {
+    if (validationResult.status === "REJECTED" || validationResult.fame_score < 4) {
       return new Response(
         JSON.stringify({
-          error: "Challenge rejected",
+          error: "Challenge rejected - not famous enough",
           reason: validationResult.reason,
-          suggestion: validationResult.suggestion || `Try choosing a more well-known ${type}. ${type === 'thing' ? 'Consider iconic inventions, famous artworks, or globally recognized brands and products.' : type === 'person' ? 'Consider historical figures, celebrities, or influential leaders.' : 'Consider world-famous landmarks or major cities.'}`,
+          suggestion: validationResult.suggestion || `This needs to be Family Feud famous! Try something 70%+ of people would instantly recognize. ${type === 'thing' ? 'Think: iPhone, Coca-Cola, Mona Lisa (not specific art pieces most people don\'t know)' : type === 'person' ? 'Think: Einstein, Shakespeare, Michael Jordan (not obscure historical figures)' : 'Think: Eiffel Tower, Grand Canyon, Mount Everest (not regional landmarks)'}`,
           fame_score: validationResult.fame_score,
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

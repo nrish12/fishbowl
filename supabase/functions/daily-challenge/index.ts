@@ -37,11 +37,12 @@ async function generateRandomSubject(
 
 YOUR ROLE: Pick something that feels right for TODAY. Use your AI judgment to select subjects that are:
 
-THE SWEET SPOT (Your Target Zone):
-- Fame Level: 60-75% recognition among general public
-- NOT the most obvious choices everyone picks (Einstein, Eiffel Tower, Mona Lisa)
-- NOT too obscure (Hedy Lamarr, Yayoi Kusama, Great Wave off Kanagawa)
-- JUST RIGHT: Interesting, recognizable, but makes players think
+THE FAMILY FEUD STANDARD (Your Target Zone):
+- Fame Level: 70-85% recognition among general public (FAMILY FEUD LEVEL!)
+- NOT the most obvious #1 answers (Einstein, Eiffel Tower, Mona Lisa)
+- NOT obscure or specialized knowledge (Hedy Lamarr, Yayoi Kusama, Great Wave off Kanagawa)
+- JUST RIGHT: Would appear on Family Feud - recognizable but not #1 answer
+- TEST: If you asked 100 random people, would 70+ know it? If no, reject it.
 
 ${excludeList ? `EXCLUSIONS - Do NOT pick any of these (used recently): ${excludeList}` : ''}
 
@@ -83,15 +84,19 @@ TOO OBSCURE (avoid these): Regional parks, small monuments, local landmarks` : '
 ${type === 'thing' ? `
 THING EXAMPLES (use these as inspiration, not a limit):
 Sweet Spot Range:
-- Art: The Scream, American Gothic, The Thinker, Venus de Milo, Nighthawks
-- Inventions: Microwave, Post-it Notes, Velcro, Zipper, Safety Pin, Lightbulb
-- Cultural Icons: Barbie, Rubik's Cube, Slinky, Etch A Sketch, Smiley Face, Pac-Man
-- Symbols: Peace Sign, Yin Yang, Recycling Symbol, Caduceus, Ampersand
-- Historic Objects: Liberty Bell, Hope Diamond, Rosetta Stone, Magna Carta
-- Modern Tech: USB Drive, QR Code, Hashtag, Bluetooth, WiFi, Emoji
+- Inventions: Microwave, Post-it Notes, Velcro, Zipper, Safety Pin, Lightbulb, Telephone
+- Cultural Icons: Barbie, Rubik's Cube, Slinky, Etch A Sketch, Smiley Face, Pac-Man, Frisbee
+- Symbols: Peace Sign, Yin Yang, Recycling Symbol, Smiley Face, Heart Symbol, Dollar Sign
+- Historic Objects: Liberty Bell, Hope Diamond, Rosetta Stone, Crown Jewels
+- Modern Tech: USB Drive, QR Code, Hashtag, Bluetooth, WiFi, Emoji, Selfie Stick
+- Everyday Objects: Paperclip, Stapler, Pencil, Scissors, Calculator, Stopwatch
+
+WARNING ON ART: Avoid specific artwork titles unless MEGA famous (Mona Lisa, The Thinker, Statue of David level)
+- DO NOT use: Specific paintings by name (Great Wave, American Gothic, The Scream, etc.)
+- INSTEAD prefer: General categories or famous sculptures everyone knows
 
 TOO OBVIOUS (avoid these defaults): Mona Lisa, iPhone, Coca-Cola, McDonald's Logo
-TOO OBSCURE (avoid these): Niche artifacts, regional items, insider references` : ''}
+TOO OBSCURE (avoid these): Specific art pieces, niche artifacts, regional items, insider references` : ''}
 
 YOUR AI DECISION PROCESS:
 1. Consider what day it is, what you've generated recently
