@@ -10,6 +10,9 @@ import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
 import Phase4Nudge from '../components/Phase4Nudge';
 import Phase5Visual from '../components/Phase5Visual';
+import FiveFoldNote from '../components/FiveFoldNote';
+import PhaseCrease from '../components/PhaseCrease';
+import Confetti from '../components/Confetti';
 import { getSessionId, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -68,6 +71,7 @@ export default function PlayChallenge() {
   const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
   const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
+  const [shouldShake, setShouldShake] = useState(false);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -265,6 +269,8 @@ export default function PlayChallenge() {
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
+        setShouldShake(true);
+        setTimeout(() => setShouldShake(false), 400);
 
         console.log('[Phase Logic] Wrong guess. Current phase:', phase);
 
@@ -423,8 +429,13 @@ export default function PlayChallenge() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 py-8 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 paper-texture opacity-30" />
+    <div className="min-h-screen desk-surface py-8 px-6 relative overflow-hidden">
+      <Confetti trigger={gameState === 'solved'} />
+
+      <div className="absolute inset-0 opacity-40 pointer-events-none">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-forest-200 rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
+      </div>
 
       <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         <div className="flex items-center justify-between">
@@ -437,8 +448,9 @@ export default function PlayChallenge() {
         </div>
 
         {gameState === 'playing' && hints && (
-          <div className="space-y-8 phase-container">
-            <div className="text-center space-y-4 animate-phase-reveal paper-fold-layer">
+          <FiveFoldNote phase={phase} wrongGuessShake={shouldShake} gameState={gameState}>
+            <div className="space-y-6">
+            <div className="text-center space-y-4">
               <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
                 <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
                 <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
@@ -457,45 +469,45 @@ export default function PlayChallenge() {
               </p>
             </div>
 
+            <PhaseCrease visible={phase >= 1 && selectedCategory !== null} delay={0.2} />
+
             {phase >= 1 && selectedCategory && (
-              <div className="animate-phase-reveal paper-fold-layer">
-                <CategoryPicker
-                  categories={hints.phase3}
-                  revealed={true}
-                  selectedCategory={selectedCategory}
-                />
-              </div>
+              <CategoryPicker
+                categories={hints.phase3}
+                revealed={true}
+                selectedCategory={selectedCategory}
+              />
             )}
 
             {phase === 1 && !selectedCategory && (
-              <div className="animate-phase-reveal paper-fold-layer">
-                <CategoryPicker
-                  categories={hints.phase3}
-                  revealed={false}
-                  selectedCategory={selectedCategory}
-                  onSelectCategory={handleSelectCategory}
-                />
-              </div>
+              <CategoryPicker
+                categories={hints.phase3}
+                revealed={false}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+              />
             )}
+
+            <PhaseCrease visible={phase >= 2} delay={0.3} />
 
             {phase >= 2 && (
-              <div className="animate-phase-reveal paper-fold-layer stagger-1">
-                <SentenceCard
-                  sentence={hints.phase2}
-                  revealed={true}
-                  onReveal={undefined}
-                />
-              </div>
+              <SentenceCard
+                sentence={hints.phase2}
+                revealed={true}
+                onReveal={undefined}
+              />
             )}
+
+            <PhaseCrease visible={phase >= 3} delay={0.4} />
 
             {phase >= 3 && (
-              <div className="animate-phase-reveal paper-fold-layer stagger-2">
-                <PhaseChips words={hints.phase1} revealed={true} />
-              </div>
+              <PhaseChips words={hints.phase1} revealed={true} />
             )}
 
+            <PhaseCrease visible={phase >= 4} delay={0.5} />
+
             {phase === 4 && (
-              <div className="animate-phase-reveal paper-fold-layer stagger-3">
+              <div>
                 {phase4Nudge ? (
                   <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
                 ) : (
@@ -508,8 +520,10 @@ export default function PlayChallenge() {
               </div>
             )}
 
+            <PhaseCrease visible={phase >= 5} delay={0.6} />
+
             {phase === 5 && (
-              <div className="animate-phase-reveal paper-fold-layer stagger-4">
+              <div>
                 {phase5Data ? (
                   <Phase5Visual data={phase5Data} />
                 ) : (
@@ -522,6 +536,24 @@ export default function PlayChallenge() {
               </div>
             )}
 
+            {wrongGuesses.length > 0 && (
+              <div className="bg-paper-100/50 rounded-2xl p-5 border border-ink-200/20 backdrop-blur-sm">
+                <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
+                <div className="flex flex-wrap gap-2">
+                  {wrongGuesses.map((guess, idx) => (
+                    <span key={idx} className="px-4 py-2 bg-paper-200 text-ink-500 rounded-full text-sm font-medium border border-ink-200/50 shadow-sm">
+                      {guess}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            </div>
+          </FiveFoldNote>
+        )}
+
+        {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
+          <div className="space-y-4">
             {isThinking && (
               <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
                 <Loader2 className="w-5 h-5 animate-spin text-fold-indigo" />
@@ -530,7 +562,7 @@ export default function PlayChallenge() {
             )}
 
             {lastGuessResult === 'correct' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-green-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-green-400 paper-shadow animate-success-glow">
                 <span className="text-2xl">✅</span>
                 <p className="text-sm font-bold text-green-700">Correct! Well done!</p>
               </div>
@@ -543,27 +575,10 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {wrongGuesses.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 paper-shadow paper-texture border border-ink-200/30">
-                <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
-                <div className="flex flex-wrap gap-2">
-                  {wrongGuesses.map((guess, idx) => (
-                    <span key={idx} className="px-4 py-2 bg-paper-100 text-ink-500 rounded-full text-sm font-medium border border-ink-200/50 shadow-sm">
-                      {guess}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {((phase === 1 && selectedCategory) || phase > 1) && (
-              <div className="space-y-4 animate-fold-open">
-                <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
-                <div className="text-center text-sm text-ink-300 font-medium">
-                  Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
-                </div>
-              </div>
-            )}
+            <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+            <div className="text-center text-sm text-ink-300 font-medium">
+              Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+            </div>
           </div>
         )}
 
