@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -395,9 +395,9 @@ export default function PlayChallenge() {
     }
   };
 
-  const handleSelectCategory = (category: string) => {
+  const handleSelectCategory = useCallback((category: string) => {
     setSelectedCategory(category);
-  };
+  }, []);
 
   if (gameState === 'loading') {
     return (
@@ -428,59 +428,6 @@ export default function PlayChallenge() {
     );
   }
 
-  const phaseContent = useMemo(() => {
-    return [
-      <div key="phase1">
-        {selectedCategory ? (
-          <CategoryPicker
-            categories={hints.phase3}
-            revealed={true}
-            selectedCategory={selectedCategory}
-          />
-        ) : (
-          <CategoryPicker
-            categories={hints.phase3}
-            revealed={false}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-          />
-        )}
-      </div>,
-      <div key="phase2">
-        <SentenceCard
-          sentence={hints.phase2}
-          revealed={true}
-          onReveal={undefined}
-        />
-      </div>,
-      <div key="phase3">
-        <PhaseChips words={hints.phase1} revealed={true} />
-      </div>,
-      <div key="phase4">
-        {phase4Nudge ? (
-          <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="text-5xl animate-pulse">💡</div>
-            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
-            <p className="text-ink-400">Loading personalized nudge...</p>
-          </div>
-        )}
-      </div>,
-      <div key="phase5">
-        {phase5Data ? (
-          <Phase5Visual data={phase5Data} />
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="text-5xl animate-pulse">🔮</div>
-            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
-            <p className="text-ink-400">Loading complete visual breakdown...</p>
-          </div>
-        )}
-      </div>,
-    ];
-  }, [hints, selectedCategory, phase4Nudge, phase4Keywords, phase5Data, handleSelectCategory]);
-
   return (
     <div className="min-h-screen desk-surface py-4 px-4 md:py-6 md:px-6 relative overflow-hidden">
       <Confetti trigger={gameState === 'solved'} />
@@ -501,7 +448,59 @@ export default function PlayChallenge() {
           </div>
         </div>
 
-        {gameState === 'playing' && hints && (
+        {gameState === 'playing' && hints && (() => {
+          const phaseContent = [
+            <div key="phase1">
+              {selectedCategory ? (
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={true}
+                  selectedCategory={selectedCategory}
+                />
+              ) : (
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={false}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={handleSelectCategory}
+                />
+              )}
+            </div>,
+            <div key="phase2">
+              <SentenceCard
+                sentence={hints.phase2}
+                revealed={true}
+                onReveal={undefined}
+              />
+            </div>,
+            <div key="phase3">
+              <PhaseChips words={hints.phase1} revealed={true} />
+            </div>,
+            <div key="phase4">
+              {phase4Nudge ? (
+                <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+              ) : (
+                <div className="text-center space-y-4">
+                  <div className="text-5xl animate-pulse">💡</div>
+                  <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
+                  <p className="text-ink-400">Loading personalized nudge...</p>
+                </div>
+              )}
+            </div>,
+            <div key="phase5">
+              {phase5Data ? (
+                <Phase5Visual data={phase5Data} />
+              ) : (
+                <div className="text-center space-y-4">
+                  <div className="text-5xl animate-pulse">🔮</div>
+                  <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
+                  <p className="text-ink-400">Loading complete visual breakdown...</p>
+                </div>
+              )}
+            </div>,
+          ];
+
+          return (
           <>
             {/* Header - compact */}
             <div className="text-center space-y-2 mb-4">
@@ -565,7 +564,8 @@ export default function PlayChallenge() {
               </div>
             )}
           </>
-        )}
+          );
+        })()}
 
         {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
           <div className="space-y-3">
