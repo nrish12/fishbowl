@@ -22,15 +22,12 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
         {words.map((word, index) => (
           <div
             key={index}
-            className="relative group animate-[fadeInUp_0.7s_cubic-bezier(0.34,1.26,0.64,1)]"
-            style={{ animationDelay: `${index * 0.12 + 0.3}s`, animationFillMode: 'both' }}
+            className="relative group"
+            style={{ animation: 'fadeInUp 0.7s cubic-bezier(0.34,1.26,0.64,1)', animationDelay: `${index * 0.12 + 0.3}s`, animationFillMode: 'both' }}
           >
             <div className="absolute -inset-1 bg-gradient-to-br from-forest-300/40 to-gold-300/40 rounded-2xl blur opacity-40 group-hover:opacity-70 transition-opacity" />
 
-            <div className="relative px-6 py-3 bg-paper-cream rounded-2xl secret-note-shadow paper-texture transform hover:scale-105 transition-all duration-300 border border-forest-300/20">
-              <div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-forest-500/40" />
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-gold-500/50" />
-
+            <div className="relative px-6 py-3 bg-paper-100/50 rounded-2xl border-2 border-forest-300/30 backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
               <span className="text-lg font-bold text-forest-800">{word}</span>
             </div>
           </div>
