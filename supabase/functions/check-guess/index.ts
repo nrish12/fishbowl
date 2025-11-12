@@ -136,7 +136,7 @@ Deno.serve(async (req: Request) => {
               model: "gpt-4o-mini",
               messages: [{
                 role: "user",
-                content: `Analyze if "${guess}" is a misspelling or valid reference to "${payload.target}".\n\nRespond ONLY with valid JSON in this format:\n{"is_match": "YES" or "NO", "suggestion": "corrected spelling if misspelled, otherwise null", "similarity_score": 0-100}\n\nExamples:\n- "jpana" for "Japan" → {"is_match": "NO", "suggestion": "Japan", "similarity_score": 15}\n- "Eiffell Tower" for "Eiffel Tower" → {"is_match": "NO", "suggestion": "Eiffel Tower", "similarity_score": 85}\n- "France" for "Eiffel Tower" → {"is_match": "NO", "suggestion": null, "similarity_score": 40}`
+                content: `Analyze if "${guess}" is a misspelling or valid reference to "${payload.target}".\n\nIMPORTANT RULES:\n1. NEVER suggest the actual answer "${payload.target}" as a correction\n2. Only suggest if there's a clear misspelling (1-2 letter difference)\n3. If guess is completely different, return null for suggestion\n4. Calculate similarity based on semantic relationship\n\nRespond ONLY with valid JSON:\n{"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}\n\nExamples:\n- "jpana" for "Japan" → {"is_match": "NO", "suggestion": "Japan", "similarity_score": 15}\n- "Eiffell Tower" for "Eiffel Tower" → {"is_match": "NO", "suggestion": "Eiffel Tower", "similarity_score": 85}\n- "tokyo" for "The Great Wave off Kanagawa" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}\n- "France" for "Eiffel Tower" → {"is_match": "NO", "suggestion": null, "similarity_score": 40}`
               }],
               temperature: 0.1,
               max_tokens: 100,
@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
               isCorrect = true;
             }
 
-            if (parsed.suggestion && parsed.suggestion !== guess) {
+            if (parsed.suggestion && parsed.suggestion !== guess && normalizeGuess(parsed.suggestion) !== normalizedTarget) {
               suggestion = parsed.suggestion;
             }
 

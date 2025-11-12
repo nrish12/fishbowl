@@ -4,19 +4,16 @@ interface Phase4NudgeProps {
 }
 
 export default function Phase4Nudge({ nudge, keywords }: Phase4NudgeProps) {
+  const textLength = nudge.length;
+  const fontSize = textLength < 60 ? 'text-2xl' : textLength < 100 ? 'text-xl' : textLength < 150 ? 'text-lg' : 'text-base';
+
   return (
     <div className="w-full mx-auto py-1">
-      <div className="text-center mb-3">
-        <div className="inline-block px-4 py-1.5 bg-purple-100 rounded-full border border-purple-300/40">
-          <span className="text-xs font-bold text-purple-700 uppercase tracking-widest">Phase 4 • AI Nudge</span>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
         <div className="lg:col-span-3">
           <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border-2 border-purple-200/60 shadow-sm h-full flex items-center justify-center">
             <blockquote className="text-center">
-              <p className="text-lg font-serif text-ink-700 leading-relaxed italic">
+              <p className={`${fontSize} font-serif text-ink-700 leading-relaxed italic`}>
                 "{nudge}"
               </p>
             </blockquote>

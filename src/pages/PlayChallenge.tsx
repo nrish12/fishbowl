@@ -222,11 +222,8 @@ export default function PlayChallenge() {
   const handleGuess = async (guess: string) => {
     if (!token || !hints || !challengeId) return;
 
-    const updatedGuessCount = guesses + 1;
-
     setIsThinking(true);
     setLastGuessResult(null);
-    setGuesses(prev => prev + 1);
 
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
@@ -272,24 +269,26 @@ export default function PlayChallenge() {
         setLastGuessResult('correct');
         setAnswer(data.canonical);
         setRank(phase === 1 ? 'Gold' : phase === 2 ? 'Silver' : 'Bronze');
+        setGuesses(prev => prev + 1);
         setTimeout(() => setGameState('solved'), 800);
 
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
         await trackEvent('completion', challengeId, {
           completed_phase: phase,
-          total_attempts: updatedGuessCount,
+          total_attempts: guesses + 1,
           time_taken_seconds: timeElapsed,
         });
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
+        setGuesses(prev => prev + 1);
         setShouldShake(true);
         setTimeout(() => setShouldShake(false), 400);
 
-        console.log('[Phase Logic] Wrong guess. Current phase:', phase);
+        console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Wrong guess count:', wrongGuesses.length + 1);
 
-        if (phase >= 5) {
-          console.log('[Game Over] Reached phase 5, revealing answer');
+        if (wrongGuesses.length + 1 >= 5 && phase >= 5) {
+          console.log('[Game Over] Reached 5 wrong guesses at phase 5, revealing answer');
           const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
             method: 'POST',
             headers: {
@@ -625,11 +624,111 @@ export default function PlayChallenge() {
                     {suggestedCorrection}
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setSuggestedCorrection(null);
                       setLastGuessResult('incorrect');
                       if (pendingGuess) {
                         setWrongGuesses(prev => [...prev, pendingGuess]);
+                        if (guessScores[pendingGuess]) {
+                          setGuessScores(prev => ({ ...prev, [pendingGuess]: guessScores[pendingGuess] }));
+                        }
+
+                        const currentWrongGuessCount = wrongGuesses.length + 1;
+                        console.log('[Phase Logic] Wrong guess rejected. Current phase:', phase, 'Wrong guess count:', currentWrongGuessCount);
+
+                        if (phase >= 5) {
+                          console.log('[Game Over] Reached phase 5, revealing answer');
+                          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            },
+                            body: JSON.stringify({ token, guess: '__reveal__', phase }),
+                          });
+                          const answerData = await answerResponse.json();
+                          setAnswer(answerData.canonical || 'Unknown');
+                          setGameState('failed');
+                        } else if (phase === 1) {
+                          console.log('[Advancing] Phase 1 → Phase 2');
+                          setPhase(2);
+                        } else if (phase === 2) {
+                          console.log('[Advancing] Phase 2 → Phase 3');
+                          setPhase(3);
+                        } else if (phase === 3) {
+                          console.log('[Advancing] Phase 3 → Phase 4');
+                          try {
+                            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                              },
+                              body: JSON.stringify({ token, guess: '__reveal__', phase }),
+                            });
+                            const answerData = await answerResponse.json();
+                            const targetAnswer = answerData.canonical || 'Unknown';
+
+                            const phase4Response = await fetch(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                              },
+                              body: JSON.stringify({
+                                target: targetAnswer,
+                                type: challengeType,
+                                guesses: wrongGuesses,
+                                hints: hints,
+                              }),
+                            });
+
+                            if (phase4Response.ok) {
+                              const phase4Data = await phase4Response.json();
+                              setPhase4Nudge(phase4Data.nudge);
+                              setPhase4Keywords(phase4Data.keywords || []);
+                            }
+                          } catch (err) {
+                            console.error('[Phase 4] Error fetching nudge:', err);
+                          }
+                          setPhase(4);
+                        } else if (phase === 4) {
+                          console.log('[Advancing] Phase 4 → Phase 5');
+                          try {
+                            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                              },
+                              body: JSON.stringify({ token, guess: '__reveal__', phase }),
+                            });
+                            const answerData = await answerResponse.json();
+                            const targetAnswer = answerData.canonical || 'Unknown';
+
+                            const phase5Response = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                              },
+                              body: JSON.stringify({
+                                target: targetAnswer,
+                                type: challengeType,
+                                guesses: wrongGuesses,
+                                hints: hints,
+                              }),
+                            });
+
+                            if (phase5Response.ok) {
+                              const phase5Resp = await phase5Response.json();
+                              setPhase5Data(phase5Resp);
+                            }
+                          } catch (err) {
+                            console.error('[Phase 5] Error fetching visual:', err);
+                          }
+                          setPhase(5);
+                        }
                       }
                       setPendingGuess(null);
                     }}
