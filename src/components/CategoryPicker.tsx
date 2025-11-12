@@ -50,10 +50,8 @@ export default function CategoryPicker({
               <button
                 key={key}
                 onClick={() => onSelectCategory(key)}
-                className="group relative bg-paper-cream rounded-xl p-4 secret-note-shadow hover:shadow-xl transition-all duration-300 transform hover:scale-105 paper-texture"
+                className="group relative bg-paper-cream rounded-xl p-4 secret-note-shadow hover:shadow-xl transition-all duration-300 transform hover:scale-105 paper-texture border-2 border-forest-300/20"
               >
-                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-forest-500/30" />
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-forest-500/30" />
 
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
@@ -88,12 +86,7 @@ export default function CategoryPicker({
         <div className="relative max-w-2xl mx-auto">
           <div className="absolute -inset-4 bg-gradient-to-br from-forest-200/40 to-gold-200/30 rounded-2xl blur-xl" />
 
-          <div className="relative bg-paper-cream rounded-2xl p-8 secret-note-shadow paper-texture">
-            <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
-            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
-            <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-forest-500/30" />
-            <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-forest-500/30" />
-
+          <div className="relative bg-paper-cream rounded-2xl p-8 secret-note-shadow paper-texture border-2 border-forest-300/20">
             <div className="fold-crease absolute top-0 bottom-0 left-1/3 w-px" />
 
             <div className="flex items-start gap-6">
