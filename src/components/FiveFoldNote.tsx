@@ -99,7 +99,7 @@ export default function FiveFoldNote({
           </div>
 
           {/* Fold crease indicators - appear as phases unlock */}
-          <div className="space-y-0">
+          <div className="space-y-0 relative z-10">
             {children}
           </div>
 
@@ -126,7 +126,7 @@ export default function FiveFoldNote({
 
           {/* Subtle paper grain overlay */}
           <div
-            className="absolute inset-0 rounded-3xl pointer-events-none opacity-30"
+            className="absolute inset-0 rounded-3xl pointer-events-none opacity-30 -z-10"
             style={{
               backgroundImage: `
                 repeating-linear-gradient(

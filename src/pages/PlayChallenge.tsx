@@ -452,11 +452,6 @@ export default function PlayChallenge() {
             <div className="space-y-6">
             <div className="text-center space-y-4">
               <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
-                <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
-                <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
-                <div className="absolute bottom-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
-                <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
-
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
 
                 <p className="text-xs font-semibold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
