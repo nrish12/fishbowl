@@ -2,24 +2,18 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
-import Lives from './Lives';
 
-interface GameHeaderProps {
-  lives: number;
-  maxLives?: number;
-}
-
-export default function GameHeader({ lives, maxLives = 5 }: GameHeaderProps) {
+export default function GameHeader() {
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="sticky top-0 z-50 bg-paper-100/95 backdrop-blur-md border-b-2 border-forest-300/20 shadow-sm"
     >
-      <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-3 items-center gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link
           to="/"
-          className="flex items-center gap-2 text-forest-700 hover:text-forest-900 transition-colors group justify-self-start"
+          className="flex items-center gap-2 text-forest-700 hover:text-forest-900 transition-colors group"
         >
           <motion.div
             whileHover={{ x: -4 }}
@@ -30,13 +24,9 @@ export default function GameHeader({ lives, maxLives = 5 }: GameHeaderProps) {
           <span className="text-sm font-semibold hidden sm:inline">Back</span>
         </Link>
 
-        <div className="justify-self-center">
-          <Logo size="md" showTagline={false} />
-        </div>
+        <Logo size="md" showTagline={false} />
 
-        <div className="justify-self-end">
-          <Lives lives={lives} maxLives={maxLives} />
-        </div>
+        <div className="w-20"></div>
       </div>
     </motion.header>
   );

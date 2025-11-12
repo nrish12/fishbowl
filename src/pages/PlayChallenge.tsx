@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Logo from '../components/Logo';
-import Lives from '../components/Lives';
 import PhaseChips from '../components/PhaseChips';
 import SentenceCard from '../components/SentenceCard';
 import CategoryPicker from '../components/CategoryPicker';
@@ -55,7 +54,6 @@ export default function PlayChallenge() {
   const [gameState, setGameState] = useState<GameState>('loading');
   const [hints, setHints] = useState<Hints | null>(null);
   const [challengeType, setChallengeType] = useState<string>('');
-  const [lives, setLives] = useState(5);
   const [phase, setPhase] = useState<Phase>(1);
   const [guesses, setGuesses] = useState(0);
   const [answer, setAnswer] = useState('');
@@ -86,7 +84,6 @@ export default function PlayChallenge() {
 
     const progress = {
       phase,
-      lives,
       guesses,
       wrongGuesses,
       startTime,
@@ -166,7 +163,6 @@ export default function PlayChallenge() {
       const progress = loadProgress();
       if (progress) {
         setPhase(progress.phase);
-        setLives(progress.lives);
         setGuesses(progress.guesses);
         setWrongGuesses(progress.wrongGuesses);
         setStartTime(progress.startTime);
@@ -183,7 +179,7 @@ export default function PlayChallenge() {
     } else if (gameState === 'solved' || gameState === 'failed') {
       clearProgress();
     }
-  }, [gameState, phase, lives, guesses, wrongGuesses, selectedCategory, phase4Nudge, phase5Data]);
+  }, [gameState, phase, guesses, wrongGuesses, selectedCategory, phase4Nudge, phase5Data]);
 
   const loadChallenge = async () => {
     try {
@@ -269,13 +265,11 @@ export default function PlayChallenge() {
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
-        const remainingLives = lives - 1;
-        setLives(prev => prev - 1);
 
-        console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Lives remaining:', remainingLives);
+        console.log('[Phase Logic] Wrong guess. Current phase:', phase);
 
-        if (remainingLives <= 0) {
-          console.log('[Game Over] Out of lives');
+        if (phase >= 5) {
+          console.log('[Game Over] Reached phase 5, revealing answer');
           const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
             method: 'POST',
             headers: {
@@ -439,7 +433,7 @@ export default function PlayChallenge() {
             <span className="font-semibold">Back</span>
           </Link>
           <Logo size="sm" showTagline={false} />
-          <Lives current={lives} total={5} />
+          <div className="w-20"></div>
         </div>
 
         {gameState === 'playing' && hints && (
