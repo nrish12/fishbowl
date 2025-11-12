@@ -1,0 +1,124 @@
+FIVE FOLD REDESIGN - ESSENTIAL FILES TO SHARE
+==============================================
+
+DOCUMENTATION (Must Share - Read First)
+----------------------------------------
+REDESIGN_PACKAGE_README.md                  # Package overview - READ THIS FIRST!
+DESIGN_REDESIGN_HANDOFF.md                  # Complete design brief
+FILES_FOR_REDESIGN_AI.md                    # File inventory with priorities
+RESEARCH_SYNTHESIS.md                       # Design research (8 sources)
+PAPER_DESIGN_IMPLEMENTATION.md              # Current paper system docs
+README.md                                   # Project overview
+
+GAME PAGES (Critical)
+---------------------
+src/pages/PlayChallenge.tsx                 # Main gameplay (530 lines) - CRITICAL!
+src/pages/Home.tsx                          # Landing page
+src/pages/DailyChallenge.tsx                # Daily challenge entry
+
+GAME COMPONENTS (Important)
+----------------------------
+src/components/PhaseChips.tsx               # Phase indicators (needs redesign!)
+src/components/HintStack.tsx                # Hint display
+src/components/CategoryPicker.tsx           # Category selection
+src/components/ShareCard.tsx                # Win/lose screen
+src/components/SentenceCard.tsx             # Cryptic sentence display
+src/components/GuessBar.tsx                 # Guess input
+src/components/Phase4Nudge.tsx              # AI nudge
+src/components/Phase5Visual.tsx             # Final analysis
+src/components/Logo.tsx                     # Logo component
+src/components/GameHeader.tsx               # Top nav
+
+PAPER COMPONENTS (Underutilized)
+---------------------------------
+src/components/paper/PaperSurface.tsx       # Base paper container
+src/components/paper/FoldedCornerCard.tsx   # Folded corner card
+src/components/paper/EnvelopePanel.tsx      # Envelope reveal
+src/components/paper/StickyNote.tsx         # Sticky note chip
+
+DESIGN SYSTEM (Critical)
+-------------------------
+src/design/tokens.ts                        # Design tokens
+src/design/theme.css                        # CSS theme
+src/index.css                               # Global styles
+tailwind.config.js                          # Tailwind config
+
+ASSETS
+------
+public/Adobe Express - file.png             # Logo (green/gold)
+
+CONFIGURATION (Reference)
+--------------------------
+package.json                                # Dependencies
+tsconfig.json                               # TypeScript config
+vite.config.ts                              # Build config
+
+
+READING ORDER
+=============
+1. REDESIGN_PACKAGE_README.md       ← Start here for overview
+2. DESIGN_REDESIGN_HANDOFF.md       ← Complete brief
+3. RESEARCH_SYNTHESIS.md            ← Design principles
+4. src/pages/PlayChallenge.tsx      ← Understand game flow
+5. src/components/PhaseChips.tsx    ← See current phase UI
+6. src/design/tokens.ts             ← Design system
+7. Other component files             ← As needed
+
+
+MINIMUM VIABLE SET (If you can only share 10 files)
+====================================================
+1. REDESIGN_PACKAGE_README.md
+2. DESIGN_REDESIGN_HANDOFF.md
+3. RESEARCH_SYNTHESIS.md
+4. src/pages/PlayChallenge.tsx
+5. src/components/PhaseChips.tsx
+6. src/components/HintStack.tsx
+7. src/design/tokens.ts
+8. src/design/theme.css
+9. src/index.css
+10. package.json
+
+
+TOTAL FILE COUNT
+================
+Documentation:        6 files
+Source Code:         ~25 files
+Configuration:        4 files
+Assets:               1 file
+------------------------
+TOTAL:               ~36 files
+
+Compressed size:     ~500KB (all text files)
+
+
+THE CORE CHALLENGE
+==================
+"Make Five Fold feel like unfolding a secret note 5 times."
+
+Current design has paper textures but doesn't embody the folding metaphor.
+Your mission: Make the entire game interface feel like a piece of folded paper.
+
+
+QUICK EXPORT COMMAND
+====================
+To export all essential files:
+
+tar -czf fivefold-redesign.tar.gz \
+  REDESIGN_PACKAGE_README.md \
+  DESIGN_REDESIGN_HANDOFF.md \
+  FILES_FOR_REDESIGN_AI.md \
+  RESEARCH_SYNTHESIS.md \
+  PAPER_DESIGN_IMPLEMENTATION.md \
+  README.md \
+  src/pages/PlayChallenge.tsx \
+  src/pages/Home.tsx \
+  src/components/*.tsx \
+  src/components/paper/*.tsx \
+  src/design/*.ts \
+  src/design/*.css \
+  src/index.css \
+  tailwind.config.js \
+  package.json \
+  public/"Adobe Express - file.png"
+
+Then share: fivefold-redesign.tar.gz
