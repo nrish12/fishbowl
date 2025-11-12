@@ -10,8 +10,7 @@ import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
 import Phase4Nudge from '../components/Phase4Nudge';
 import Phase5Visual from '../components/Phase5Visual';
-import FiveFoldNote from '../components/FiveFoldNote';
-import PhaseCrease from '../components/PhaseCrease';
+import AccordionFold from '../components/AccordionFold';
 import Confetti from '../components/Confetti';
 import { getSessionId, trackEvent } from '../utils/tracking';
 
@@ -448,12 +447,11 @@ export default function PlayChallenge() {
         </div>
 
         {gameState === 'playing' && hints && (
-          <FiveFoldNote phase={phase} wrongGuessShake={shouldShake} gameState={gameState}>
-            <div className="space-y-6">
-            <div className="text-center space-y-4">
+          <>
+            {/* Header - always visible */}
+            <div className="text-center space-y-4 mb-8">
               <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
-
                 <p className="text-xs font-semibold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
                 <p className="text-4xl font-serif font-bold text-gold-50 drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
@@ -464,75 +462,70 @@ export default function PlayChallenge() {
               </p>
             </div>
 
-            <PhaseCrease visible={phase >= 1 && selectedCategory !== null} delay={0.2} />
+            {/* Accordion Fold Paper */}
+            <AccordionFold phase={selectedCategory ? phase : Math.max(1, phase)} wrongGuessShake={shouldShake}>
+              {/* Phase 1 Panel */}
+              <div>
+                {selectedCategory ? (
+                  <CategoryPicker
+                    categories={hints.phase3}
+                    revealed={true}
+                    selectedCategory={selectedCategory}
+                  />
+                ) : (
+                  <CategoryPicker
+                    categories={hints.phase3}
+                    revealed={false}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleSelectCategory}
+                  />
+                )}
+              </div>
 
-            {phase >= 1 && selectedCategory && (
-              <CategoryPicker
-                categories={hints.phase3}
-                revealed={true}
-                selectedCategory={selectedCategory}
-              />
-            )}
+              {/* Phase 2 Panel */}
+              <div>
+                <SentenceCard
+                  sentence={hints.phase2}
+                  revealed={true}
+                  onReveal={undefined}
+                />
+              </div>
 
-            {phase === 1 && !selectedCategory && (
-              <CategoryPicker
-                categories={hints.phase3}
-                revealed={false}
-                selectedCategory={selectedCategory}
-                onSelectCategory={handleSelectCategory}
-              />
-            )}
+              {/* Phase 3 Panel */}
+              <div>
+                <PhaseChips words={hints.phase1} revealed={true} />
+              </div>
 
-            <PhaseCrease visible={phase >= 2} delay={0.3} />
-
-            {phase >= 2 && (
-              <SentenceCard
-                sentence={hints.phase2}
-                revealed={true}
-                onReveal={undefined}
-              />
-            )}
-
-            <PhaseCrease visible={phase >= 3} delay={0.4} />
-
-            {phase >= 3 && (
-              <PhaseChips words={hints.phase1} revealed={true} />
-            )}
-
-            <PhaseCrease visible={phase >= 4} delay={0.5} />
-
-            {phase === 4 && (
+              {/* Phase 4 Panel */}
               <div>
                 {phase4Nudge ? (
                   <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
                 ) : (
-                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                  <div className="text-center space-y-4">
                     <div className="text-5xl animate-pulse">💡</div>
                     <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
                     <p className="text-ink-400">Loading personalized nudge...</p>
                   </div>
                 )}
               </div>
-            )}
 
-            <PhaseCrease visible={phase >= 5} delay={0.6} />
-
-            {phase === 5 && (
+              {/* Phase 5 Panel */}
               <div>
                 {phase5Data ? (
                   <Phase5Visual data={phase5Data} />
                 ) : (
-                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                  <div className="text-center space-y-4">
                     <div className="text-5xl animate-pulse">🔮</div>
                     <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
                     <p className="text-ink-400">Loading complete visual breakdown...</p>
                   </div>
                 )}
               </div>
-            )}
+            </AccordionFold>
 
+            {/* Wrong guesses */}
             {wrongGuesses.length > 0 && (
-              <div className="bg-paper-100/50 rounded-2xl p-5 border border-ink-200/20 backdrop-blur-sm">
+              <div className="mt-6 bg-paper-100/50 rounded-2xl p-5 border border-ink-200/20 backdrop-blur-sm">
                 <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
@@ -543,8 +536,7 @@ export default function PlayChallenge() {
                 </div>
               </div>
             )}
-            </div>
-          </FiveFoldNote>
+          </>
         )}
 
         {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
