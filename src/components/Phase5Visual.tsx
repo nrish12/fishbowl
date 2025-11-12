@@ -19,6 +19,16 @@ interface Phase5VisualProps {
 }
 
 export default function Phase5Visual({ data }: Phase5VisualProps) {
+  if (!data || !data.semantic_scores || !data.themes_identified || !data.themes_missing) {
+    return (
+      <div className="w-full max-w-6xl mx-auto py-2">
+        <div className="text-center">
+          <p className="text-ink-400">Loading analysis...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto py-2">
       <div className="text-center mb-4">
@@ -43,7 +53,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
             Your Guesses Analyzed
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {data.semantic_scores.map((item, idx) => (
+            {data.semantic_scores && data.semantic_scores.map((item, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-lg border p-3 shadow-sm"
@@ -87,7 +97,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
               <h4 className="text-xs font-bold text-forest-800 uppercase tracking-wide">You Found</h4>
             </div>
             <div className="space-y-1">
-              {data.themes_identified.map((theme, idx) => (
+              {data.themes_identified && data.themes_identified.map((theme, idx) => (
                 <div
                   key={idx}
                   className="text-xs text-forest-800 bg-white px-2 py-1.5 rounded font-semibold border border-green-200"
@@ -105,7 +115,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
               <h4 className="text-xs font-bold text-forest-800 uppercase tracking-wide">You Missed</h4>
             </div>
             <div className="space-y-1">
-              {data.themes_missing.map((theme, idx) => (
+              {data.themes_missing && data.themes_missing.map((theme, idx) => (
                 <div
                   key={idx}
                   className="text-xs text-forest-800 bg-white px-2 py-1.5 rounded font-semibold border border-red-200"

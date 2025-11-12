@@ -504,8 +504,8 @@ export default function PlayChallenge() {
               <Logo size="lg" showTagline={false} />
               <div className="px-12 py-6 bg-forest-700 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-base font-bold text-gold-200 uppercase tracking-widest mb-2">The mystery is a</p>
-                <p className="text-5xl font-serif font-bold text-white drop-shadow-lg">
+                <p className="text-base font-bold text-gold-200 uppercase tracking-widest mb-2 text-center">The mystery is a</p>
+                <p className="text-5xl font-serif font-bold text-white drop-shadow-lg text-center">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
@@ -527,7 +527,7 @@ export default function PlayChallenge() {
             {wrongGuesses.length > 0 && (
               <div className="mt-4 bg-paper-100/50 rounded-xl p-4 border border-ink-200/20 backdrop-blur-sm">
                 <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {wrongGuesses.map((guess, idx) => (
                     <span key={idx} className="px-4 py-2 bg-paper-200 text-ink-500 rounded-full text-sm font-medium border border-ink-200/50 shadow-sm">
                       {guess}
@@ -588,7 +588,9 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+            <div className="mb-6">
+              <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+            </div>
             <div className="text-center text-sm text-ink-300 font-medium">
               Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
             </div>

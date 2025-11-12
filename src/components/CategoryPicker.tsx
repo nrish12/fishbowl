@@ -31,7 +31,7 @@ export default function CategoryPicker({
 
   if (!revealed && onSelectCategory) {
     return (
-      <div className="space-y-6 animate-fold-open">
+      <div className="space-y-8 py-12 animate-fold-open">
         <div className="text-center space-y-2">
           <div className="inline-block px-4 py-1 bg-forest-100 border border-forest-300/30 rounded-full mb-2">
             <span className="text-xs font-bold text-forest-700 uppercase tracking-widest">Phase 1</span>
