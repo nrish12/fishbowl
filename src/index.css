@@ -11,6 +11,15 @@
       radial-gradient(circle at 20% 50%, rgba(45, 139, 95, 0.03) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
   }
+
+  /* Desk background for game page */
+  .desk-background {
+    background: linear-gradient(135deg, #8B7355 0%, #6B5644 50%, #4A3C2E 100%);
+    background-image:
+      linear-gradient(135deg, #8B7355 0%, #6B5644 50%, #4A3C2E 100%),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  }
 }
 
 @layer utilities {
@@ -198,6 +207,31 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  @keyframes confetti {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes confettiBurst {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.5) rotate(360deg);
+      opacity: 0;
     }
   }
 
