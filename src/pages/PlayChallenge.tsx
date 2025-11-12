@@ -524,9 +524,28 @@ export default function PlayChallenge() {
                 </p>
               </div>
             </div>
-            <p className="text-sm text-forest-700 font-medium italic text-center mb-2">
-              Each guess unfolds another clue...
-            </p>
+
+            {/* Top bar with tagline and Previous Attempts */}
+            <div className="flex items-center justify-between mb-2 min-h-[32px]">
+              <p className="text-sm text-forest-700 font-medium italic flex-1 text-center">
+                Each guess unfolds another clue...
+              </p>
+              {wrongGuesses.length > 0 && (
+                <div className="flex flex-wrap justify-end gap-2 max-w-md">
+                  {wrongGuesses.map((guess, idx) => {
+                    const score = guessScores[guess] || 0;
+                    const bgColor = score >= 70 ? 'bg-green-100 border-green-400 text-green-800' :
+                                   score >= 40 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                   'bg-red-100 border-red-400 text-red-800';
+                    return (
+                      <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium border-2 shadow-sm ${bgColor}`}>
+                        {guess}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Folded Letter Paper */}
             <FoldedLetter
@@ -537,25 +556,6 @@ export default function PlayChallenge() {
               {phaseContent}
             </FoldedLetter>
 
-            {/* Wrong guesses */}
-            {wrongGuesses.length > 0 && (
-              <div className="mt-4 bg-paper-100/50 rounded-xl p-4 border border-ink-200/20 backdrop-blur-sm">
-                <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {wrongGuesses.map((guess, idx) => {
-                    const score = guessScores[guess] || 0;
-                    const bgColor = score >= 70 ? 'bg-green-100 border-green-400 text-green-800' :
-                                   score >= 40 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                   'bg-red-100 border-red-400 text-red-800';
-                    return (
-                      <span key={idx} className={`px-4 py-2 rounded-full text-sm font-medium border-2 shadow-sm ${bgColor}`}>
-                        {guess}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
             {/* Phase Review Modal */}
             {viewingPhase && viewingPhase < phase && (
               <div

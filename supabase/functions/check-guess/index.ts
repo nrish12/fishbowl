@@ -119,6 +119,9 @@ Deno.serve(async (req: Request) => {
         }
       }
 
+    let suggestion = null;
+    let similarityScore = 0;
+
     if (!isCorrect && guess.length >= 3) {
       const openaiKey = Deno.env.get("OPENAI_API_KEY");
       if (openaiKey) {
@@ -133,18 +136,28 @@ Deno.serve(async (req: Request) => {
               model: "gpt-4o-mini",
               messages: [{
                 role: "user",
-                content: `Is "${guess}" a valid way to refer to "${payload.target}"? Consider:\n- Misspellings\n- Abbreviations\n- Common variations\n- Partial names that are unambiguous\n\nRespond with only "YES" or "NO".`
+                content: `Analyze if "${guess}" is a misspelling or valid reference to "${payload.target}".\n\nRespond ONLY with valid JSON in this format:\n{"is_match": "YES" or "NO", "suggestion": "corrected spelling if misspelled, otherwise null", "similarity_score": 0-100}\n\nExamples:\n- "jpana" for "Japan" → {"is_match": "NO", "suggestion": "Japan", "similarity_score": 15}\n- "Eiffell Tower" for "Eiffel Tower" → {"is_match": "NO", "suggestion": "Eiffel Tower", "similarity_score": 85}\n- "France" for "Eiffel Tower" → {"is_match": "NO", "suggestion": null, "similarity_score": 40}`
               }],
               temperature: 0.1,
-              max_tokens: 5,
+              max_tokens: 100,
             }),
           });
 
           if (aiResponse.ok) {
             const aiData = await aiResponse.json();
-            const aiAnswer = aiData.choices[0].message.content.trim().toUpperCase();
-            if (aiAnswer === "YES") {
+            const content = aiData.choices[0].message.content.trim();
+            const parsed = JSON.parse(content);
+
+            if (parsed.is_match === "YES") {
               isCorrect = true;
+            }
+
+            if (parsed.suggestion && parsed.suggestion !== guess) {
+              suggestion = parsed.suggestion;
+            }
+
+            if (parsed.similarity_score !== undefined) {
+              similarityScore = parsed.similarity_score;
             }
           }
         } catch (aiError) {
@@ -173,6 +186,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         result: isCorrect ? "correct" : "incorrect",
         canonical: isCorrect ? payload.target : undefined,
+        suggestion: suggestion,
+        similarity_score: similarityScore,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
