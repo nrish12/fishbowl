@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -71,6 +71,7 @@ export default function PlayChallenge() {
   const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
   const [shouldShake, setShouldShake] = useState(false);
+  const [viewingPhase, setViewingPhase] = useState<number | null>(null);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -427,8 +428,61 @@ export default function PlayChallenge() {
     );
   }
 
+  const phaseContent = useMemo(() => {
+    return [
+      <div key="phase1">
+        {selectedCategory ? (
+          <CategoryPicker
+            categories={hints.phase3}
+            revealed={true}
+            selectedCategory={selectedCategory}
+          />
+        ) : (
+          <CategoryPicker
+            categories={hints.phase3}
+            revealed={false}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+          />
+        )}
+      </div>,
+      <div key="phase2">
+        <SentenceCard
+          sentence={hints.phase2}
+          revealed={true}
+          onReveal={undefined}
+        />
+      </div>,
+      <div key="phase3">
+        <PhaseChips words={hints.phase1} revealed={true} />
+      </div>,
+      <div key="phase4">
+        {phase4Nudge ? (
+          <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="text-5xl animate-pulse">💡</div>
+            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
+            <p className="text-ink-400">Loading personalized nudge...</p>
+          </div>
+        )}
+      </div>,
+      <div key="phase5">
+        {phase5Data ? (
+          <Phase5Visual data={phase5Data} />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="text-5xl animate-pulse">🔮</div>
+            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
+            <p className="text-ink-400">Loading complete visual breakdown...</p>
+          </div>
+        )}
+      </div>,
+    ];
+  }, [hints, selectedCategory, phase4Nudge, phase4Keywords, phase5Data, handleSelectCategory]);
+
   return (
-    <div className="min-h-screen desk-surface py-8 px-6 relative overflow-hidden">
+    <div className="min-h-screen desk-surface py-4 px-4 md:py-6 md:px-6 relative overflow-hidden">
       <Confetti trigger={gameState === 'solved'} />
 
       <div className="absolute inset-0 opacity-40 pointer-events-none">
@@ -436,96 +490,45 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+      <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 relative z-10">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-300 hover:text-ink-500 transition-colors">
-            <ArrowLeft size={20} />
-            <span className="font-semibold">Back</span>
-          </Link>
-          <Logo size="sm" showTagline={false} />
-          <div className="w-20"></div>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
+              <ArrowLeft size={18} />
+              <span className="text-sm font-semibold">Back</span>
+            </Link>
+            <Logo size="sm" showTagline={false} />
+          </div>
         </div>
 
         {gameState === 'playing' && hints && (
           <>
-            {/* Header - always visible */}
-            <div className="text-center space-y-4 mb-8">
-              <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
-                <p className="text-xs font-semibold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
-                <p className="text-4xl font-serif font-bold text-gold-50 drop-shadow-lg">
+            {/* Header - compact */}
+            <div className="text-center space-y-2 mb-4">
+              <div className="inline-block px-8 py-4 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
+                <p className="text-xs font-semibold text-gold-300 uppercase tracking-widest mb-1">The mystery is a</p>
+                <p className="text-3xl font-serif font-bold text-white drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
-              <p className="text-base text-forest-700 font-medium italic">
+              <p className="text-sm text-forest-700 font-medium italic">
                 Each guess unfolds another clue...
               </p>
             </div>
 
             {/* Folded Letter Paper */}
-            <FoldedLetter phase={selectedCategory ? phase : Math.max(1, phase)} wrongGuessShake={shouldShake}>
-              {/* Phase 1 Panel */}
-              <div>
-                {selectedCategory ? (
-                  <CategoryPicker
-                    categories={hints.phase3}
-                    revealed={true}
-                    selectedCategory={selectedCategory}
-                  />
-                ) : (
-                  <CategoryPicker
-                    categories={hints.phase3}
-                    revealed={false}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={handleSelectCategory}
-                  />
-                )}
-              </div>
-
-              {/* Phase 2 Panel */}
-              <div>
-                <SentenceCard
-                  sentence={hints.phase2}
-                  revealed={true}
-                  onReveal={undefined}
-                />
-              </div>
-
-              {/* Phase 3 Panel */}
-              <div>
-                <PhaseChips words={hints.phase1} revealed={true} />
-              </div>
-
-              {/* Phase 4 Panel */}
-              <div>
-                {phase4Nudge ? (
-                  <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
-                ) : (
-                  <div className="text-center space-y-4">
-                    <div className="text-5xl animate-pulse">💡</div>
-                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
-                    <p className="text-ink-400">Loading personalized nudge...</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Phase 5 Panel */}
-              <div>
-                {phase5Data ? (
-                  <Phase5Visual data={phase5Data} />
-                ) : (
-                  <div className="text-center space-y-4">
-                    <div className="text-5xl animate-pulse">🔮</div>
-                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
-                    <p className="text-ink-400">Loading complete visual breakdown...</p>
-                  </div>
-                )}
-              </div>
+            <FoldedLetter
+              phase={selectedCategory ? phase : Math.max(1, phase)}
+              wrongGuessShake={shouldShake}
+              onPhaseClick={(p) => setViewingPhase(p)}
+            >
+              {phaseContent}
             </FoldedLetter>
 
             {/* Wrong guesses */}
             {wrongGuesses.length > 0 && (
-              <div className="mt-6 bg-paper-100/50 rounded-2xl p-5 border border-ink-200/20 backdrop-blur-sm">
+              <div className="mt-4 bg-paper-100/50 rounded-xl p-4 border border-ink-200/20 backdrop-blur-sm">
                 <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
@@ -536,11 +539,36 @@ export default function PlayChallenge() {
                 </div>
               </div>
             )}
+            {/* Phase Review Modal */}
+            {viewingPhase && viewingPhase < phase && (
+              <div
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                onClick={() => setViewingPhase(null)}
+              >
+                <div
+                  className="bg-paper-cream rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[80vh] overflow-y-auto border-4 border-amber-200/50 paper-texture relative"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setViewingPhase(null)}
+                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg"
+                  >
+                    ✕
+                  </button>
+                  <div className="mb-4">
+                    <span className="inline-block px-4 py-2 bg-forest-600 text-gold-100 rounded-full text-sm font-bold">
+                      Phase {viewingPhase}
+                    </span>
+                  </div>
+                  {phaseContent[viewingPhase - 1]}
+                </div>
+              </div>
+            )}
           </>
         )}
 
         {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {isThinking && (
               <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
                 <Loader2 className="w-5 h-5 animate-spin text-fold-indigo" />
