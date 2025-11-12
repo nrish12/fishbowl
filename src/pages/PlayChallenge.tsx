@@ -437,15 +437,12 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="w-full max-w-[1800px] px-8 mx-auto space-y-3 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
-              <ArrowLeft size={18} />
-              <span className="text-sm font-semibold">Back</span>
-            </Link>
-            <Logo size="md" showTagline={false} />
-          </div>
+      <div className="w-full max-w-[1800px] px-8 mx-auto space-y-2 relative z-10">
+        <div className="flex items-start justify-start mb-2">
+          <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
+            <ArrowLeft size={18} />
+            <span className="text-sm font-semibold">Back</span>
+          </Link>
         </div>
 
         {gameState === 'playing' && hints && (() => {
@@ -502,19 +499,20 @@ export default function PlayChallenge() {
 
           return (
           <>
-            {/* Header - compact */}
-            <div className="text-center space-y-2 mb-4">
-              <div className="inline-block px-10 py-5 bg-forest-700 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
+            {/* Header - Logo + Mystery Box Side by Side */}
+            <div className="flex items-center justify-center gap-8 mb-3">
+              <Logo size="lg" showTagline={false} />
+              <div className="px-12 py-6 bg-forest-700 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-sm font-bold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
-                <p className="text-4xl font-serif font-bold text-white drop-shadow-lg">
+                <p className="text-base font-bold text-gold-200 uppercase tracking-widest mb-2">The mystery is a</p>
+                <p className="text-5xl font-serif font-bold text-white drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
-              <p className="text-sm text-forest-700 font-medium italic">
-                Each guess unfolds another clue...
-              </p>
             </div>
+            <p className="text-sm text-forest-700 font-medium italic text-center mb-2">
+              Each guess unfolds another clue...
+            </p>
 
             {/* Folded Letter Paper */}
             <FoldedLetter

@@ -116,7 +116,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
       </div>
 
       {/* Clickable phase indicators */}
-      <div className="absolute right-4 md:right-8 top-0 md:top-1/2 md:-translate-y-1/2 flex flex-col gap-3 z-20">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-20">
         {[1, 2, 3, 4, 5].map((p) => {
           const isCompleted = p < phase;
           const isCurrent = p === phase;
