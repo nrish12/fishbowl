@@ -10,8 +10,6 @@ import ShareCard from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
 import Phase4Nudge from '../components/Phase4Nudge';
 import Phase5Visual from '../components/Phase5Visual';
-import FiveFoldNote from '../components/FiveFoldNote';
-import Confetti from '../components/Confetti';
 import { getSessionId, trackEvent } from '../utils/tracking';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -70,7 +68,6 @@ export default function PlayChallenge() {
   const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
   const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
-  const [wrongGuessShake, setWrongGuessShake] = useState(false);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -268,8 +265,6 @@ export default function PlayChallenge() {
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
-        setWrongGuessShake(true);
-        setTimeout(() => setWrongGuessShake(false), 400);
 
         console.log('[Phase Logic] Wrong guess. Current phase:', phase);
 
@@ -428,18 +423,12 @@ export default function PlayChallenge() {
   }
 
   return (
-    <div className="min-h-screen desk-background py-8 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(139, 115, 85, 0.1) 0%, transparent 50%)'
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 py-8 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 paper-texture opacity-30" />
 
-      <Confetti trigger={gameState === 'solved'} />
-
-      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-paper-100 hover:text-gold-200 transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-ink-300 hover:text-ink-500 transition-colors">
             <ArrowLeft size={20} />
             <span className="font-semibold">Back</span>
           </Link>
@@ -448,143 +437,114 @@ export default function PlayChallenge() {
         </div>
 
         {gameState === 'playing' && hints && (
-          <div className="space-y-8">
-            {/* Challenge Type Header */}
-            <div className="text-center space-y-4 animate-fade-in">
+          <div className="space-y-8 phase-container">
+            <div className="text-center space-y-4 animate-phase-reveal paper-fold-layer">
               <div className="inline-block px-10 py-5 bg-gradient-to-br from-forest-600 via-forest-500 to-forest-600 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-700/30">
                 <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
                 <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
                 <div className="absolute bottom-3 left-3 w-2 h-2 rounded-full bg-gold-400/40" />
                 <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-gold-400/40" />
+
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-forest-800/10 to-transparent pointer-events-none" />
+
                 <p className="text-xs font-semibold text-gold-200 uppercase tracking-widest mb-1.5">The mystery is a</p>
                 <p className="text-4xl font-serif font-bold text-gold-50 drop-shadow-lg">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
-              <p className="text-base text-paper-100 font-medium italic">
+              <p className="text-base text-forest-700 font-medium italic">
                 Each guess unfolds another clue...
               </p>
             </div>
 
-            {/* Five Fold Note Canvas */}
-            <FiveFoldNote
-              phase={phase}
-              wrongGuessShake={wrongGuessShake}
-              gameState={gameState}
-            >
-              {/* Panel 1: Category Picker */}
-              <div className="p-6 h-full flex flex-col justify-center">
-                {phase === 1 && !selectedCategory ? (
-                  <CategoryPicker
-                    categories={hints.phase3}
-                    revealed={false}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={handleSelectCategory}
-                  />
-                ) : selectedCategory ? (
-                  <CategoryPicker
-                    categories={hints.phase3}
-                    revealed={true}
-                    selectedCategory={selectedCategory}
-                  />
+            {phase >= 1 && selectedCategory && (
+              <div className="animate-phase-reveal paper-fold-layer">
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={true}
+                  selectedCategory={selectedCategory}
+                />
+              </div>
+            )}
+
+            {phase === 1 && !selectedCategory && (
+              <div className="animate-phase-reveal paper-fold-layer">
+                <CategoryPicker
+                  categories={hints.phase3}
+                  revealed={false}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={handleSelectCategory}
+                />
+              </div>
+            )}
+
+            {phase >= 2 && (
+              <div className="animate-phase-reveal paper-fold-layer stagger-1">
+                <SentenceCard
+                  sentence={hints.phase2}
+                  revealed={true}
+                  onReveal={undefined}
+                />
+              </div>
+            )}
+
+            {phase >= 3 && (
+              <div className="animate-phase-reveal paper-fold-layer stagger-2">
+                <PhaseChips words={hints.phase1} revealed={true} />
+              </div>
+            )}
+
+            {phase === 4 && (
+              <div className="animate-phase-reveal paper-fold-layer stagger-3">
+                {phase4Nudge ? (
+                  <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
                 ) : (
-                  <div className="text-center py-12 text-ink-300">
-                    <p className="text-sm">Waiting for category selection...</p>
+                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                    <div className="text-5xl animate-pulse">💡</div>
+                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
+                    <p className="text-ink-400">Loading personalized nudge...</p>
                   </div>
                 )}
               </div>
+            )}
 
-              {/* Panel 2: Sentence Card */}
-              <div className="p-6 h-full flex flex-col justify-center">
-                {phase >= 2 ? (
-                  <SentenceCard
-                    sentence={hints.phase2}
-                    revealed={true}
-                    onReveal={undefined}
-                  />
+            {phase === 5 && (
+              <div className="animate-phase-reveal paper-fold-layer stagger-4">
+                {phase5Data ? (
+                  <Phase5Visual data={phase5Data} />
                 ) : (
-                  <div className="text-center py-12 text-ink-300/50">
-                    <p className="text-sm italic">Locked until Phase 2</p>
+                  <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
+                    <div className="text-5xl animate-pulse">🔮</div>
+                    <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
+                    <p className="text-ink-400">Loading complete visual breakdown...</p>
                   </div>
                 )}
               </div>
+            )}
 
-              {/* Panel 3: Five Words */}
-              <div className="p-6 h-full flex flex-col justify-center">
-                {phase >= 3 ? (
-                  <PhaseChips words={hints.phase1} revealed={true} />
-                ) : (
-                  <div className="text-center py-12 text-ink-300/50">
-                    <p className="text-sm italic">Locked until Phase 3</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Panel 4: AI Nudge */}
-              <div className="p-6 h-full flex flex-col justify-center">
-                {phase >= 4 ? (
-                  phase4Nudge ? (
-                    <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
-                  ) : (
-                    <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
-                      <div className="text-5xl animate-pulse">💡</div>
-                      <h3 className="text-xl font-serif font-bold text-ink-500">AI Reflection</h3>
-                      <p className="text-sm text-ink-400">Loading personalized nudge...</p>
-                    </div>
-                  )
-                ) : (
-                  <div className="text-center py-12 text-ink-300/50">
-                    <p className="text-sm italic">Locked until Phase 4</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Panel 5: AI Analysis */}
-              <div className="p-6 h-full flex flex-col justify-center">
-                {phase >= 5 ? (
-                  phase5Data ? (
-                    <Phase5Visual data={phase5Data} />
-                  ) : (
-                    <div className="bg-white rounded-2xl p-8 paper-shadow text-center space-y-4">
-                      <div className="text-5xl animate-pulse">🔮</div>
-                      <h3 className="text-xl font-serif font-bold text-ink-500">Final Chance</h3>
-                      <p className="text-sm text-ink-400">Loading complete analysis...</p>
-                    </div>
-                  )
-                ) : (
-                  <div className="text-center py-12 text-ink-300/50">
-                    <p className="text-sm italic">Locked until Phase 5</p>
-                  </div>
-                )}
-              </div>
-            </FiveFoldNote>
-
-            {/* Feedback Messages */}
             {isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-paper-cream rounded-2xl border-2 border-forest-400/30 paper-shadow animate-pulse">
-                <Loader2 className="w-5 h-5 animate-spin text-forest-500" />
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
+                <Loader2 className="w-5 h-5 animate-spin text-fold-indigo" />
                 <p className="text-sm font-bold text-ink-500">Checking your answer...</p>
               </div>
             )}
 
             {lastGuessResult === 'correct' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-paper-cream rounded-2xl border-2 border-green-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-green-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
                 <span className="text-2xl">✅</span>
                 <p className="text-sm font-bold text-green-700">Correct! Well done!</p>
               </div>
             )}
 
             {lastGuessResult === 'incorrect' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-paper-cream rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
+              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
                 <span className="text-2xl">❌</span>
                 <p className="text-sm font-bold text-red-700">Not quite! Try again</p>
               </div>
             )}
 
-            {/* Wrong Guesses History */}
             {wrongGuesses.length > 0 && (
-              <div className="bg-paper-cream rounded-2xl p-5 paper-shadow paper-texture border border-ink-200/30">
+              <div className="bg-white rounded-2xl p-5 paper-shadow paper-texture border border-ink-200/30">
                 <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap gap-2">
                   {wrongGuesses.map((guess, idx) => (
@@ -596,11 +556,10 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {/* Guess Bar (Persistent Footer) */}
             {((phase === 1 && selectedCategory) || phase > 1) && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-4 animate-fold-open">
                 <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
-                <div className="text-center text-sm text-paper-200 font-medium">
+                <div className="text-center text-sm text-ink-300 font-medium">
                   Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
                 </div>
               </div>
@@ -608,7 +567,6 @@ export default function PlayChallenge() {
           </div>
         )}
 
-        {/* End Game States */}
         {(gameState === 'solved' || gameState === 'failed') && (
           <>
             <ShareCard
