@@ -66,6 +66,9 @@ export default function PlayChallenge() {
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [isThinking, setIsThinking] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
+  const [guessScores, setGuessScores] = useState<Record<string, number>>({});
+  const [suggestedCorrection, setSuggestedCorrection] = useState<string | null>(null);
+  const [pendingGuess, setPendingGuess] = useState<string | null>(null);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
   const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
   const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
@@ -247,6 +250,17 @@ export default function PlayChallenge() {
 
       const data = await response.json();
       const isCorrect = data.result === 'correct';
+
+      if (data.suggestion && data.suggestion !== guess) {
+        setPendingGuess(guess);
+        setSuggestedCorrection(data.suggestion);
+        setIsThinking(false);
+        return;
+      }
+
+      if (data.similarity_score !== undefined) {
+        setGuessScores(prev => ({ ...prev, [guess]: data.similarity_score }));
+      }
 
       await trackEvent('attempt', challengeId, {
         guess_text: guess,
@@ -528,11 +542,17 @@ export default function PlayChallenge() {
               <div className="mt-4 bg-paper-100/50 rounded-xl p-4 border border-ink-200/20 backdrop-blur-sm">
                 <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3">Previous Attempts:</p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {wrongGuesses.map((guess, idx) => (
-                    <span key={idx} className="px-4 py-2 bg-paper-200 text-ink-500 rounded-full text-sm font-medium border border-ink-200/50 shadow-sm">
-                      {guess}
-                    </span>
-                  ))}
+                  {wrongGuesses.map((guess, idx) => {
+                    const score = guessScores[guess] || 0;
+                    const bgColor = score >= 70 ? 'bg-green-100 border-green-400 text-green-800' :
+                                   score >= 40 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                   'bg-red-100 border-red-400 text-red-800';
+                    return (
+                      <span key={idx} className={`px-4 py-2 rounded-full text-sm font-medium border-2 shadow-sm ${bgColor}`}>
+                        {guess}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -581,15 +601,48 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            {lastGuessResult === 'incorrect' && !isThinking && (
+            {lastGuessResult === 'incorrect' && !isThinking && !suggestedCorrection && (
               <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
                 <span className="text-2xl">❌</span>
                 <p className="text-sm font-bold text-red-700">Not quite! Try again</p>
               </div>
             )}
 
+            {suggestedCorrection && (
+              <div className="bg-white rounded-2xl border-2 border-blue-400 paper-shadow p-4">
+                <p className="text-sm font-bold text-ink-600 mb-3 text-center">Did you mean:</p>
+                <div className="flex justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setSuggestedCorrection(null);
+                      if (pendingGuess) {
+                        handleGuess(suggestedCorrection);
+                      }
+                      setPendingGuess(null);
+                    }}
+                    className="px-6 py-2 bg-forest-600 text-white rounded-full font-bold hover:bg-forest-700 transition-colors"
+                  >
+                    {suggestedCorrection}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSuggestedCorrection(null);
+                      setLastGuessResult('incorrect');
+                      if (pendingGuess) {
+                        setWrongGuesses(prev => [...prev, pendingGuess]);
+                      }
+                      setPendingGuess(null);
+                    }}
+                    className="px-6 py-2 bg-gray-300 text-ink-700 rounded-full font-bold hover:bg-gray-400 transition-colors"
+                  >
+                    No, use "{pendingGuess}"
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="mb-6">
-              <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking} />
+              <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking || !!suggestedCorrection} />
             </div>
             <div className="text-center text-sm text-ink-300 font-medium">
               Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used

@@ -30,6 +30,7 @@ export default function GuessBar({ onSubmit, disabled = false, placeholder = "Ty
             onChange={(e) => setGuess(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
+            maxLength={50}
             className="flex-1 px-4 py-3 bg-transparent text-ink-charcoal placeholder-forest-400 focus:outline-none disabled:opacity-50 font-medium"
           />
           <button
