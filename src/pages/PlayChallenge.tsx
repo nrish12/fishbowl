@@ -437,14 +437,14 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6 relative z-10">
+      <div className="w-full max-w-[1800px] px-8 mx-auto space-y-3 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
               <ArrowLeft size={18} />
               <span className="text-sm font-semibold">Back</span>
             </Link>
-            <Logo size="sm" showTagline={false} />
+            <Logo size="md" showTagline={false} />
           </div>
         </div>
 

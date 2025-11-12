@@ -81,7 +81,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
       <div className="relative z-10 flex items-start justify-center">
         <div
           ref={currentPanelRef}
-          className="w-full max-w-4xl bg-paper-cream rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] p-8 md:p-12 border-4 border-amber-200/50 paper-texture relative"
+          className="w-full bg-paper-cream rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] p-6 border-4 border-amber-200/50 paper-texture relative"
           style={{
             transformStyle: 'preserve-3d',
             backfaceVisibility: 'hidden',
