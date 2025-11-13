@@ -54,7 +54,7 @@ export default function DailyChallenge() {
         <div className="absolute inset-0 paper-texture opacity-30" />
 
         <div className="text-center space-y-8 relative z-10 animate-paper-unfold">
-          <Logo size="md" showTagline={false} forceGold={true} />
+          <Logo size="md" showTagline={false} />
 
           <div className="relative perspective-1200">
             <div className="absolute -inset-8 bg-gradient-to-br from-fold-indigo/20 to-fold-purple/20 rounded-3xl blur-2xl animate-pulse" />
@@ -66,8 +66,8 @@ export default function DailyChallenge() {
               <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
 
               <div className="space-y-6">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-fold-indigo to-fold-purple flex items-center justify-center shadow-xl animate-echo-pulse">
-                  <Calendar className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-forest-600 to-forest-700 flex items-center justify-center shadow-xl animate-echo-pulse">
+                  <Calendar className="w-10 h-10 text-gold-300" />
                 </div>
 
                 <div className="space-y-2">
