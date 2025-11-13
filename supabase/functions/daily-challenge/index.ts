@@ -40,9 +40,10 @@ YOUR ROLE: Pick something that feels right for TODAY. Use your AI judgment to se
 THE FAMILY FEUD STANDARD (Your Target Zone):
 - Fame Level: 70-85% recognition among general public (FAMILY FEUD LEVEL!)
 - NOT the most obvious #1 answers (Einstein, Eiffel Tower, Mona Lisa)
-- NOT obscure or specialized knowledge (Hedy Lamarr, Yayoi Kusama, Great Wave off Kanagawa)
+- NOT obscure or specialized knowledge (Hedy Lamarr, Yayoi Kusama, Billie Holiday, Great Wave off Kanagawa)
 - JUST RIGHT: Would appear on Family Feud - recognizable but not #1 answer
-- TEST: If you asked 100 random people, would 70+ know it? If no, reject it.
+- TEST: If you asked 100 random people at a shopping mall, would 70+ know it? If no, REJECT IT.
+- CRITICAL: If it's an art piece, historical figure, or cultural reference that only educated/art enthusiasts would know - REJECT IT!
 
 ${excludeList ? `EXCLUSIONS - Do NOT pick any of these (used recently): ${excludeList}` : ''}
 
@@ -57,16 +58,16 @@ ${type === 'person' ? `
 PERSON EXAMPLES (use these as inspiration, not a limit):
 Sweet Spot Range:
 - Historical: Cleopatra, Genghis Khan, Queen Victoria, Joan of Arc, Frederick Douglass
-- Scientists: Marie Curie, Nikola Tesla, Jane Goodall, Carl Sagan, Rachel Carson
-- Artists: Frida Kahlo, Salvador Dali, Georgia O'Keeffe, Banksy, Bob Ross
+- Scientists: Marie Curie, Nikola Tesla, Jane Goodall, Carl Sagan, Stephen Hawking
+- Artists: Frida Kahlo, Salvador Dali, Pablo Picasso, Vincent van Gogh, Bob Ross
 - Writers: Maya Angelou, Edgar Allan Poe, J.K. Rowling, Dr. Seuss, Roald Dahl
-- Musicians: Louis Armstrong, Jimi Hendrix, Ella Fitzgerald, David Bowie, Freddie Mercury
-- Athletes: Jackie Robinson, Usain Bolt, Simone Biles, Bruce Lee, Tony Hawk
-- Leaders: Dalai Lama, Malala Yousafzai, Cesar Chavez, Susan B. Anthony
-- Entertainers: Charlie Chaplin, Lucille Ball, Robin Williams, Mr. Rogers, Betty White
+- Musicians: Elvis Presley, Michael Jackson, Madonna, Beyoncé, Johnny Cash, Aretha Franklin
+- Athletes: Jackie Robinson, Usain Bolt, Simone Biles, Muhammad Ali, Serena Williams
+- Leaders: Dalai Lama, Malala Yousafzai, Nelson Mandela, Susan B. Anthony, Martin Luther King Jr
+- Entertainers: Charlie Chaplin, Lucille Ball, Robin Williams, Mr. Rogers, Betty White, Oprah Winfrey
 
 TOO OBVIOUS (avoid these defaults): Einstein, Washington, Lincoln, Shakespeare, Jesus
-TOO OBSCURE (avoid these): Obscure PhDs, niche artists, regional-only figures` : ''}
+TOO OBSCURE (avoid these - NEVER use): Billie Holiday, Hedy Lamarr, Yayoi Kusama, Rachel Carson, Cesar Chavez, any jazz musicians, any artists known only to art students, any historical figures known only to history majors` : ''}
 
 ${type === 'place' ? `
 PLACE EXAMPLES (use these as inspiration, not a limit):
@@ -92,11 +93,12 @@ Sweet Spot Range:
 - Everyday Objects: Paperclip, Stapler, Pencil, Scissors, Calculator, Stopwatch
 
 WARNING ON ART: Avoid specific artwork titles unless MEGA famous (Mona Lisa, The Thinker, Statue of David level)
-- DO NOT use: Specific paintings by name (Great Wave, American Gothic, The Scream, etc.)
-- INSTEAD prefer: General categories or famous sculptures everyone knows
+- NEVER USE: The Great Wave off Kanagawa, American Gothic, The Scream, Starry Night, any specific painting
+- NEVER USE: Jazz-era cultural items, specific art movements, niche historical artifacts
+- INSTEAD prefer: Famous inventions, everyday objects, well-known symbols, modern tech everyone uses
 
 TOO OBVIOUS (avoid these defaults): Mona Lisa, iPhone, Coca-Cola, McDonald's Logo
-TOO OBSCURE (avoid these): Specific art pieces, niche artifacts, regional items, insider references` : ''}
+TOO OBSCURE (avoid these - NEVER use): The Great Wave off Kanagawa, any specific paintings/artwork, art movement references, niche artifacts, regional items, insider references, anything requiring art/history education to know` : ''}
 
 YOUR AI DECISION PROCESS:
 1. Consider what day it is, what you've generated recently
@@ -123,7 +125,7 @@ Respond with ONLY a JSON object:
       messages: [
         {
           role: "system",
-          content: "You are an AI curator for a daily guessing game. Your superpower is finding the SWEET SPOT: subjects that are recognizable but not obvious. Avoid both extremes - no Einstein/Eiffel Tower defaults, but also no obscure academics. Think '60-75% of people would know this' - interesting enough to be engaging, known enough to be fair. Embrace your creativity and variety. Each day should feel fresh and different."
+          content: "You are an AI curator for a daily guessing game that MUST follow the FAMILY FEUD standard. Your job is to pick subjects that 70-85% of random people at a shopping mall would know. NO art pieces, NO jazz musicians, NO historical figures requiring education to know. Think: Would my grandmother know this? Would a teenager know this? If not, REJECT IT. You MUST stay in the mainstream recognition zone - no niche knowledge allowed."
         },
         { role: "user", content: prompt }
       ],

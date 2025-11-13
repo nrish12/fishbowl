@@ -592,7 +592,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase - 1);
                       }}
-                      className="absolute bottom-4 left-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-gold-200 rounded-full transition-colors shadow-lg z-10 text-xl font-bold"
+                      className="absolute bottom-6 left-6 w-14 h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
                     >
                       ←
                     </button>
@@ -604,7 +604,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase + 1);
                       }}
-                      className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-gold-200 rounded-full transition-colors shadow-lg z-10 text-xl font-bold"
+                      className="absolute bottom-6 right-6 w-14 h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
                     >
                       →
                     </button>
@@ -661,6 +661,7 @@ export default function PlayChallenge() {
                       setLastGuessResult('incorrect');
                       if (pendingGuess) {
                         setWrongGuesses(prev => [...prev, pendingGuess]);
+                        setGuesses(prev => prev + 1);
                         if (guessScores[pendingGuess]) {
                           setGuessScores(prev => ({ ...prev, [pendingGuess]: guessScores[pendingGuess] }));
                         }
