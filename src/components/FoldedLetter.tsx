@@ -93,14 +93,14 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
           <div className="absolute bottom-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-forest-300/20 to-transparent" />
 
           {/* Phase badge */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-br from-forest-600 to-forest-700 text-gold-100 px-6 py-2 rounded-full shadow-lg border-2 border-gold-300/40">
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-forest-700 text-gold-100 px-6 py-2 rounded-full shadow-lg border-2 border-gold-300/40">
             <span className="text-sm font-bold uppercase tracking-wider">
               Phase {phase}: {phaseLabels[phase - 1]}
             </span>
           </div>
 
           {/* Current content */}
-          <div className="relative z-10 mt-4">{currentChild}</div>
+          <div className="relative z-10 mt-8">{currentChild}</div>
 
           {/* Paper texture overlay */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-amber-100/20 pointer-events-none" />

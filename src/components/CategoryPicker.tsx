@@ -31,11 +31,8 @@ export default function CategoryPicker({
 
   if (!revealed && onSelectCategory) {
     return (
-      <div className="space-y-8 py-12 animate-fold-open">
+      <div className="space-y-8 py-8 animate-fold-open">
         <div className="text-center space-y-2">
-          <div className="inline-block px-4 py-1 bg-forest-100 border border-forest-300/30 rounded-full mb-2">
-            <span className="text-xs font-bold text-forest-700 uppercase tracking-widest">Phase 1</span>
-          </div>
           <h2 className="text-2xl font-serif font-bold text-forest-800">
             Choose Your First Fold
           </h2>
@@ -75,9 +72,6 @@ export default function CategoryPicker({
     return (
       <div className="space-y-6 animate-paper-unfold">
         <div className="text-center space-y-2">
-          <div className="inline-block px-4 py-1 bg-forest-100 border border-forest-300/30 rounded-full mb-2">
-            <span className="text-xs font-bold text-forest-700 uppercase tracking-widest">Phase 1 • {config.label}</span>
-          </div>
           <h2 className="text-2xl font-serif font-bold text-forest-800">
             The First Fold Opens
           </h2>

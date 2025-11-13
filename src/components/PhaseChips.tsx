@@ -9,9 +9,6 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2 animate-fade-in">
-        <div className="inline-block px-4 py-1 bg-gold-100 rounded-full mb-2 border border-gold-300/30">
-          <span className="text-xs font-bold text-gold-700 uppercase tracking-widest">Phase 3</span>
-        </div>
         <h2 className="text-2xl font-serif font-bold text-forest-800">
           Five Revealing Words
         </h2>
