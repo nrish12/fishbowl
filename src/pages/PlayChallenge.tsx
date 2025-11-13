@@ -526,23 +526,30 @@ export default function PlayChallenge() {
 
             {/* Top bar with tagline and Previous Attempts */}
             <div className="flex items-center justify-between mb-2 min-h-[32px]">
-              <p className="text-sm text-forest-700 font-medium italic flex-1 text-center">
-                Each guess unfolds another clue...
-              </p>
-              {wrongGuesses.length > 0 && (
-                <div className="flex flex-wrap justify-end gap-2 max-w-md">
-                  {wrongGuesses.map((guess, idx) => {
-                    const score = guessScores[guess] || 0;
-                    const bgColor = score >= 70 ? 'bg-green-100 border-green-400 text-green-800' :
-                                   score >= 40 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                   'bg-red-100 border-red-400 text-red-800';
-                    return (
-                      <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium border-2 shadow-sm ${bgColor}`}>
-                        {guess}
-                      </span>
-                    );
-                  })}
-                </div>
+              {wrongGuesses.length > 0 ? (
+                <>
+                  <div className="flex-1" />
+                  <p className="text-sm text-forest-700 font-medium italic text-center">
+                    Each guess unfolds another clue...
+                  </p>
+                  <div className="flex-1 flex flex-wrap justify-end gap-2">
+                    {wrongGuesses.map((guess, idx) => {
+                      const score = guessScores[guess] || 0;
+                      const bgColor = score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                                     score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                     'bg-red-100 border-red-400 text-red-800';
+                      return (
+                        <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium border-2 shadow-sm ${bgColor}`}>
+                          {guess}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-forest-700 font-medium italic w-full text-center">
+                  Each guess unfolds another clue...
+                </p>
               )}
             </div>
 
@@ -567,10 +574,29 @@ export default function PlayChallenge() {
                 >
                   <button
                     onClick={() => setViewingPhase(null)}
-                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg"
+                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
                   >
                     ✕
                   </button>
+
+                  {viewingPhase > 1 && (
+                    <button
+                      onClick={() => setViewingPhase(viewingPhase - 1)}
+                      className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
+                    >
+                      ←
+                    </button>
+                  )}
+
+                  {viewingPhase < phase - 1 && (
+                    <button
+                      onClick={() => setViewingPhase(viewingPhase + 1)}
+                      className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
+                    >
+                      →
+                    </button>
+                  )}
+
                   <div className="mb-4">
                     <span className="inline-block px-4 py-2 bg-forest-600 text-gold-100 rounded-full text-sm font-bold">
                       Phase {viewingPhase}
