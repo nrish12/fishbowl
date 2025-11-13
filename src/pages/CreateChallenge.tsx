@@ -244,10 +244,11 @@ export default function CreateChallenge() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-amber-50 py-8 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 py-8 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 paper-texture opacity-30" />
+      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-forest/60 hover:text-forest transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-forest-700 hover:text-forest-900 transition-colors font-medium">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -256,25 +257,25 @@ export default function CreateChallenge() {
         </div>
 
         <div className="text-center space-y-3">
-          <h1 className="text-4xl font-serif font-bold text-forest">Craft Your Note</h1>
-          <p className="text-forest/70 max-w-xl mx-auto">
+          <h1 className="text-4xl font-serif font-bold text-ink-600">Craft Your Note</h1>
+          <p className="text-ink-500 max-w-xl mx-auto">
             Pick someone or something fascinating. Our AI crafts clues that unfold like a secret message—ready to challenge a friend.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-6">
+        <div className="bg-white rounded-3xl p-8 paper-shadow paper-texture border border-fold-indigo/10 space-y-6">
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-semibold text-forest/80 uppercase tracking-wider">Type</span>
+              <span className="text-sm font-semibold text-ink-600 uppercase tracking-wider">Type</span>
               <div className="grid grid-cols-3 gap-3 mt-2">
                 {(['person', 'place', 'thing'] as ChallengeType[]).map((t) => (
                   <button
                     key={t}
                     onClick={() => setType(t)}
-                    className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
                       type === t
-                        ? 'bg-forest text-white'
-                        : 'bg-white text-forest border border-forest/20 hover:bg-forest/5'
+                        ? 'bg-gradient-to-br from-forest-600 to-forest-700 text-gold-200 paper-shadow'
+                        : 'bg-paper-100 text-ink-600 border-2 border-fold-indigo/20 hover:border-fold-indigo/40 hover:bg-paper-50'
                     }`}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -284,13 +285,13 @@ export default function CreateChallenge() {
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-forest/80 uppercase tracking-wider">Target</span>
+              <span className="text-sm font-semibold text-ink-600 uppercase tracking-wider">Target</span>
               <input
                 type="text"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
                 placeholder={`e.g., ${type === 'person' ? 'Albert Einstein' : type === 'place' ? 'Eiffel Tower' : 'Mona Lisa'}`}
-                className="w-full mt-2 px-4 py-3 border-2 border-neutral-200 rounded-lg focus:border-gold focus:outline-none transition-colors"
+                className="w-full mt-2 px-4 py-3 border-2 border-fold-indigo/20 rounded-xl focus:border-forest-600 focus:outline-none transition-colors bg-paper-50 text-ink-700"
                 disabled={loading}
               />
             </label>
@@ -373,7 +374,7 @@ export default function CreateChallenge() {
           <button
             onClick={handleGenerate}
             disabled={loading || !target.trim()}
-            className="w-full px-6 py-4 bg-forest text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-forest disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full px-6 py-4 bg-gradient-to-br from-forest-600 to-forest-700 text-gold-200 rounded-full font-bold text-lg hover:from-forest-700 hover:to-forest-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 paper-shadow"
           >
             {loading ? (
               <>
@@ -389,8 +390,8 @@ export default function CreateChallenge() {
         {challengeData && !shareUrl && (
           <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
             <div className="text-center">
-              <h2 className="text-2xl font-serif font-bold text-forest">Fold Your Note</h2>
-              <p className="text-sm text-forest/70 mt-1">Choose how cryptic each layer of clues should be</p>
+              <h2 className="text-2xl font-serif font-bold text-ink-600">Fold Your Note</h2>
+              <p className="text-sm text-ink-500 mt-1">Choose how cryptic each layer of clues should be</p>
             </div>
 
             {difficultyReasoning && (
@@ -404,15 +405,15 @@ export default function CreateChallenge() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 space-y-8">
+            <div className="bg-white rounded-3xl p-8 paper-shadow paper-texture border border-fold-indigo/10 space-y-8">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-700 text-center">Categories <span className="text-sm text-neutral-500">(Shown First)</span></h3>
-                <p className="text-xs text-neutral-500 text-center">Player picks one category to see first. These hints are fixed and cannot be changed</p>
+                <h3 className="text-lg font-semibold text-ink-600 text-center">Categories <span className="text-sm text-ink-400">(Shown First)</span></h3>
+                <p className="text-xs text-ink-400 text-center">Player picks one category to see first. These hints are fixed and cannot be changed</p>
                 <div className="grid gap-3">
                   {Object.entries(challengeData.phase3).map(([key, value]) => (
-                    <div key={key} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                      <span className="text-sm font-semibold text-neutral-900 uppercase tracking-wider">{key}</span>
-                      <p className="text-sm text-neutral-700 mt-1">{value}</p>
+                    <div key={key} className="p-4 bg-paper-50 rounded-xl border-2 border-fold-indigo/20">
+                      <span className="text-sm font-semibold text-forest-700 uppercase tracking-wider">{key}</span>
+                      <p className="text-sm text-ink-600 mt-1">{value}</p>
                     </div>
                   ))}
                 </div>
@@ -420,29 +421,29 @@ export default function CreateChallenge() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-700">One Sentence <span className="text-sm text-neutral-500">(Shown Second)</span></h3>
-                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
+                  <h3 className="text-lg font-semibold text-ink-600">One Sentence <span className="text-sm text-ink-400">(Shown Second)</span></h3>
+                  <span className="text-xs text-ink-400 uppercase tracking-wider">Select Difficulty</span>
                 </div>
                 <div className="space-y-3">
                   {challengeData.phase2_options.map((sentence, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedPhase2(index)}
-                      className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                         selectedPhase2 === index
-                          ? 'border-gold bg-gold/5'
-                          : 'border-neutral-200 hover:border-neutral-300'
+                          ? 'border-forest-600 bg-forest-50 paper-shadow'
+                          : 'border-fold-indigo/20 hover:border-fold-indigo/40 bg-paper-50'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span className="text-xs font-semibold text-ink-400 uppercase tracking-wider">
                           {index === 0 ? 'Easier' : index === 1 ? 'Medium' : 'Harder'}
                         </span>
                         {selectedPhase2 === index && (
-                          <Check className="text-gold" size={16} />
+                          <Check className="text-forest-600" size={16} />
                         )}
                       </div>
-                      <p className="text-sm text-neutral-700 leading-relaxed">{sentence}</p>
+                      <p className="text-sm text-ink-600 leading-relaxed">{sentence}</p>
                     </button>
                   ))}
                 </div>
@@ -450,33 +451,33 @@ export default function CreateChallenge() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-700">Five Words <span className="text-sm text-neutral-500">(Shown Last)</span></h3>
-                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Select Difficulty</span>
+                  <h3 className="text-lg font-semibold text-ink-600">Five Words <span className="text-sm text-ink-400">(Shown Last)</span></h3>
+                  <span className="text-xs text-ink-400 uppercase tracking-wider">Select Difficulty</span>
                 </div>
                 <div className="space-y-3">
                   {challengeData.phase1_options.map((words, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedPhase1(index)}
-                      className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                         selectedPhase1 === index
-                          ? 'border-gold bg-gold/5'
-                          : 'border-neutral-200 hover:border-neutral-300'
+                          ? 'border-forest-600 bg-forest-50 paper-shadow'
+                          : 'border-fold-indigo/20 hover:border-fold-indigo/40 bg-paper-50'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span className="text-xs font-semibold text-ink-400 uppercase tracking-wider">
                           {index === 0 ? 'Easier' : index === 1 ? 'Medium' : 'Harder'}
                         </span>
                         {selectedPhase1 === index && (
-                          <Check className="text-gold" size={16} />
+                          <Check className="text-forest-600" size={16} />
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {words.map((word, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 bg-neutral-100 rounded-full text-sm font-medium text-neutral-900"
+                            className="px-3 py-1 bg-paper-100 border border-fold-indigo/20 rounded-full text-sm font-semibold text-ink-600"
                           >
                             {word}
                           </span>
@@ -490,7 +491,7 @@ export default function CreateChallenge() {
               <button
                 onClick={handleFinalize}
                 disabled={finalizing}
-                className="w-full px-6 py-4 bg-forest text-white rounded-full font-semibold text-lg hover:bg-gold hover:text-forest disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-gradient-to-br from-forest-600 to-forest-700 text-gold-200 rounded-full font-bold text-lg hover:from-forest-700 hover:to-forest-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 paper-shadow"
               >
                 {finalizing ? (
                   <>
@@ -506,23 +507,23 @@ export default function CreateChallenge() {
         )}
 
         {shareUrl && (
-          <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-gold space-y-4">
+          <div className="bg-white rounded-3xl p-8 paper-shadow paper-texture border-2 border-forest-600 space-y-4">
             <div className="text-center space-y-2">
               <div className="text-4xl">✉️</div>
-              <h3 className="text-2xl font-serif font-bold text-forest">Your Note Is Ready!</h3>
-              <p className="text-forest/70">Pass it along—let them unfold the mystery</p>
+              <h3 className="text-2xl font-serif font-bold text-ink-600">Your Note Is Ready!</h3>
+              <p className="text-ink-500">Pass it along—let them unfold the mystery</p>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+            <div className="flex items-center gap-3 p-4 bg-paper-50 rounded-xl border-2 border-fold-indigo/20">
               <input
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 bg-transparent text-sm text-neutral-700 focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-ink-600 focus:outline-none"
               />
               <button
                 onClick={handleCopyLink}
-                className="px-6 py-2 bg-forest text-white rounded-full font-medium hover:bg-gold hover:text-forest transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-gradient-to-br from-forest-600 to-forest-700 text-gold-200 rounded-full font-semibold hover:from-forest-700 hover:to-forest-800 transition-all flex items-center gap-2"
               >
                 {copied ? (
                   <>
