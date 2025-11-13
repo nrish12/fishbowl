@@ -54,7 +54,7 @@ export default function DailyChallenge() {
         <div className="absolute inset-0 paper-texture opacity-30" />
 
         <div className="text-center space-y-8 relative z-10 animate-paper-unfold">
-          <Logo size="md" showTagline={false} />
+          <Logo size="md" showTagline={false} forceGold={true} />
 
           <div className="relative perspective-1200">
             <div className="absolute -inset-8 bg-gradient-to-br from-fold-indigo/20 to-fold-purple/20 rounded-3xl blur-2xl animate-pulse" />
