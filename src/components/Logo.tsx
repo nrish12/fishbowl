@@ -18,8 +18,12 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
         <img
           src="/Adobe Express - file.png"
           alt="Five Fold Logo"
-          style={{ width: current.img, height: current.img }}
           className="object-contain"
+          style={{
+            width: current.img,
+            height: current.img,
+            filter: 'brightness(0) saturate(100%) invert(56%) sepia(77%) saturate(446%) hue-rotate(6deg) brightness(95%) contrast(90%)',
+          }}
         />
       </div>
       {showTagline && (

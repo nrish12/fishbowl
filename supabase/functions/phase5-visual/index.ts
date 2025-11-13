@@ -116,13 +116,20 @@ Respond with ONLY a JSON object in this exact format.`;
     const data = await response.json();
     const result = JSON.parse(data.choices[0].message.content);
 
+    const normalizedTarget = target.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+
+    const filteredScores = (result.semantic_scores || []).filter((item: any) => {
+      const normalizedGuess = (item.guess || "").toLowerCase().trim().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+      return normalizedGuess !== normalizedTarget;
+    }).slice(0, 4);
+
     return new Response(
       JSON.stringify({
-        semantic_scores: result.semantic_scores,
-        connections: result.connections,
-        synthesis: result.synthesis,
-        themes_identified: result.themes_identified,
-        themes_missing: result.themes_missing,
+        semantic_scores: filteredScores,
+        connections: result.connections || [],
+        synthesis: result.synthesis || "Review your guesses and find the pattern.",
+        themes_identified: result.themes_identified || [],
+        themes_missing: result.themes_missing || [],
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

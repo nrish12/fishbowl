@@ -579,10 +579,20 @@ export default function PlayChallenge() {
                     ✕
                   </button>
 
+                  <div className="mb-4">
+                    <span className="inline-block px-4 py-2 bg-forest-600 text-gold-100 rounded-full text-sm font-bold">
+                      Phase {viewingPhase}
+                    </span>
+                  </div>
+                  {phaseContent[viewingPhase - 1]}
+
                   {viewingPhase > 1 && (
                     <button
-                      onClick={() => setViewingPhase(viewingPhase - 1)}
-                      className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setViewingPhase(viewingPhase - 1);
+                      }}
+                      className="absolute bottom-4 left-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-gold-200 rounded-full transition-colors shadow-lg z-10 text-xl font-bold"
                     >
                       ←
                     </button>
@@ -590,19 +600,15 @@ export default function PlayChallenge() {
 
                   {viewingPhase < phase - 1 && (
                     <button
-                      onClick={() => setViewingPhase(viewingPhase + 1)}
-                      className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setViewingPhase(viewingPhase + 1);
+                      }}
+                      className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-gold-200 rounded-full transition-colors shadow-lg z-10 text-xl font-bold"
                     >
                       →
                     </button>
                   )}
-
-                  <div className="mb-4">
-                    <span className="inline-block px-4 py-2 bg-forest-600 text-gold-100 rounded-full text-sm font-bold">
-                      Phase {viewingPhase}
-                    </span>
-                  </div>
-                  {phaseContent[viewingPhase - 1]}
                 </div>
               </div>
             )}
