@@ -110,7 +110,13 @@ Deno.serve(async (req: Request) => {
               if (!words.length) return false;
               const meaningfulTargetWords = words.filter((word) => word.length > 3);
               if (!meaningfulTargetWords.length) return false;
-              return meaningfulGuessWords.every((word) => meaningfulTargetWords.includes(word));
+
+              // Require ALL guess words to be in target AND at least 50% of target words to be in guess
+              const allGuessWordsInTarget = meaningfulGuessWords.every((word) => meaningfulTargetWords.includes(word));
+              const matchingTargetWords = meaningfulTargetWords.filter((word) => meaningfulGuessWords.includes(word)).length;
+              const targetWordCoverage = matchingTargetWords / meaningfulTargetWords.length;
+
+              return allGuessWordsInTarget && targetWordCoverage >= 0.5;
             });
           }
         }

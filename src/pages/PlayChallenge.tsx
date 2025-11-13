@@ -539,8 +539,9 @@ export default function PlayChallenge() {
                                      score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
                                      'bg-red-100 border-red-400 text-red-800';
                       return (
-                        <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium border-2 shadow-sm ${bgColor}`}>
-                          {guess}
+                        <span key={idx} className={`px-3 py-1 rounded-full text-xs font-semibold border-2 shadow-sm ${bgColor} flex items-center gap-1`}>
+                          <span>{guess}</span>
+                          {score > 0 && <span className="opacity-80">{score}%</span>}
                         </span>
                       );
                     })}
