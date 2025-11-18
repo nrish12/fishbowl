@@ -1,5 +1,5 @@
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   showTagline?: boolean;
 }
 
@@ -8,6 +8,7 @@ export default function Logo({ size = 'md', showTagline = false }: LogoProps) {
     sm: { img: 90, tagline: 'text-sm' },
     md: { img: 130, tagline: 'text-base' },
     lg: { img: 200, tagline: 'text-base' },
+    xl: { img: 280, tagline: 'text-lg' },
   };
 
   const current = sizes[size];
