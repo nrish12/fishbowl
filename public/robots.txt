@@ -1,0 +1,10 @@
+# Allow all bots
+User-agent: *
+Allow: /
+
+# Disallow admin and dev tools
+Disallow: /admin
+Disallow: /dev-tools
+
+# Sitemap location
+Sitemap: https://fivefold.com/sitemap.xml

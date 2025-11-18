@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Users, Sparkles, Settings } from 'lucide-react';
 import Logo from '../components/Logo';
 import PaperSurface from '../components/paper/PaperSurface';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
@@ -136,6 +137,8 @@ export default function Home() {
           </motion.div>
         )}
       </motion.div>
+
+      <Footer />
     </div>
   );
 }

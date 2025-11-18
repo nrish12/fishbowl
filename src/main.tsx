@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
+import { initializeGA, initializeAdSense } from './utils/analytics.ts';
 import './design/theme.css';
 import './index.css';
 
@@ -47,6 +48,8 @@ async function initializeSentry() {
 }
 
 initializeSentry();
+initializeGA();
+initializeAdSense();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
