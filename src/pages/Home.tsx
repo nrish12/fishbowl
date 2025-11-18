@@ -24,25 +24,16 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <Logo size="lg" showTagline={false} />
+            <Logo size="xl" showTagline={false} />
           </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-4xl md:text-5xl font-serif font-bold text-forest-800 tracking-tight"
-          >
-            Five Fold
-          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-base text-forest-700 font-medium max-w-xl mx-auto"
+            className="text-base text-forest-700 font-medium max-w-xl mx-auto mt-4"
           >
-            Each clue unfolds like a secret note. Five phases to solve the mystery.
+            Five phases to solve the mystery.
           </motion.p>
         </div>
 
@@ -122,20 +113,6 @@ export default function Home() {
           transition={{ delay: 0.7 }}
           className="text-center"
         >
-          <div className="flex justify-center gap-2 mb-3">
-            {[1, 2, 3, 4, 5].map((num, idx) => (
-              <motion.div
-                key={num}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.8 + idx * 0.05, type: 'spring' }}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-forest-500 to-forest-700 flex items-center justify-center shadow-md"
-              >
-                <span className="font-serif text-sm font-bold text-white">{num}</span>
-              </motion.div>
-            ))}
-          </div>
-
           <p className="text-xs text-ink-muted max-w-lg mx-auto">
             Each wrong guess unfolds another clue. Earn Gold, Silver, or Bronze!
           </p>
