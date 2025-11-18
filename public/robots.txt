@@ -7,5 +7,4 @@ Disallow: /admin
 Disallow: /dev-tools
 
 # Sitemap location
-# TODO: Replace YOURDOMAIN.COM with your actual domain
-Sitemap: https://YOURDOMAIN.COM/sitemap.xml
+Sitemap: https://mystle.app/sitemap.xml

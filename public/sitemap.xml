@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- TODO: Replace YOURDOMAIN.COM with your actual domain -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://YOURDOMAIN.COM/</loc>
+    <loc>https://mystle.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://YOURDOMAIN.COM/daily</loc>
+    <loc>https://mystle.app/daily</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://YOURDOMAIN.COM/create</loc>
+    <loc>https://mystle.app/create</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://YOURDOMAIN.COM/privacy</loc>
+    <loc>https://mystle.app/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://YOURDOMAIN.COM/terms</loc>
+    <loc>https://mystle.app/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
