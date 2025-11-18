@@ -18,7 +18,7 @@ export default function Home() {
         transition={{ duration: 0.6 }}
         className="max-w-5xl w-full relative z-10"
       >
-        <div className="text-center mb-6 space-y-2">
+        <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -31,13 +31,13 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-base text-forest-700 font-medium max-w-xl mx-auto mt-4"
+            className="text-xl text-forest-700 font-medium max-w-xl mx-auto mt-2"
           >
             Five phases to solve the mystery.
           </motion.p>
         </div>
 
-        <div className="relative max-w-3xl mx-auto mb-6">
+        <div className="relative max-w-4xl mx-auto mb-6">
           <motion.div
             initial={{ rotateX: 5, scale: 0.97 }}
             animate={{ rotateX: 0, scale: 1 }}
