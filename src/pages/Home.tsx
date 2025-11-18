@@ -31,9 +31,10 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-3xl md:text-4xl text-forest-700 font-medium max-w-2xl mx-auto mt-4"
+            className="text-3xl md:text-4xl text-forest-700 font-bold max-w-2xl mx-auto mt-4 tracking-tight"
+            style={{ fontFamily: '"Space Grotesk", system-ui, -apple-system, sans-serif' }}
           >
-            Five phases to solve the mystery.
+            5 phases to solve the mystery.
           </motion.p>
         </div>
 
