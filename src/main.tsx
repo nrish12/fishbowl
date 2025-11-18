@@ -42,7 +42,7 @@ async function initializeSentry() {
 
       window.Sentry = Sentry;
     } catch (error) {
-      console.warn('Sentry initialization failed:', error);
+      // Fail silently
     }
   }
 }

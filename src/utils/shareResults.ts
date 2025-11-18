@@ -54,9 +54,7 @@ export async function shareResults(
       });
       return true;
     } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        console.warn('Share failed:', error);
-      }
+      // User cancelled share
     }
   }
 
@@ -64,7 +62,6 @@ export async function shareResults(
     await navigator.clipboard.writeText(shareText);
     return true;
   } catch (error) {
-    console.error('Copy failed:', error);
     return false;
   }
 }

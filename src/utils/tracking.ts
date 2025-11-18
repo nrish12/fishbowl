@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from './fetchWithTimeout';
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const SESSION_KEY = 'clueladder_session_id';
@@ -21,7 +23,7 @@ export async function trackPageView(pagePath: string, pageTitle: string): Promis
     const isLandingPage = !sessionStorage.getItem('has_viewed_page');
     sessionStorage.setItem('has_viewed_page', 'true');
 
-    await fetch(`${SUPABASE_URL}/rest/v1/page_views`, {
+    await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/page_views`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,13 +38,14 @@ export async function trackPageView(pagePath: string, pageTitle: string): Promis
         referrer: document.referrer || null,
         landing_page: isLandingPage,
       }),
+      timeout: 5000,
     });
 
     if (!localStorage.getItem(VISIT_START_KEY)) {
       localStorage.setItem(VISIT_START_KEY, Date.now().toString());
     }
   } catch (error) {
-    console.error('Error tracking page view:', error);
+    // Fail silently
   }
 }
 
@@ -53,7 +56,7 @@ export async function trackInteraction(
   metadata?: Record<string, any>
 ): Promise<void> {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/user_interactions`, {
+    await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/user_interactions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,9 +72,10 @@ export async function trackInteraction(
         page_path: window.location.pathname,
         metadata: metadata || {},
       }),
+      timeout: 5000,
     });
   } catch (error) {
-    console.error('Error tracking interaction:', error);
+    // Fail silently
   }
 }
 
@@ -82,7 +86,7 @@ export async function updateSessionMetrics(): Promise<void> {
 
     const totalTimeSeconds = Math.floor((Date.now() - parseInt(visitStart)) / 1000);
 
-    await fetch(`${SUPABASE_URL}/rest/v1/session_metrics`, {
+    await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/session_metrics`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,9 +100,10 @@ export async function updateSessionMetrics(): Promise<void> {
         total_time_seconds: totalTimeSeconds,
         referrer_source: document.referrer ? new URL(document.referrer).hostname : null,
       }),
+      timeout: 5000,
     });
   } catch (error) {
-    console.error('Error updating session metrics:', error);
+    // Fail silently
   }
 }
 
@@ -120,7 +125,7 @@ export async function logPreview(
   generatedAliases: string[]
 ): Promise<string | null> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/log-preview`, {
+    const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/log-preview`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -135,6 +140,7 @@ export async function logPreview(
         generated_aliases: generatedAliases,
         session_id: getSessionId(),
       }),
+      timeout: 10000,
     });
 
     if (response.ok) {
@@ -143,7 +149,6 @@ export async function logPreview(
     }
     return null;
   } catch (error) {
-    console.error('Error logging preview:', error);
     return null;
   }
 }
@@ -154,7 +159,7 @@ export async function trackEvent(
   data?: any
 ): Promise<void> {
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+    await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/track-event`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -166,20 +171,22 @@ export async function trackEvent(
         session_id: getSessionId(),
         data,
       }),
+      timeout: 5000,
     });
   } catch (error) {
-    console.error('Error tracking event:', error);
+    // Fail silently
   }
 }
 
 export async function getLeaderboard(challengeId: string): Promise<any> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${SUPABASE_URL}/functions/v1/get-leaderboard?challenge_id=${challengeId}`,
       {
         headers: {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        timeout: 10000,
       }
     );
 
@@ -188,7 +195,6 @@ export async function getLeaderboard(challengeId: string): Promise<any> {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
     return null;
   }
 }

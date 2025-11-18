@@ -7,4 +7,5 @@ Disallow: /admin
 Disallow: /dev-tools
 
 # Sitemap location
-Sitemap: https://fivefold.com/sitemap.xml
+# TODO: Replace YOURDOMAIN.COM with your actual domain
+Sitemap: https://YOURDOMAIN.COM/sitemap.xml

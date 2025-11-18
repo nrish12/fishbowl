@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -18,12 +19,13 @@ export default function DailyChallenge() {
 
   const loadDailyChallenge = async () => {
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
+      const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        timeout: 15000,
       });
 
       if (!response.ok) {
@@ -42,7 +44,6 @@ export default function DailyChallenge() {
         throw new Error('No token received');
       }
     } catch (err: any) {
-      console.error('Daily challenge error:', err);
       setError(err.message || 'Failed to fetch');
       setLoading(false);
     }
