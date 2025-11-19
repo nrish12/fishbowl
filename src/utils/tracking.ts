@@ -92,7 +92,7 @@ export async function updateSessionMetrics(): Promise<void> {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'apikey': SUPABASE_ANON_KEY,
-        'Prefer': 'resolution=merge-duplicates,return=minimal',
+        'Prefer': 'resolution=merge-duplicates',
       },
       body: JSON.stringify({
         session_id: getSessionId(),
@@ -103,7 +103,7 @@ export async function updateSessionMetrics(): Promise<void> {
       timeout: 5000,
     });
   } catch (error) {
-    // Silently ignore all errors including duplicates
+    // Fail silently
   }
 }
 
