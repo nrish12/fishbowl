@@ -215,8 +215,34 @@ export default function CreateChallenge() {
         return;
       }
 
-      const url = `${window.location.origin}/play?t=${data.token}`;
-      setShareUrl(url);
+      // Create short URL
+      try {
+        const shortResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-short-url`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            token: data.token,
+            challenge_id: data.id,
+          }),
+        });
+
+        if (shortResponse.ok) {
+          const shortData = await shortResponse.json();
+          const url = `${window.location.origin}/s/${shortData.short_code}`;
+          setShareUrl(url);
+        } else {
+          // Fallback to long URL if short URL creation fails
+          const url = `${window.location.origin}/play?t=${data.token}`;
+          setShareUrl(url);
+        }
+      } catch {
+        // Fallback to long URL
+        const url = `${window.location.origin}/play?t=${data.token}`;
+        setShareUrl(url);
+      }
     } catch (err: any) {
       setError({
         error: 'Connection Error',

@@ -23,13 +23,20 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { token, guess, phase, player_fingerprint } = await req.json();
+    let { token, guess, phase, player_fingerprint } = await req.json();
 
     if (!token || !guess) {
       return new Response(
         JSON.stringify({ error: "Token and guess are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Decode URL-encoded token if necessary
+    try {
+      token = decodeURIComponent(token);
+    } catch {
+      // If decoding fails, use original token
     }
 
     const secret = Deno.env.get("CHALLENGE_SIGNING_SECRET");

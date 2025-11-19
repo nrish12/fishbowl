@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import DailyChallenge from './pages/DailyChallenge';
 import CreateChallenge from './pages/CreateChallenge';
 import PlayChallenge from './pages/PlayChallenge';
+import ShortUrlRedirect from './pages/ShortUrlRedirect';
 import Admin from './pages/Admin';
 import DevTools from './pages/DevTools';
 import LogoShowcase from './pages/LogoShowcase';
@@ -19,6 +20,7 @@ function AppRoutes() {
         <Route path="/daily" element={<DailyChallenge />} />
         <Route path="/create" element={<CreateChallenge />} />
         <Route path="/play" element={<PlayChallenge />} />
+        <Route path="/s/:code" element={<ShortUrlRedirect />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/dev" element={<DevTools />} />
         <Route path="/logos" element={<LogoShowcase />} />

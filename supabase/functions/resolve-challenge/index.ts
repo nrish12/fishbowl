@@ -29,7 +29,17 @@ Deno.serve(async (req: Request) => {
       throw new Error("JWT signing secret not configured");
     }
 
-    const parts = token.split(".");
+    // Decode URL-encoded token if necessary
+    let decodedToken = token;
+    try {
+      // Handle potential URL encoding issues from messaging apps
+      decodedToken = decodeURIComponent(token);
+    } catch {
+      // If decoding fails, use original token
+      decodedToken = token;
+    }
+
+    const parts = decodedToken.split(".");
     if (parts.length !== 3) {
       return new Response(
         JSON.stringify({ error: "Invalid token format" }),
@@ -38,6 +48,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const [encodedHeader, encodedPayload, encodedSignature] = parts;
+
+    // Update token reference for verification
+    token = decodedToken;
 
     // Verify signature
     const encoder = new TextEncoder();
