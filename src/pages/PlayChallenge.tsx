@@ -524,8 +524,11 @@ export default function PlayChallenge() {
           <>
             {/* Header - Logo + Mystery Box Side by Side */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 mb-3">
-              <div className="scale-75 sm:scale-100">
+              <div className="hidden sm:block">
                 <Logo size="lg" showTagline={false} />
+              </div>
+              <div className="block sm:hidden">
+                <Logo size="md" showTagline={false} />
               </div>
               <div className="px-6 py-3 sm:px-12 sm:py-6 bg-forest-700 rounded-xl sm:rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
                 <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
