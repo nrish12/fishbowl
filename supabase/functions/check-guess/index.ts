@@ -143,7 +143,7 @@ Deno.serve(async (req: Request) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "gpt-4o-mini",
+              model: "gpt-5-mini",
               messages: [{
                 role: "user",
                 content: `Analyze the guess "${guess}" in relation to the answer "${payload.target}".

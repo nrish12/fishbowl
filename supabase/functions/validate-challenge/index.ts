@@ -130,7 +130,7 @@ For normal approval/rejection:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5.1-chat-latest",
         messages: [{ role: "user", content: validationPrompt }],
         temperature: 0.3,
         response_format: { type: "json_object" },
@@ -293,7 +293,7 @@ Respond with ONLY valid JSON:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5.1-chat-latest",
         messages: [
           {
             role: "system",
