@@ -39,17 +39,17 @@ ${hints.phase4_nudge ? `Phase 4 (nudge): ${hints.phase4_nudge}` : ''}
 
     const guessesSummary = guesses.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n');
 
-    const prompt = `You are helping a player in a deduction game where they must guess: ${target} (a ${type}).
+    const prompt = `You are helping a player in a deduction game where they must guess a ${type}. The answer is "${target}".
 
 They have seen these hints:
 ${hintsSummary}
 
-They have made these guesses:
+They have made these wrong guesses:
 ${guessesSummary}
 
 YOUR TASK - Create a visual connection analysis:
 
-1. SEMANTIC ANALYSIS: Rate each guess on how semantically close it is to "${target}" on a scale of 0-100
+1. SEMANTIC ANALYSIS: Rate each guess on how semantically close it is to the answer on a scale of 0-100
    - Consider conceptual similarity, category overlap, thematic connections
    - 0 = completely unrelated
    - 100 = extremely close (but not the answer)
@@ -60,20 +60,26 @@ YOUR TASK - Create a visual connection analysis:
 
 3. SYNTHESIS SENTENCE: Write ONE powerful sentence that:
    - Describes the pattern shift they need to make
-   - Connects all their attempts to the final answer
+   - Connects all their attempts to the final answer WITHOUT revealing it
    - Is poetic but clear
    - Follows this format: "Across your guesses you've chased [theme1], [theme2], and [theme3]—all that's left is [final hint]"
 
 4. THEMES: Identify 2-3 themes they captured correctly, and 2-3 themes they missed
 
+CRITICAL RULES:
+- NEVER mention the answer "${target}" in any reason or explanation
+- NEVER use the answer's name in the "reason" field
+- Keep explanations focused on WHY the guess is close/far, not on comparing it to the answer by name
+- Use general terms like "the answer", "the target", "it" instead of the actual name
+
 EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower", "satellite"]:
 {
   "semantic_scores": [
-    {"guess": "telephone", "score": 85, "reason": "Communication device, very similar function"},
-    {"guess": "computer", "score": 70, "reason": "Modern technology, similar capabilities"},
-    {"guess": "radio", "score": 60, "reason": "Wireless communication"},
-    {"guess": "satellite", "score": 50, "reason": "Wireless signal transmission"},
-    {"guess": "tower", "score": 40, "reason": "Communication infrastructure"}
+    {"guess": "telephone", "score": 85, "reason": "Communication device with very similar function"},
+    {"guess": "computer", "score": 70, "reason": "Modern technology with similar capabilities"},
+    {"guess": "radio", "score": 60, "reason": "Wireless communication technology"},
+    {"guess": "satellite", "score": 50, "reason": "Wireless signal transmission system"},
+    {"guess": "tower", "score": 40, "reason": "Communication infrastructure component"}
   ],
   "connections": [
     {"guess": "telephone", "hint": "phase2", "pattern": "Identified communication aspect"},
@@ -87,7 +93,10 @@ EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower"
   "themes_missing": ["Personal/portable", "Handheld size", "Multi-function tool"]
 }
 
-IMPORTANT: You MUST include themes_identified and themes_missing arrays with 2-3 items each.
+IMPORTANT: 
+- You MUST include themes_identified and themes_missing arrays with 2-3 items each
+- NEVER use the answer's name in any explanation
+- Focus on characteristics, not comparisons to the specific answer
 Respond with ONLY a JSON object in this exact format.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -101,7 +110,7 @@ Respond with ONLY a JSON object in this exact format.`;
         messages: [
           {
             role: "system",
-            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response."
+            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response. NEVER mention the target answer by name in your explanations."
           },
           { role: "user", content: prompt }
         ],
@@ -125,11 +134,17 @@ Respond with ONLY a JSON object in this exact format.`;
       return normalizedGuess !== normalizedTarget;
     }).slice(0, 4);
 
+    // Double-check: Remove any mention of the target answer from reasons
+    const sanitizedScores = filteredScores.map((item: any) => ({
+      ...item,
+      reason: item.reason.replace(new RegExp(target, 'gi'), 'the answer')
+    }));
+
     return new Response(
       JSON.stringify({
-        semantic_scores: filteredScores,
+        semantic_scores: sanitizedScores,
         connections: result.connections || [],
-        synthesis: result.synthesis || "Review your guesses and find the pattern.",
+        synthesis: result.synthesis ? result.synthesis.replace(new RegExp(target, 'gi'), 'the answer') : "Review your guesses and find the pattern.",
         themes_identified: result.themes_identified && result.themes_identified.length > 0 ? result.themes_identified : ["Pattern recognition", "Logical deduction"],
         themes_missing: result.themes_missing && result.themes_missing.length > 0 ? result.themes_missing : ["Key details", "Context clues"],
       }),

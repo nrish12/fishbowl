@@ -385,6 +385,16 @@ export default function PlayChallenge() {
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
                 setPhase5Data(visualData);
+
+                // Update guess scores with Phase 5 semantic scores
+                if (visualData.semantic_scores) {
+                  const newScores: Record<string, number> = {};
+                  visualData.semantic_scores.forEach((item: any) => {
+                    newScores[item.guess] = item.score;
+                  });
+                  setGuessScores(prev => ({ ...prev, ...newScores }));
+                }
+
                 setPhase(5);
               } else {
                 const errorText = await phase5Response.text();
