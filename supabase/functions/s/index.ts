@@ -30,7 +30,7 @@ Deno.serve(async (req: Request) => {
     // Look up short URL
     const { data, error } = await supabase
       .from("short_urls")
-      .select("full_token, challenge_id")
+      .select("full_token, challenge_id, clicks")
       .eq("short_code", shortCode)
       .maybeSingle();
 
@@ -42,10 +42,11 @@ Deno.serve(async (req: Request) => {
     }
 
     // Update click count and last accessed
+    const currentClicks = (data as any).clicks || 0;
     await supabase
       .from("short_urls")
       .update({
-        clicks: supabase.rpc('increment', { row_id: shortCode }),
+        clicks: currentClicks + 1,
         last_accessed: new Date().toISOString(),
       })
       .eq("short_code", shortCode);
