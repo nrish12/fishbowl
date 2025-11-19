@@ -94,6 +94,7 @@ export default function PlayChallenge() {
       phase,
       guesses,
       wrongGuesses,
+      guessScores,
       startTime,
       selectedCategory,
       phase4Nudge,
@@ -173,6 +174,7 @@ export default function PlayChallenge() {
         setPhase(progress.phase);
         setGuesses(progress.guesses);
         setWrongGuesses(progress.wrongGuesses);
+        if (progress.guessScores) setGuessScores(progress.guessScores);
         setStartTime(progress.startTime);
         setSelectedCategory(progress.selectedCategory);
         if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
@@ -541,26 +543,33 @@ export default function PlayChallenge() {
             </div>
 
             {/* Top bar with tagline and Previous Attempts */}
-            <div className="flex flex-col items-center justify-center mb-2 gap-1.5 sm:gap-2">
-              <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
-                Each guess unfolds another clue...
-              </p>
-              {wrongGuesses.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 sm:gap-2 max-w-full">
-                  {wrongGuesses.map((guess, idx) => {
-                    const score = guessScores[guess];
-                    const displayScore = score !== undefined ? score : null;
-                    const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                                   score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                   'bg-red-100 border-red-400 text-red-800';
-                    return (
-                      <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
-                        <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
-                        {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
-                      </span>
-                    );
-                  })}
-                </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-2 gap-1.5 sm:gap-2 sm:min-h-[32px]">
+              {wrongGuesses.length > 0 ? (
+                <>
+                  <div className="hidden sm:block flex-1" />
+                  <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
+                    Each guess unfolds another clue...
+                  </p>
+                  <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2">
+                    {wrongGuesses.map((guess, idx) => {
+                      const score = guessScores[guess];
+                      const displayScore = score !== undefined ? score : null;
+                      const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                                     score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                     'bg-red-100 border-red-400 text-red-800';
+                      return (
+                        <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
+                          <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
+                          {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic w-full text-center">
+                  Each guess unfolds another clue...
+                </p>
               )}
             </div>
 
