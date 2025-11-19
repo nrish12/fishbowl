@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const expiresIn = 7 * 24 * 60 * 60;
+    const expiresIn = 24 * 60 * 60; // 24 hours
 
     const payload = {
       ver: 1,

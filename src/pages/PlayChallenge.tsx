@@ -12,6 +12,7 @@ import Phase4Nudge from '../components/Phase4Nudge';
 import Phase5Visual from '../components/Phase5Visual';
 import FoldedLetter from '../components/FoldedLetter';
 import Confetti from '../components/Confetti';
+import { ChallengeTimer } from '../components/ChallengeTimer';
 import { getSessionId, trackEvent } from '../utils/tracking';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
@@ -76,6 +77,8 @@ export default function PlayChallenge() {
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
   const [shouldShake, setShouldShake] = useState(false);
   const [viewingPhase, setViewingPhase] = useState<number | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [isExpired, setIsExpired] = useState(false);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -208,6 +211,7 @@ export default function PlayChallenge() {
       setHints(data.hints);
       setChallengeType(data.type);
       setChallengeId(data.id);
+      setExpiresAt(data.expires_at);
       setGameState('playing');
       setStartTime(Date.now());
 
@@ -444,6 +448,26 @@ export default function PlayChallenge() {
     );
   }
 
+  if (isExpired && gameState === 'playing') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border-2 border-orange-200 text-center space-y-4">
+          <div className="text-5xl">⏰</div>
+          <h2 className="text-2xl font-serif font-bold text-forest">Challenge Expired</h2>
+          <p className="text-forest/70">
+            This challenge's 24-hour time limit has expired. Create a new challenge to share with friends!
+          </p>
+          <Link
+            to="/"
+            className="inline-block px-6 py-3 bg-forest text-white rounded-full font-medium hover:bg-gold hover:text-forest transition-colors"
+          >
+            Create New Challenge
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen desk-surface relative overflow-x-hidden">
       <Confetti trigger={gameState === 'solved'} />
@@ -532,11 +556,21 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Tagline and Previous Attempts */}
+            {/* Tagline, Timer, and Previous Attempts */}
             <div className="mb-4 space-y-2">
-              <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
-                Each guess unfolds another clue...
-              </p>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
+                  Each guess unfolds another clue...
+                </p>
+                {expiresAt && !isExpired && (
+                  <div className="flex flex-col items-center gap-1">
+                    <ChallengeTimer expiresAt={expiresAt} onExpired={() => setIsExpired(true)} />
+                    <p className="text-[10px] sm:text-xs text-ink-300 text-center">
+                      Send to friends before time runs out!
+                    </p>
+                  </div>
+                )}
+              </div>
               {wrongGuesses.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
                   {wrongGuesses.map((guess, idx) => {
