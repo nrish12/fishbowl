@@ -243,8 +243,8 @@ Deno.serve(async (req: Request) => {
     console.log(`Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
 
     // Randomly pick type
-    const types = ["person", "place", "thing"] as const;
-    const type = types[Math.floor(Math.random() * types.length)];
+    const types = ["person", "place", "thing"];
+    const type = types[Math.floor(Math.random() * types.length)] as "person" | "place" | "thing";
 
     // Generate random subject using AI with exclusion list
     const target = await generateRandomSubject(type, null, recentSubjects, openaiKey);
