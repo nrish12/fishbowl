@@ -92,8 +92,20 @@ Deno.serve(async (req: Request) => {
     );
 
     const header = { alg: "HS256", typ: "JWT" };
-    const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, "");
-    const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, "");
+
+    // Use proper UTF-8 encoding instead of btoa for Unicode support
+    const headerBytes = encoder.encode(JSON.stringify(header));
+    const payloadBytes = encoder.encode(JSON.stringify(payload));
+
+    const encodedHeader = btoa(String.fromCharCode(...headerBytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+    const encodedPayload = btoa(String.fromCharCode(...payloadBytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+
     const signatureData = encoder.encode(`${encodedHeader}.${encodedPayload}`);
     const signature = await crypto.subtle.sign("HMAC", key, signatureData);
     const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))

@@ -16,7 +16,7 @@ export function generateShareText(
   const progressBar = phaseSquares.slice(0, phase).join('') + '⬜'.repeat(3 - phase);
 
   if (!solved) {
-    return `🎯 ClueLadder ${isDaily ? date : 'Custom'}
+    return `🎯 5 Fold ${isDaily ? date : 'Custom'}
 
 ❌ Unsolved
 ${progressBar}
@@ -26,7 +26,7 @@ Can you solve it?
 ${window.location.origin}`;
   }
 
-  return `🎯 ClueLadder ${isDaily ? date : 'Custom'}
+  return `🎯 5 Fold ${isDaily ? date : 'Custom'}
 
 ${rankEmoji} ${rank} Rank
 ${progressBar}
@@ -48,7 +48,7 @@ export async function shareResults(
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'ClueLadder Results',
+        title: '5 Fold Results',
         text: shareText,
         url: shareUrl || window.location.origin,
       });
