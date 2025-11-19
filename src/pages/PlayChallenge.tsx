@@ -284,58 +284,10 @@ export default function PlayChallenge() {
         });
       } else {
         setLastGuessResult('incorrect');
-        const newWrongGuesses = [...wrongGuesses, guess];
-        setWrongGuesses(newWrongGuesses);
+        setWrongGuesses(prev => [...prev, guess]);
         setGuesses(prev => prev + 1);
         setShouldShake(true);
         setTimeout(() => setShouldShake(false), 400);
-
-        // Fetch semantic scores for ALL wrong guesses to update with better AI analysis
-        if (hints && challengeType) {
-          try {
-            // First reveal the answer to get the target
-            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({ token, guess: '__reveal__', phase }),
-            });
-            const answerData = await answerResponse.json();
-            const targetAnswer = answerData.canonical;
-
-            if (targetAnswer) {
-              const scoreResponse = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({
-                  target: targetAnswer,
-                  type: challengeType,
-                  guesses: newWrongGuesses,
-                  hints: hints,
-                }),
-              });
-
-              if (scoreResponse.ok) {
-                const scoreData = await scoreResponse.json();
-                if (scoreData.semantic_scores) {
-                  const newScores: Record<string, number> = {};
-                  scoreData.semantic_scores.forEach((item: any) => {
-                    newScores[item.guess] = item.score;
-                  });
-                  setGuessScores(prev => ({ ...prev, ...newScores }));
-                  console.log('Updated semantic scores:', newScores);
-                }
-              }
-            }
-          } catch (err) {
-            console.error('Failed to fetch semantic scores:', err);
-          }
-        }
 
         console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Wrong guess count:', wrongGuesses.length + 1);
 
@@ -436,16 +388,6 @@ export default function PlayChallenge() {
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
                 setPhase5Data(visualData);
-
-                // Update guess scores with Phase 5 semantic scores
-                if (visualData.semantic_scores) {
-                  const newScores: Record<string, number> = {};
-                  visualData.semantic_scores.forEach((item: any) => {
-                    newScores[item.guess] = item.score;
-                  });
-                  setGuessScores(prev => ({ ...prev, ...newScores }));
-                }
-
                 setPhase(5);
               } else {
                 const errorText = await phase5Response.text();

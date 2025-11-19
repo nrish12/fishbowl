@@ -146,7 +146,29 @@ Deno.serve(async (req: Request) => {
               model: "gpt-4o-mini",
               messages: [{
                 role: "user",
-                content: `Analyze if "${guess}" is a misspelling or valid reference to "${payload.target}".\n\nIMPORTANT RULES:\n1. NEVER suggest the actual answer "${payload.target}" as a correction\n2. Suggest corrections for:\n   - Clear misspellings (1-3 letter difference or transposed letters)\n   - Missing/extra letters (e.g., "billie holliday" → "Billie Holiday")\n   - Common name misspellings (e.g., "esinstein" → "Einstein")\n3. If guess is semantically different, return null for suggestion\n4. Calculate similarity based on semantic relationship\n\nRespond ONLY with valid JSON:\n{"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}\n\nExamples:\n- "esinstein" for "Einstein" → {"is_match": "NO", "suggestion": "Einstein", "similarity_score": 15}\n- "billie holliday" for "Billie Holiday" → {"is_match": "NO", "suggestion": "Billie Holiday", "similarity_score": 95}\n- "Eiffell Tower" for "Eiffel Tower" → {"is_match": "NO", "suggestion": "Eiffel Tower", "similarity_score": 85}\n- "tokyo" for "The Great Wave off Kanagawa" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}\n- "France" for "Eiffel Tower" → {"is_match": "NO", "suggestion": null, "similarity_score": 40}`
+                content: `Analyze the guess "${guess}" in relation to the answer "${payload.target}".
+
+SCORING GUIDELINES (0-100):
+- 90-100: Extremely close conceptually, different form/name of same thing
+- 75-89: Very closely related, same category/domain with strong connection
+- 55-74: Moderately related, shares significant themes or characteristics
+- 30-54: Some connection but different domains or weak relationship
+- 0-29: Unrelated or completely different concepts
+
+TYPO DETECTION:
+- Only suggest corrections for clear misspellings (1-3 character differences)
+- NEVER suggest "${payload.target}" itself as a correction
+- If semantically different, return null for suggestion
+
+Respond ONLY with valid JSON:
+{"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}
+
+Examples:
+- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 30}
+- "jonas brothers" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 90}
+- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 60}
+- "actor" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}
+- "Nick Jonass" for "Nick Jonas" → {"is_match": "NO", "suggestion": "Nick Jonas", "similarity_score": 95}`
               }],
               temperature: 0.1,
               max_tokens: 100,
