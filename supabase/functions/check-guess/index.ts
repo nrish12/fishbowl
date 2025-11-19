@@ -118,12 +118,13 @@ Deno.serve(async (req: Request) => {
               const meaningfulTargetWords = words.filter((word) => word.length > 3);
               if (!meaningfulTargetWords.length) return false;
 
-              // Require ALL guess words to be in target AND at least 50% of target words to be in guess
-              const allGuessWordsInTarget = meaningfulGuessWords.every((word) => meaningfulTargetWords.includes(word));
-              const matchingTargetWords = meaningfulTargetWords.filter((word) => meaningfulGuessWords.includes(word)).length;
-              const targetWordCoverage = matchingTargetWords / meaningfulTargetWords.length;
+              // Calculate bidirectional coverage
+              const matchingWords = meaningfulGuessWords.filter((word) => meaningfulTargetWords.includes(word)).length;
+              const guessCoverage = matchingWords / meaningfulGuessWords.length;
+              const targetCoverage = matchingWords / meaningfulTargetWords.length;
 
-              return allGuessWordsInTarget && targetWordCoverage >= 0.5;
+              // Require BOTH high coverage: guess must contain 80%+ of target words AND target must contain 80%+ of guess words
+              return guessCoverage >= 0.8 && targetCoverage >= 0.8;
             });
           }
         }
