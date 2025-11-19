@@ -2,8 +2,8 @@ import { fetchWithTimeout } from './fetchWithTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const SESSION_KEY = 'clueladder_session_id';
-const VISIT_START_KEY = 'clueladder_visit_start';
+const SESSION_KEY = 'mystle_session_id';
+const VISIT_START_KEY = 'mystle_visit_start';
 
 export function getSessionId(): string {
   let sessionId = localStorage.getItem(SESSION_KEY);

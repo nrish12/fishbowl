@@ -67,13 +67,13 @@ export default function DailyChallenge() {
               <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
 
               <div className="space-y-6">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-forest-600 to-forest-700 flex items-center justify-center shadow-xl animate-echo-pulse">
-                  <Calendar className="w-10 h-10 text-gold-300" />
+                <div className="mx-auto flex items-center justify-center">
+                  <Logo loading={true} />
                 </div>
 
                 <div className="space-y-2">
                   <p className="text-xl font-serif font-bold text-ink-500">
-                    Unfolding Today's Mystery
+                    Loading Today's Mystery
                   </p>
                   <div className="flex justify-center gap-2">
                     <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />

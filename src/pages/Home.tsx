@@ -116,7 +116,7 @@ export default function Home() {
           className="text-center"
         >
           <p className="text-xs text-ink-muted max-w-lg mx-auto">
-            Each wrong guess unfolds another clue. Earn Gold, Silver, or Bronze!
+            Each wrong guess reveals another clue. Earn Gold, Silver, or Bronze!
           </p>
         </motion.div>
 

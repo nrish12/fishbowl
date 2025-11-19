@@ -87,8 +87,8 @@ export default function PlayChallenge() {
     }
   });
 
-  const STORAGE_KEY_PREFIX = 'clueladder_progress_';
-  const DAILY_CHALLENGE_DATE_KEY = 'clueladder_daily_date';
+  const STORAGE_KEY_PREFIX = 'mystle_progress_';
+  const DAILY_CHALLENGE_DATE_KEY = 'mystle_daily_date';
 
   const saveProgress = () => {
     if (!token) return;
@@ -423,7 +423,7 @@ export default function PlayChallenge() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-gold mx-auto" />
+          <Logo loading={true} />
           <p className="text-forest/70">Loading challenge...</p>
         </div>
       </div>
@@ -560,7 +560,7 @@ export default function PlayChallenge() {
             <div className="mb-4 space-y-2">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
-                  Each guess unfolds another clue...
+                  Each guess reveals another clue...
                 </p>
                 {expiresAt && !isExpired && (
                   <div className="flex flex-col items-center gap-1">
@@ -657,7 +657,7 @@ export default function PlayChallenge() {
           <div className="space-y-2 sm:space-y-3">
             {isThinking && (
               <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl sm:rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
-                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-fold-indigo" />
+                <Logo loading={true} />
                 <p className="text-xs sm:text-sm font-bold text-ink-500">Checking your answer...</p>
               </div>
             )}

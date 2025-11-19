@@ -285,7 +285,7 @@ export default function CreateChallenge() {
         <div className="text-center space-y-3">
           <h1 className="text-4xl font-serif font-bold text-ink-600">Craft Your Note</h1>
           <p className="text-ink-500 max-w-xl mx-auto">
-            Pick someone or something fascinating. Our AI crafts clues that unfold like a secret message—ready to challenge a friend.
+            Pick someone or something fascinating. Our AI crafts clues that create an engaging mystery puzzle—ready to challenge a friend.
           </p>
         </div>
 
@@ -537,7 +537,7 @@ export default function CreateChallenge() {
             <div className="text-center space-y-2">
               <div className="text-4xl">✉️</div>
               <h3 className="text-2xl font-serif font-bold text-ink-600">Your Note Is Ready!</h3>
-              <p className="text-ink-500">Pass it along—let them unfold the mystery</p>
+              <p className="text-ink-500">Pass it along—let them solve the mystery</p>
             </div>
 
             <div className="flex items-center gap-3 p-4 bg-paper-50 rounded-xl border-2 border-fold-indigo/20">
