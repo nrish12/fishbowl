@@ -452,7 +452,7 @@ export default function PlayChallenge() {
   }
 
   return (
-    <div className="min-h-screen desk-surface py-4 px-4 md:py-6 md:px-6 relative overflow-hidden">
+    <div className="min-h-screen desk-surface py-2 px-2 sm:py-4 sm:px-4 md:py-6 md:px-6 relative overflow-hidden">
       <Confetti trigger={gameState === 'solved'} />
 
       <div className="absolute inset-0 opacity-40 pointer-events-none">
@@ -460,11 +460,11 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="w-full max-w-[1800px] px-8 mx-auto space-y-2 relative z-10">
+      <div className="w-full max-w-[1800px] px-2 sm:px-4 lg:px-8 mx-auto space-y-2 relative z-10">
         <div className="flex items-start justify-start mb-2">
           <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-semibold">Back</span>
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-xs sm:text-sm font-semibold">Back</span>
           </Link>
         </div>
 
@@ -523,26 +523,28 @@ export default function PlayChallenge() {
           return (
           <>
             {/* Header - Logo + Mystery Box Side by Side */}
-            <div className="flex items-center justify-center gap-8 mb-3">
-              <Logo size="lg" showTagline={false} />
-              <div className="px-12 py-6 bg-forest-700 rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-base font-bold text-gold-200 uppercase tracking-widest mb-2 text-center">The mystery is a</p>
-                <p className="text-5xl font-serif font-bold text-white drop-shadow-lg text-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 mb-3">
+              <div className="scale-75 sm:scale-100">
+                <Logo size="lg" showTagline={false} />
+              </div>
+              <div className="px-6 py-3 sm:px-12 sm:py-6 bg-forest-700 rounded-xl sm:rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
+                <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                <p className="text-xs sm:text-base font-bold text-gold-200 uppercase tracking-widest mb-1 sm:mb-2 text-center">The mystery is a</p>
+                <p className="text-2xl sm:text-5xl font-serif font-bold text-white drop-shadow-lg text-center">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
             </div>
 
             {/* Top bar with tagline and Previous Attempts */}
-            <div className="flex items-center justify-between mb-2 min-h-[32px]">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-2 gap-2 sm:min-h-[32px]">
               {wrongGuesses.length > 0 ? (
                 <>
-                  <div className="flex-1" />
-                  <p className="text-sm text-forest-700 font-medium italic text-center">
+                  <div className="hidden sm:block flex-1" />
+                  <p className="text-xs sm:text-sm text-forest-700 font-medium italic text-center">
                     Each guess unfolds another clue...
                   </p>
-                  <div className="flex-1 flex flex-wrap justify-end gap-2">
+                  <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2">
                     {wrongGuesses.map((guess, idx) => {
                       const score = guessScores[guess] || 0;
                       const bgColor = score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
@@ -576,22 +578,22 @@ export default function PlayChallenge() {
             {/* Phase Review Modal */}
             {viewingPhase && viewingPhase < phase && (
               <div
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
                 onClick={() => setViewingPhase(null)}
               >
                 <div
-                  className="bg-paper-cream rounded-3xl shadow-2xl p-8 max-w-3xl w-full max-h-[80vh] overflow-y-auto border-4 border-amber-200/50 paper-texture relative"
+                  className="bg-paper-cream rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 max-w-3xl w-full max-h-[80vh] overflow-y-auto border-2 sm:border-4 border-amber-200/50 paper-texture relative"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={() => setViewingPhase(null)}
-                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10 text-sm sm:text-base"
                   >
                     ✕
                   </button>
 
-                  <div className="mb-4">
-                    <span className="inline-block px-4 py-2 bg-forest-600 text-gold-100 rounded-full text-sm font-bold">
+                  <div className="mb-3 sm:mb-4">
+                    <span className="inline-block px-3 py-1 sm:px-4 sm:py-2 bg-forest-600 text-gold-100 rounded-full text-xs sm:text-sm font-bold">
                       Phase {viewingPhase}
                     </span>
                   </div>
@@ -603,7 +605,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase - 1);
                       }}
-                      className="absolute bottom-6 left-6 w-14 h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
+                      className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-xl sm:text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
                     >
                       ←
                     </button>
@@ -615,7 +617,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase + 1);
                       }}
-                      className="absolute bottom-6 right-6 w-14 h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
+                      className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-xl sm:text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
                     >
                       →
                     </button>
@@ -628,31 +630,31 @@ export default function PlayChallenge() {
         })()}
 
         {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
-                <Loader2 className="w-5 h-5 animate-spin text-fold-indigo" />
-                <p className="text-sm font-bold text-ink-500">Checking your answer...</p>
+              <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl sm:rounded-2xl border-2 border-fold-indigo/30 paper-shadow animate-pulse">
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-fold-indigo" />
+                <p className="text-xs sm:text-sm font-bold text-ink-500">Checking your answer...</p>
               </div>
             )}
 
             {lastGuessResult === 'correct' && !isThinking && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-green-400 paper-shadow animate-success-glow">
-                <span className="text-2xl">✅</span>
-                <p className="text-sm font-bold text-green-700">Correct! Well done!</p>
+              <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl sm:rounded-2xl border-2 border-green-400 paper-shadow animate-success-glow">
+                <span className="text-xl sm:text-2xl">✅</span>
+                <p className="text-xs sm:text-sm font-bold text-green-700">Correct! Well done!</p>
               </div>
             )}
 
             {lastGuessResult === 'incorrect' && !isThinking && !suggestedCorrection && (
-              <div className="flex items-center justify-center gap-3 p-4 bg-white rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
-                <span className="text-2xl">❌</span>
-                <p className="text-sm font-bold text-red-700">Not quite! Try again</p>
+              <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl sm:rounded-2xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
+                <span className="text-xl sm:text-2xl">❌</span>
+                <p className="text-xs sm:text-sm font-bold text-red-700">Not quite! Try again</p>
               </div>
             )}
 
             {suggestedCorrection && (
-              <div className="bg-white rounded-2xl border-2 border-blue-400 paper-shadow p-4">
-                <p className="text-sm font-bold text-ink-600 mb-3 text-center">Did you mean:</p>
+              <div className="bg-white rounded-xl sm:rounded-2xl border-2 border-blue-400 paper-shadow p-3 sm:p-4">
+                <p className="text-xs sm:text-sm font-bold text-ink-600 mb-2 sm:mb-3 text-center">Did you mean:</p>
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => {
@@ -786,10 +788,10 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking || !!suggestedCorrection} />
             </div>
-            <div className="text-center text-sm text-ink-300 font-medium">
+            <div className="text-center text-xs sm:text-sm text-ink-300 font-medium">
               Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
             </div>
           </div>

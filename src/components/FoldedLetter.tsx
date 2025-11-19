@@ -81,7 +81,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
       <div className="relative z-10 flex items-start justify-center">
         <div
           ref={currentPanelRef}
-          className="w-full bg-paper-cream rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] p-6 border-4 border-amber-200/50 paper-texture relative"
+          className="w-full bg-paper-cream rounded-2xl sm:rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] sm:shadow-[0_20px_60px_rgba(0,0,0,0.2)] p-3 sm:p-6 border-2 sm:border-4 border-amber-200/50 paper-texture relative"
           style={{
             transformStyle: 'preserve-3d',
             backfaceVisibility: 'hidden',
@@ -93,14 +93,15 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
           <div className="absolute bottom-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-forest-300/20 to-transparent" />
 
           {/* Phase badge */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-forest-700 text-gold-100 px-6 py-2 rounded-full shadow-lg border-2 border-gold-300/40">
-            <span className="text-sm font-bold uppercase tracking-wider">
-              Phase {phase}: {phaseLabels[phase - 1]}
+          <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 bg-forest-700 text-gold-100 px-3 py-1 sm:px-6 sm:py-2 rounded-full shadow-lg border-2 border-gold-300/40">
+            <span className="text-[10px] sm:text-sm font-bold uppercase tracking-wider">
+              <span className="hidden sm:inline">Phase {phase}: {phaseLabels[phase - 1]}</span>
+              <span className="sm:hidden">P{phase}: {phaseLabels[phase - 1]}</span>
             </span>
           </div>
 
           {/* Current content */}
-          <div className="relative z-10 mt-8">{currentChild}</div>
+          <div className="relative z-10 mt-6 sm:mt-8">{currentChild}</div>
 
           {/* Paper texture overlay */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-amber-100/20 pointer-events-none" />
@@ -116,7 +117,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
       </div>
 
       {/* Clickable phase indicators */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-20">
+      <div className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 z-20">
         {[1, 2, 3, 4, 5].map((p) => {
           const isCompleted = p < phase;
           const isCurrent = p === phase;
@@ -133,7 +134,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
               title={isClickable ? `View Phase ${p}: ${phaseLabels[p - 1]}` : undefined}
             >
               <div
-                className={`w-3 h-12 rounded-full transition-all duration-500 ${
+                className={`w-2 h-8 sm:w-3 sm:h-12 rounded-full transition-all duration-500 ${
                   isCurrent
                     ? 'bg-gradient-to-b from-gold-400 to-gold-600 shadow-lg ring-2 ring-gold-300/50'
                     : isCompleted

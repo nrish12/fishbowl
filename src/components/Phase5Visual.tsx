@@ -35,16 +35,16 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
 
   return (
     <div className="w-full mx-auto">
-      <div className="bg-gradient-to-r from-forest-50 via-amber-50 to-forest-50 rounded-xl p-2.5 border border-forest-200/60 mb-2">
-        <p className="text-sm text-forest-800 text-center font-medium italic leading-snug">
+      <div className="bg-gradient-to-r from-forest-50 via-amber-50 to-forest-50 rounded-lg sm:rounded-xl p-2 sm:p-2.5 border border-forest-200/60 mb-2">
+        <p className="text-xs sm:text-sm text-forest-800 text-center font-medium italic leading-snug">
           {data.synthesis}
         </p>
       </div>
 
-      <div className="flex gap-2 mb-2 justify-center">
+      <div className="flex gap-1 sm:gap-2 mb-2 justify-center">
         <button
           onClick={() => setActiveTab('guesses')}
-          className={`px-5 py-2 rounded-lg font-bold text-sm transition-all ${
+          className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
             activeTab === 'guesses'
               ? 'bg-forest-600 text-white shadow-md'
               : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
@@ -54,7 +54,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
         </button>
         <button
           onClick={() => setActiveTab('themes')}
-          className={`px-5 py-2 rounded-lg font-bold text-sm transition-all ${
+          className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
             activeTab === 'themes'
               ? 'bg-forest-600 text-white shadow-md'
               : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
@@ -64,9 +64,9 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-forest-200 p-3 max-h-[280px] overflow-y-auto">
+      <div className="bg-white rounded-lg sm:rounded-xl border border-forest-200 p-2 sm:p-3 max-h-[280px] overflow-y-auto">
         {activeTab === 'guesses' && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {data.semantic_scores && data.semantic_scores.map((item, idx) => (
               <div
                 key={idx}
@@ -77,8 +77,8 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-forest-800 text-sm">{item.guess}</span>
-                  <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full" style={{
+                  <span className="font-bold text-forest-800 text-xs sm:text-sm">{item.guess}</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-white px-1.5 py-0.5 sm:px-2 rounded-full" style={{
                     backgroundColor: item.score >= 75 ? '#10b981' : item.score >= 55 ? '#f59e0b' : '#ef4444'
                   }}>
                     {item.score}%
@@ -97,7 +97,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
                     }}
                   />
                 </div>
-                <p className="text-xs text-gray-600 italic leading-tight line-clamp-2">
+                <p className="text-[10px] sm:text-xs text-gray-600 italic leading-tight line-clamp-2">
                   {item.reason}
                 </p>
               </div>
@@ -106,17 +106,17 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
         )}
 
         {activeTab === 'themes' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-green-50 rounded-xl p-3 border-2 border-green-300/60">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
-                <h4 className="text-xs font-bold text-forest-800 uppercase tracking-wide">You Found</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
+            <div className="bg-green-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-green-300/60">
+              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold">✓</div>
+                <h4 className="text-[10px] sm:text-xs font-bold text-forest-800 uppercase tracking-wide">You Found</h4>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1 sm:space-y-1.5">
                 {data.themes_identified && data.themes_identified.map((theme, idx) => (
                   <div
                     key={idx}
-                    className="text-xs text-forest-800 bg-white px-2.5 py-1.5 rounded-lg font-semibold border border-green-200 shadow-sm"
+                    className="text-[10px] sm:text-xs text-forest-800 bg-white px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold border border-green-200 shadow-sm"
                     style={{ animation: 'slideIn 0.3s ease-out', animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
                   >
                     {theme}
@@ -125,16 +125,16 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
               </div>
             </div>
 
-            <div className="bg-red-50 rounded-xl p-3 border-2 border-red-300/60">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold">!</div>
-                <h4 className="text-xs font-bold text-forest-800 uppercase tracking-wide">You Missed</h4>
+            <div className="bg-red-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-red-300/60">
+              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold">!</div>
+                <h4 className="text-[10px] sm:text-xs font-bold text-forest-800 uppercase tracking-wide">You Missed</h4>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1 sm:space-y-1.5">
                 {data.themes_missing && data.themes_missing.map((theme, idx) => (
                   <div
                     key={idx}
-                    className="text-xs text-forest-800 bg-white px-2.5 py-1.5 rounded-lg font-semibold border border-red-200 shadow-sm"
+                    className="text-[10px] sm:text-xs text-forest-800 bg-white px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold border border-red-200 shadow-sm"
                   >
                     {theme}
                   </div>
