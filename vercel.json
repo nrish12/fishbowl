@@ -11,15 +11,5 @@
       "destination": "https://mystle.app/:path*",
       "permanent": true
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/s/:code",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/:path((?!.*\\.).*)",
-      "destination": "/index.html"
-    }
   ]
 }
