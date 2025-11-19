@@ -13,6 +13,7 @@ import Phase5Visual from '../components/Phase5Visual';
 import FoldedLetter from '../components/FoldedLetter';
 import Confetti from '../components/Confetti';
 import { getSessionId, trackEvent } from '../utils/tracking';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -321,7 +322,8 @@ export default function PlayChallenge() {
               const answerData = await answerResponse.json();
               const targetAnswer = answerData.canonical || 'Unknown';
 
-              const phase4Response = await fetch(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
+              console.log('[Phase 4] Calling phase4-nudge with target:', targetAnswer);
+              const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -333,6 +335,7 @@ export default function PlayChallenge() {
                   guesses: [...wrongGuesses, guess],
                   hints: hints,
                 }),
+                timeout: 45000, // 45 second timeout for OpenAI call
               });
 
               if (phase4Response.ok) {
@@ -364,7 +367,8 @@ export default function PlayChallenge() {
               const answerData = await answerResponse.json();
               const targetAnswer = answerData.canonical || 'Unknown';
 
-              const phase5Response = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+              console.log('[Phase 5] Calling phase5-visual with target:', targetAnswer);
+              const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -379,6 +383,7 @@ export default function PlayChallenge() {
                     phase4_nudge: phase4Nudge,
                   },
                 }),
+                timeout: 45000, // 45 second timeout for OpenAI call
               });
 
               if (phase5Response.ok) {
@@ -703,7 +708,7 @@ export default function PlayChallenge() {
                             const answerData = await answerResponse.json();
                             const targetAnswer = answerData.canonical || 'Unknown';
 
-                            const phase4Response = await fetch(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
+                            const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -715,6 +720,7 @@ export default function PlayChallenge() {
                                 guesses: wrongGuesses,
                                 hints: hints,
                               }),
+                              timeout: 45000,
                             });
 
                             if (phase4Response.ok) {
@@ -740,7 +746,7 @@ export default function PlayChallenge() {
                             const answerData = await answerResponse.json();
                             const targetAnswer = answerData.canonical || 'Unknown';
 
-                            const phase5Response = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+                            const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -752,6 +758,7 @@ export default function PlayChallenge() {
                                 guesses: wrongGuesses,
                                 hints: hints,
                               }),
+                              timeout: 45000,
                             });
 
                             if (phase5Response.ok) {
