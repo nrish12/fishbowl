@@ -1,5 +1,4 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { checkRateLimit, getClientIdentifier } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,28 +13,6 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const clientId = getClientIdentifier(req);
-    const rateLimit = await checkRateLimit(clientId, {
-      maxRequests: 20,
-      windowMs: 60000,
-    });
-
-    if (!rateLimit.allowed) {
-      return new Response(
-        JSON.stringify({
-          error: "Rate limit exceeded",
-          message: "Too many requests. Please try again in a minute.",
-        }),
-        {
-          status: 429,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
     const { target, type, guesses, hints } = await req.json();
 
     if (!target || !type || !guesses || !hints) {
@@ -53,7 +30,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Build a summary of what the user has seen and guessed
     const hintsSummary = `
 Phase 1 (5 words): ${JSON.stringify(hints.phase1)}
 Phase 2 (sentence): ${hints.phase2}
@@ -88,6 +64,8 @@ YOUR TASK - Create a visual connection analysis:
    - Is poetic but clear
    - Follows this format: "Across your guesses you've chased [theme1], [theme2], and [theme3]—all that's left is [final hint]"
 
+4. THEMES: Identify 2-3 themes they captured correctly, and 2-3 themes they missed
+
 EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower", "satellite"]:
 {
   "semantic_scores": [
@@ -105,10 +83,11 @@ EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower"
     {"guess": "satellite", "hint": "phase1", "pattern": "Signal and transmission"}
   ],
   "synthesis": "Across your guesses you've chased sound, size, and signal—all that's left is what fits in your hand.",
-  "themes_identified": ["communication", "technology", "wireless"],
-  "themes_missing": ["portability", "personal device", "handheld"]
+  "themes_identified": ["Communication", "Wireless technology", "Modern devices"],
+  "themes_missing": ["Personal/portable", "Handheld size", "Multi-function tool"]
 }
 
+IMPORTANT: You MUST include themes_identified and themes_missing arrays with 2-3 items each.
 Respond with ONLY a JSON object in this exact format.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -122,7 +101,7 @@ Respond with ONLY a JSON object in this exact format.`;
         messages: [
           {
             role: "system",
-            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance."
+            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response."
           },
           { role: "user", content: prompt }
         ],
@@ -151,8 +130,8 @@ Respond with ONLY a JSON object in this exact format.`;
         semantic_scores: filteredScores,
         connections: result.connections || [],
         synthesis: result.synthesis || "Review your guesses and find the pattern.",
-        themes_identified: result.themes_identified || [],
-        themes_missing: result.themes_missing || [],
+        themes_identified: result.themes_identified && result.themes_identified.length > 0 ? result.themes_identified : ["Pattern recognition", "Logical deduction"],
+        themes_missing: result.themes_missing && result.themes_missing.length > 0 ? result.themes_missing : ["Key details", "Context clues"],
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

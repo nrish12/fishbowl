@@ -321,8 +321,6 @@ export default function PlayChallenge() {
               });
               const answerData = await answerResponse.json();
               const targetAnswer = answerData.canonical || 'Unknown';
-
-              console.log('[Phase 4] Calling phase4-nudge with target:', targetAnswer);
               const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
                 method: 'POST',
                 headers: {
@@ -366,8 +364,6 @@ export default function PlayChallenge() {
               });
               const answerData = await answerResponse.json();
               const targetAnswer = answerData.canonical || 'Unknown';
-
-              console.log('[Phase 5] Calling phase5-visual with target:', targetAnswer);
               const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
                 method: 'POST',
                 headers: {
@@ -388,7 +384,6 @@ export default function PlayChallenge() {
 
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
-                console.log('[Phase 5] Success! Visual data:', visualData);
                 setPhase5Data(visualData);
                 setPhase(5);
               } else {
