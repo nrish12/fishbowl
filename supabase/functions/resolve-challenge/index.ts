@@ -14,9 +14,9 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
-    const token = url.searchParams.get("t");
+    const tokenParam = url.searchParams.get("t");
 
-    if (!token) {
+    if (!tokenParam) {
       return new Response(
         JSON.stringify({ error: "Token parameter 't' is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -30,16 +30,16 @@ Deno.serve(async (req: Request) => {
     }
 
     // Decode URL-encoded token if necessary
-    let decodedToken = token;
+    let token = tokenParam;
     try {
       // Handle potential URL encoding issues from messaging apps
-      decodedToken = decodeURIComponent(token);
+      token = decodeURIComponent(tokenParam);
     } catch {
       // If decoding fails, use original token
-      decodedToken = token;
+      token = tokenParam;
     }
 
-    const parts = decodedToken.split(".");
+    const parts = token.split(".");
     if (parts.length !== 3) {
       return new Response(
         JSON.stringify({ error: "Invalid token format" }),
@@ -48,9 +48,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const [encodedHeader, encodedPayload, encodedSignature] = parts;
-
-    // Update token reference for verification
-    token = decodedToken;
 
     // Verify signature
     const encoder = new TextEncoder();
