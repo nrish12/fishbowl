@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex flex-col p-4 relative overflow-hidden">
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(45, 139, 95, 0.1) 1px, transparent 0)',
         backgroundSize: '32px 32px'
@@ -17,7 +17,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-5xl w-full relative z-10"
+        className="max-w-5xl w-full relative z-10 mx-auto flex-1 flex flex-col justify-center"
       >
         <div className="text-center mb-10 mt-12">
           <motion.div
@@ -32,7 +32,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-3xl md:text-4xl text-forest-700 font-bold max-w-2xl mx-auto mt-4 tracking-tight"
+            className="text-xl sm:text-3xl md:text-4xl text-forest-700 font-bold max-w-2xl mx-auto mt-4 tracking-tight"
             style={{ fontFamily: '"Space Grotesk", system-ui, -apple-system, sans-serif' }}
           >
             5 phases to solve the mystery.
@@ -45,7 +45,7 @@ export default function Home() {
             animate={{ rotateX: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <Link to="/daily" className="group">
                 <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
                   <PaperSurface variant="lifted" className="h-full hover:shadow-[var(--shadow-envelope)] transition-all duration-300">
