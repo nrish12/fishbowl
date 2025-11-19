@@ -284,10 +284,58 @@ export default function PlayChallenge() {
         });
       } else {
         setLastGuessResult('incorrect');
-        setWrongGuesses(prev => [...prev, guess]);
+        const newWrongGuesses = [...wrongGuesses, guess];
+        setWrongGuesses(newWrongGuesses);
         setGuesses(prev => prev + 1);
         setShouldShake(true);
         setTimeout(() => setShouldShake(false), 400);
+
+        // Fetch semantic scores for ALL wrong guesses to update with better AI analysis
+        if (hints && challengeType) {
+          try {
+            // First reveal the answer to get the target
+            const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({ token, guess: '__reveal__', phase }),
+            });
+            const answerData = await answerResponse.json();
+            const targetAnswer = answerData.canonical;
+
+            if (targetAnswer) {
+              const scoreResponse = await fetch(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({
+                  target: targetAnswer,
+                  type: challengeType,
+                  guesses: newWrongGuesses,
+                  hints: hints,
+                }),
+              });
+
+              if (scoreResponse.ok) {
+                const scoreData = await scoreResponse.json();
+                if (scoreData.semantic_scores) {
+                  const newScores: Record<string, number> = {};
+                  scoreData.semantic_scores.forEach((item: any) => {
+                    newScores[item.guess] = item.score;
+                  });
+                  setGuessScores(prev => ({ ...prev, ...newScores }));
+                  console.log('Updated semantic scores:', newScores);
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to fetch semantic scores:', err);
+          }
+        }
 
         console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Wrong guess count:', wrongGuesses.length + 1);
 
@@ -542,34 +590,27 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Top bar with tagline and Previous Attempts */}
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-2 gap-1.5 sm:gap-2 sm:min-h-[32px]">
-              {wrongGuesses.length > 0 ? (
-                <>
-                  <div className="hidden sm:block flex-1" />
-                  <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
-                    Each guess unfolds another clue...
-                  </p>
-                  <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2">
-                    {wrongGuesses.map((guess, idx) => {
-                      const score = guessScores[guess];
-                      const displayScore = score !== undefined ? score : null;
-                      const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                                     score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                     'bg-red-100 border-red-400 text-red-800';
-                      return (
-                        <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
-                          <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
-                          {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic w-full text-center">
-                  Each guess unfolds another clue...
-                </p>
+            {/* Tagline and Previous Attempts */}
+            <div className="mb-4 space-y-2">
+              <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
+                Each guess unfolds another clue...
+              </p>
+              {wrongGuesses.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+                  {wrongGuesses.map((guess, idx) => {
+                    const score = guessScores[guess];
+                    const displayScore = score !== undefined ? score : null;
+                    const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                                   score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                   'bg-red-100 border-red-400 text-red-800';
+                    return (
+                      <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
+                        <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
+                        {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
