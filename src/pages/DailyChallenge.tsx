@@ -94,12 +94,10 @@ export default function DailyChallenge() {
       <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute inset-0 paper-texture opacity-30" />
 
-        <div className="relative z-10 w-full max-w-2xl animate-envelope-fold">
-          <div className="bg-white rounded-3xl p-16 paper-shadow paper-texture transform-gpu">
-            <div className="text-center space-y-4">
-              <div className="text-6xl animate-pulse">📜</div>
-              <p className="text-2xl font-script text-ink-500">Opening your note...</p>
-            </div>
+        <div className="relative z-10 w-full max-w-2xl">
+          <div className="text-center space-y-8">
+            <Logo loading={true} />
+            <p className="text-2xl font-serif font-semibold text-forest-700">Loading Today's Mystery...</p>
           </div>
         </div>
       </div>

@@ -34,7 +34,7 @@ export default function CategoryPicker({
       <div className="space-y-4 sm:space-y-8 py-4 sm:py-8 animate-fold-open">
         <div className="text-center space-y-1 sm:space-y-2">
           <h2 className="text-lg sm:text-2xl font-serif font-bold text-forest-800">
-            Choose Your First Fold
+            Choose Your First Clue
           </h2>
           <p className="text-xs sm:text-sm text-forest-600">
             Pick one category to reveal
@@ -73,7 +73,7 @@ export default function CategoryPicker({
       <div className="space-y-3 sm:space-y-6 animate-paper-unfold">
         <div className="text-center space-y-1 sm:space-y-2">
           <h2 className="text-lg sm:text-2xl font-serif font-bold text-forest-800">
-            The First Fold Opens
+            The First Clue is Revealed
           </h2>
         </div>
 

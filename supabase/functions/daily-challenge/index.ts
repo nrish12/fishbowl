@@ -152,7 +152,6 @@ function base64UrlEncode(str: string): string {
 
 async function createToken(challenge: any): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
-  const expiresIn = 7 * 24 * 60 * 60;
 
   const payload = {
     ver: 1,
@@ -162,7 +161,7 @@ async function createToken(challenge: any): Promise<string> {
     aliases: challenge.aliases || [challenge.target],
     hints: challenge.hints || {},
     createdAt: Math.floor(new Date(challenge.created_at).getTime() / 1000),
-    exp: now + expiresIn,
+    isDaily: true,
   };
 
   const secret = Deno.env.get("CHALLENGE_SIGNING_SECRET");
@@ -337,3 +336,4 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
+
