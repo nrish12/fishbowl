@@ -257,6 +257,7 @@ export default function PlayChallenge() {
       }
 
       if (data.similarity_score !== undefined) {
+        console.log(`Setting similarity score for "${guess}": ${data.similarity_score}%`);
         setGuessScores(prev => ({ ...prev, [guess]: data.similarity_score }));
       }
 
@@ -452,7 +453,7 @@ export default function PlayChallenge() {
   }
 
   return (
-    <div className="min-h-screen desk-surface py-2 px-2 sm:py-4 sm:px-4 md:py-6 md:px-6 relative overflow-hidden">
+    <div className="min-h-screen desk-surface relative overflow-x-hidden">
       <Confetti trigger={gameState === 'solved'} />
 
       <div className="absolute inset-0 opacity-40 pointer-events-none">
@@ -460,7 +461,7 @@ export default function PlayChallenge() {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gold-200 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="w-full max-w-[1800px] px-2 sm:px-4 lg:px-8 mx-auto space-y-2 relative z-10">
+      <div className="w-full max-w-6xl px-3 sm:px-6 lg:px-8 py-3 sm:py-6 mx-auto space-y-2 sm:space-y-3 relative z-10">
         <div className="flex items-start justify-start mb-2">
           <Link to="/" className="flex items-center gap-1 text-ink-300 hover:text-ink-500 transition-colors">
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -523,49 +524,43 @@ export default function PlayChallenge() {
           return (
           <>
             {/* Header - Logo + Mystery Box Side by Side */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 mb-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 mb-2 sm:mb-3">
               <div className="hidden sm:block">
                 <Logo size="lg" showTagline={false} />
               </div>
-              <div className="block sm:hidden">
+              <div className="block sm:hidden scale-90">
                 <Logo size="md" showTagline={false} />
               </div>
-              <div className="px-6 py-3 sm:px-12 sm:py-6 bg-forest-700 rounded-xl sm:rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
-                <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-xs sm:text-base font-bold text-gold-200 uppercase tracking-widest mb-1 sm:mb-2 text-center">The mystery is a</p>
-                <p className="text-2xl sm:text-5xl font-serif font-bold text-white drop-shadow-lg text-center">
+              <div className="px-4 py-2 sm:px-12 sm:py-6 bg-forest-700 rounded-lg sm:rounded-2xl secret-note-shadow paper-texture relative border-2 border-forest-800">
+                <div className="absolute inset-0 rounded-lg sm:rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                <p className="text-[10px] sm:text-base font-bold text-gold-200 uppercase tracking-wide sm:tracking-widest mb-0.5 sm:mb-2 text-center">The mystery is a</p>
+                <p className="text-xl sm:text-5xl font-serif font-bold text-white drop-shadow-lg text-center">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
             </div>
 
             {/* Top bar with tagline and Previous Attempts */}
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-2 gap-2 sm:min-h-[32px]">
-              {wrongGuesses.length > 0 ? (
-                <>
-                  <div className="hidden sm:block flex-1" />
-                  <p className="text-xs sm:text-sm text-forest-700 font-medium italic text-center">
-                    Each guess unfolds another clue...
-                  </p>
-                  <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2">
-                    {wrongGuesses.map((guess, idx) => {
-                      const score = guessScores[guess] || 0;
-                      const bgColor = score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                                     score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                     'bg-red-100 border-red-400 text-red-800';
-                      return (
-                        <span key={idx} className={`px-3 py-1 rounded-full text-xs font-semibold border-2 shadow-sm ${bgColor} flex items-center gap-1`}>
-                          <span>{guess}</span>
-                          {score > 0 && <span className="opacity-80">{score}%</span>}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-forest-700 font-medium italic w-full text-center">
-                  Each guess unfolds another clue...
-                </p>
+            <div className="flex flex-col items-center justify-center mb-2 gap-1.5 sm:gap-2">
+              <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
+                Each guess unfolds another clue...
+              </p>
+              {wrongGuesses.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1 sm:gap-2 max-w-full">
+                  {wrongGuesses.map((guess, idx) => {
+                    const score = guessScores[guess];
+                    const displayScore = score !== undefined ? score : null;
+                    const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                                   score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                   'bg-red-100 border-red-400 text-red-800';
+                    return (
+                      <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
+                        <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
+                        {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
@@ -791,10 +786,10 @@ export default function PlayChallenge() {
               </div>
             )}
 
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-6 pb-safe">
               <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking || !!suggestedCorrection} />
             </div>
-            <div className="text-center text-xs sm:text-sm text-ink-300 font-medium">
+            <div className="text-center text-[11px] sm:text-sm text-ink-300 font-medium pb-4 sm:pb-0">
               Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
             </div>
           </div>
