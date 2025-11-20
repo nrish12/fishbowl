@@ -1,18 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Caveat:wght@400;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-paper-100 text-ink-charcoal font-sans antialiased;
+    @apply bg-paper-100 text-ink-charcoal antialiased;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     background-image:
       radial-gradient(circle at 20% 50%, rgba(45, 139, 95, 0.03) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
   }
 
   /* Desk background for play page */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  .card-title {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+
+  .hero-title {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
   .desk-surface {
     background: linear-gradient(135deg, #f5f3e8 0%, #ebe8d6 50%, #f5f3e8 100%);
     background-image:

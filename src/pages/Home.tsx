@@ -32,9 +32,8 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-forest-800 font-bold max-w-2xl mx-auto mt-4 leading-tight"
+            className="hero-title text-forest-800 max-w-2xl mx-auto mt-4 leading-tight"
             style={{
-              fontFamily: '"Space Grotesk", system-ui, -apple-system, sans-serif',
               fontSize: 'clamp(28px, 3vw, 38px)'
             }}
           >
@@ -59,15 +58,26 @@ export default function Home() {
           >
             <div className="grid sm:grid-cols-2 gap-4">
               <Link to="/daily" className="group">
-                <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                  <PaperSurface variant="lifted" className="h-full hover:shadow-[0_12px_40px_rgba(45,139,95,0.25)] transition-all duration-300 ring-1 ring-forest-500/10">
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <PaperSurface
+                    variant="lifted"
+                    className="h-full transition-all duration-300 ring-2 ring-forest-500/20 bg-gradient-to-br from-white to-forest-50/30 group-hover:shadow-[0_16px_48px_rgba(45,139,95,0.3)] group-hover:ring-forest-500/40"
+                  >
                     <div className="flex flex-col items-center text-center space-y-4 p-6">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-forest-500 to-forest-700 flex items-center justify-center shadow-lg">
+                      <motion.div
+                        className="w-16 h-16 rounded-full bg-gradient-to-br from-forest-500 to-forest-700 flex items-center justify-center shadow-lg"
+                        whileHover={{ rotate: 5, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
                         <Calendar size={28} className="text-gold-50" strokeWidth={2.5} />
-                      </div>
+                      </motion.div>
 
                       <div className="space-y-2 min-h-[80px] flex flex-col justify-center">
-                        <h2 className="text-2xl font-serif font-bold text-forest-800">
+                        <h2 className="card-title text-2xl font-bold text-forest-800">
                           Daily Challenge
                         </h2>
                         <p className="text-sm text-forest-600 leading-relaxed">
@@ -76,11 +86,16 @@ export default function Home() {
                       </div>
 
                       <motion.div
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.05, x: 2 }}
                         whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center group-hover:shadow-xl transition-shadow"
                       >
-                        <Sparkles size={16} />
+                        <motion.div
+                          animate={{ rotate: [0, 5, -5, 0] }}
+                          transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                        >
+                          <Sparkles size={16} />
+                        </motion.div>
                         Start Playing
                       </motion.div>
                     </div>
@@ -89,15 +104,26 @@ export default function Home() {
               </Link>
 
               <Link to="/create" className="group">
-                <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                  <PaperSurface variant="lifted" className="h-full hover:shadow-[var(--shadow-envelope)] transition-all duration-300">
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <PaperSurface
+                    variant="lifted"
+                    className="h-full transition-all duration-300 ring-1 ring-gold-400/20 group-hover:shadow-[0_16px_48px_rgba(245,158,11,0.25)] group-hover:ring-gold-400/40"
+                  >
                     <div className="flex flex-col items-center text-center space-y-4 p-6">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center shadow-lg">
+                      <motion.div
+                        className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center shadow-lg"
+                        whileHover={{ rotate: -5, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
                         <Users size={28} className="text-forest-800" strokeWidth={2.5} />
-                      </div>
+                      </motion.div>
 
                       <div className="space-y-2 min-h-[80px] flex flex-col justify-center">
-                        <h2 className="text-2xl font-serif font-bold text-forest-800">
+                        <h2 className="card-title text-2xl font-bold text-forest-800">
                           Custom Challenge
                         </h2>
                         <p className="text-sm text-forest-600 leading-relaxed">
@@ -106,9 +132,9 @@ export default function Home() {
                       </div>
 
                       <motion.div
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.05, x: 2 }}
                         whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-900 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-900 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center group-hover:shadow-xl transition-shadow"
                       >
                         <Sparkles size={16} />
                         Create Puzzle
