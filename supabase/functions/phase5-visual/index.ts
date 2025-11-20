@@ -63,14 +63,17 @@ YOUR TASK - Create a visual connection analysis:
    - Connects all their attempts to the final answer WITHOUT revealing it
    - Is poetic but clear
    - Follows this format: "Across your guesses you've chased [theme1], [theme2], and [theme3]—all that's left is [final hint]"
+   - MUST NOT contain ANY word from "${target}" (not even individual words!)
 
 4. THEMES: Identify 2-3 themes they captured correctly, and 2-3 themes they missed
+   - MUST NOT contain ANY word from "${target}" in any theme
 
 CRITICAL RULES:
-- NEVER mention the answer "${target}" in any reason or explanation
-- NEVER use the answer's name in the "reason" field
+- NEVER mention the answer "${target}" in any reason, explanation, synthesis, or theme
+- NEVER use ANY individual word from "${target}" anywhere in your response
+- For "${target}", do not use any of these words: ${target.toLowerCase().split(/\s+/).filter((w: string) => w.length >= 3).join(', ')}
 - Keep explanations focused on WHY the guess is close/far, not on comparing it to the answer by name
-- Use general terms like "the answer", "the target", "it" instead of the actual name
+- Use general terms like "the answer", "the target", "it" instead of the actual name or any words from it
 
 EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower", "satellite"]:
 {
@@ -93,10 +96,11 @@ EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower"
   "themes_missing": ["Personal/portable", "Handheld size", "Multi-function tool"]
 }
 
-IMPORTANT: 
+IMPORTANT:
 - You MUST include themes_identified and themes_missing arrays with 2-3 items each
-- NEVER use the answer's name in any explanation
+- NEVER use the answer's name OR any individual word from it in any explanation, synthesis, or theme
 - Focus on characteristics, not comparisons to the specific answer
+- Double-check your entire response to ensure NO words from "${target}" appear anywhere
 Respond with ONLY a JSON object in this exact format.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -110,7 +114,7 @@ Respond with ONLY a JSON object in this exact format.`;
         messages: [
           {
             role: "system",
-            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response. NEVER mention the target answer by name in your explanations."
+            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response. CRITICAL: NEVER use the target answer OR any individual word from the answer in your explanations, synthesis sentence, or themes. This is absolutely forbidden."
           },
           { role: "user", content: prompt }
         ],
@@ -134,19 +138,40 @@ Respond with ONLY a JSON object in this exact format.`;
       return normalizedGuess !== normalizedTarget;
     }).slice(0, 4);
 
+    // Extract all meaningful words from the target (3+ chars) to filter out
+    const targetWords = target.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter((word: string) => word.length >= 3);
+
+    // Helper function to sanitize text by removing all target words
+    const sanitizeText = (text: string): string => {
+      if (!text) return text;
+      let sanitized = text;
+      targetWords.forEach((word: string) => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        sanitized = sanitized.replace(regex, '[...]');
+      });
+      return sanitized;
+    };
+
     // Double-check: Remove any mention of the target answer from reasons
     const sanitizedScores = filteredScores.map((item: any) => ({
       ...item,
-      reason: item.reason.replace(new RegExp(target, 'gi'), 'the answer')
+      reason: sanitizeText(item.reason)
     }));
 
     return new Response(
       JSON.stringify({
         semantic_scores: sanitizedScores,
         connections: result.connections || [],
-        synthesis: result.synthesis ? result.synthesis.replace(new RegExp(target, 'gi'), 'the answer') : "Review your guesses and find the pattern.",
-        themes_identified: result.themes_identified && result.themes_identified.length > 0 ? result.themes_identified : ["Pattern recognition", "Logical deduction"],
-        themes_missing: result.themes_missing && result.themes_missing.length > 0 ? result.themes_missing : ["Key details", "Context clues"],
+        synthesis: sanitizeText(result.synthesis) || "Review your guesses and find the pattern.",
+        themes_identified: (result.themes_identified && result.themes_identified.length > 0
+          ? result.themes_identified.map((theme: string) => sanitizeText(theme))
+          : ["Pattern recognition", "Logical deduction"]),
+        themes_missing: (result.themes_missing && result.themes_missing.length > 0
+          ? result.themes_missing.map((theme: string) => sanitizeText(theme))
+          : ["Key details", "Context clues"]),
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
