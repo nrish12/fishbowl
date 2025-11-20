@@ -25,7 +25,7 @@ export default function DailyChallenge() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
-        timeout: 15000,
+        timeout: 30000,
       });
 
       if (!response.ok) {
@@ -58,13 +58,13 @@ export default function DailyChallenge() {
           <Logo size="md" showTagline={false} />
 
           <div className="relative perspective-1200">
-            <div className="absolute -inset-8 bg-gradient-to-br from-fold-indigo/20 to-fold-purple/20 rounded-3xl blur-2xl animate-pulse" />
+            <div className="absolute -inset-8 bg-gradient-to-br from-forest-500/20 to-gold-500/20 rounded-3xl blur-2xl animate-pulse" />
 
             <div className="relative bg-white rounded-3xl p-12 paper-shadow paper-texture">
-              <div className="absolute top-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-              <div className="absolute top-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-              <div className="absolute bottom-6 left-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
-              <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-fold-indigo/20" />
+              <div className="absolute top-6 left-6 w-4 h-4 rounded-full bg-forest-500/20" />
+              <div className="absolute top-6 right-6 w-4 h-4 rounded-full bg-forest-500/20" />
+              <div className="absolute bottom-6 left-6 w-4 h-4 rounded-full bg-forest-500/20" />
+              <div className="absolute bottom-6 right-6 w-4 h-4 rounded-full bg-forest-500/20" />
 
               <div className="space-y-6">
                 <div className="mx-auto flex items-center justify-center">
@@ -72,13 +72,13 @@ export default function DailyChallenge() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-xl font-serif font-bold text-ink-500">
+                  <p className="text-xl font-serif font-bold text-forest-800">
                     Loading Today's Mystery
                   </p>
                   <div className="flex justify-center gap-2">
-                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-fold-indigo rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -115,11 +115,11 @@ export default function DailyChallenge() {
 
           <div className="bg-white rounded-2xl p-8 paper-shadow paper-texture text-center space-y-4 border-2 border-red-200">
             <div className="text-5xl">⚠️</div>
-            <h2 className="text-2xl font-serif font-bold text-ink-500">Unable to Load</h2>
-            <p className="text-ink-300">{error}</p>
+            <h2 className="text-2xl font-serif font-bold text-forest-800">Unable to Load</h2>
+            <p className="text-forest-600">{error}</p>
             <button
               onClick={loadDailyChallenge}
-              className="px-6 py-3 bg-gradient-to-r from-fold-indigo to-fold-purple text-white rounded-full font-semibold hover:shadow-lg transition-all transform hover:scale-105"
+              className="px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full font-bold hover:shadow-xl transition-all transform hover:scale-105"
             >
               Try Again
             </button>
