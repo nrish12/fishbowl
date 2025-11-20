@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Sparkles, Settings, Clock, UserX, Link2, ArrowRight } from 'lucide-react';
+import { Calendar, Users, Sparkles, Settings } from 'lucide-react';
 import Logo from '../components/Logo';
 import PaperSurface from '../components/paper/PaperSurface';
 import Footer from '../components/Footer';
@@ -17,9 +17,9 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-5xl w-full relative z-10 mx-auto flex-1 flex flex-col justify-center"
+        className="max-w-5xl w-full relative z-10 mx-auto flex-1 flex flex-col justify-center py-10"
       >
-        <div className="text-center mb-8 mt-12">
+        <div className="text-center mb-6">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -32,54 +32,56 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-2xl sm:text-3xl md:text-5xl text-forest-800 font-bold max-w-3xl mx-auto mt-6 leading-tight"
-            style={{ fontFamily: '"Space Grotesk", system-ui, -apple-system, sans-serif' }}
+            className="text-forest-800 font-bold max-w-2xl mx-auto mt-4 leading-tight"
+            style={{
+              fontFamily: '"Space Grotesk", system-ui, -apple-system, sans-serif',
+              fontSize: 'clamp(28px, 3vw, 38px)'
+            }}
           >
-            One mystery. Five phases. Can you crack it before your friends do?
+            5 phases to solve the mystery.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="text-base sm:text-lg md:text-xl text-forest-600 max-w-2xl mx-auto mt-4 leading-relaxed font-medium"
+            transition={{ delay: 0.5 }}
+            className="text-base sm:text-lg text-forest-600 max-w-2xl mx-auto mt-3 font-medium"
           >
-            A fast, shareable mystery game. Ask questions, unlock phases, and guess the answer in under five steps.
+            Play today's mystery or create your own for friends.
           </motion.p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto mb-8">
+        <div className="relative max-w-4xl mx-auto">
           <motion.div
             initial={{ rotateX: 5, scale: 0.97 }}
             animate={{ rotateX: 0, scale: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
           >
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid sm:grid-cols-2 gap-4">
               <Link to="/daily" className="group">
-                <motion.div whileHover={{ scale: 1.03, y: -3 }} whileTap={{ scale: 0.98 }}>
-                  <PaperSurface variant="lifted" className="h-full hover:shadow-[0_12px_40px_rgba(45,139,95,0.25)] transition-all duration-300 ring-2 ring-forest-500/20">
-                    <div className="flex flex-col items-center text-center space-y-5 p-6 sm:p-7">
+                <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
+                  <PaperSurface variant="lifted" className="h-full hover:shadow-[0_12px_40px_rgba(45,139,95,0.25)] transition-all duration-300 ring-1 ring-forest-500/10">
+                    <div className="flex flex-col items-center text-center space-y-4 p-6">
                       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-forest-500 to-forest-700 flex items-center justify-center shadow-lg">
-                        <Calendar size={30} className="text-gold-50" strokeWidth={2.5} />
+                        <Calendar size={28} className="text-gold-50" strokeWidth={2.5} />
                       </div>
 
-                      <div className="space-y-2 min-h-[100px] flex flex-col justify-center">
-                        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-forest-800">
-                          Daily Mystery
+                      <div className="space-y-2 min-h-[80px] flex flex-col justify-center">
+                        <h2 className="text-2xl font-serif font-bold text-forest-800">
+                          Daily Challenge
                         </h2>
-                        <p className="text-sm sm:text-base text-forest-600 leading-relaxed">
-                          A fresh, curated mystery every day. Compare your result with friends.
+                        <p className="text-sm text-forest-600 leading-relaxed">
+                          A fresh mystery every day.
                         </p>
                       </div>
 
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-base font-bold shadow-[0_8px_20px_rgba(45,139,95,0.3)] hover:shadow-[0_12px_28px_rgba(45,139,95,0.4)] transition-shadow w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center"
                       >
-                        <Sparkles size={18} />
-                        <span>Play Today's Puzzle</span>
-                        <ArrowRight size={18} className="hidden sm:inline" />
+                        <Sparkles size={16} />
+                        Start Playing
                       </motion.div>
                     </div>
                   </PaperSurface>
@@ -89,27 +91,27 @@ export default function Home() {
               <Link to="/create" className="group">
                 <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
                   <PaperSurface variant="lifted" className="h-full hover:shadow-[var(--shadow-envelope)] transition-all duration-300">
-                    <div className="flex flex-col items-center text-center space-y-5 p-6 sm:p-7">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg">
-                        <Users size={30} className="text-forest-800" strokeWidth={2.5} />
+                    <div className="flex flex-col items-center text-center space-y-4 p-6">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center shadow-lg">
+                        <Users size={28} className="text-forest-800" strokeWidth={2.5} />
                       </div>
 
-                      <div className="space-y-2 min-h-[100px] flex flex-col justify-center">
-                        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-forest-800">
+                      <div className="space-y-2 min-h-[80px] flex flex-col justify-center">
+                        <h2 className="text-2xl font-serif font-bold text-forest-800">
                           Custom Challenge
                         </h2>
-                        <p className="text-sm sm:text-base text-forest-600 leading-relaxed">
-                          Create your own mystery in seconds and share a link with friends.
+                        <p className="text-sm text-forest-600 leading-relaxed">
+                          Make a mystery for friends.
                         </p>
                       </div>
 
                       <motion.div
-                        whileHover={{ scale: 1.04 }}
+                        whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold-500 to-gold-600 text-forest-900 rounded-full text-base font-bold shadow-lg w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold-600 to-gold-700 text-forest-900 rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center"
                       >
-                        <Sparkles size={18} />
-                        <span>Create a Puzzle</span>
+                        <Sparkles size={16} />
+                        Create Puzzle
                       </motion.div>
                     </div>
                   </PaperSurface>
@@ -119,45 +121,30 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-          className="max-w-4xl mx-auto mb-8"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            <div className="flex items-center justify-center gap-3 text-forest-600">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-forest-100 flex items-center justify-center">
-                <Clock size={20} className="text-forest-600" strokeWidth={2} />
-              </div>
-              <p className="text-sm font-medium text-left">
-                Takes about 3–5 minutes to play
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-3 text-forest-600">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-forest-100 flex items-center justify-center">
-                <UserX size={20} className="text-forest-600" strokeWidth={2} />
-              </div>
-              <p className="text-sm font-medium text-left">
-                No signup required to start
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-3 text-forest-600">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-forest-100 flex items-center justify-center">
-                <Link2 size={20} className="text-forest-600" strokeWidth={2} />
-              </div>
-              <p className="text-sm font-medium text-left">
-                Share your results & custom links
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        {import.meta.env.MODE === 'development' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-6"
+          >
+            <Link
+              to="/dev"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-ink-muted/20 hover:bg-ink-muted/30 text-ink-primary text-xs rounded-lg transition-colors"
+            >
+              <Settings size={14} />
+              Dev Tools
+            </Link>
+          </motion.div>
+        )}
+      </motion.div>
 
+      <div className="max-w-5xl w-full relative z-10 mx-auto pb-12">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
-          className="max-w-3xl mx-auto mb-12"
+          transition={{ delay: 1.0 }}
+          className="max-w-3xl mx-auto"
         >
           <PaperSurface className="p-6 sm:p-8">
             <h3 className="text-xl sm:text-2xl font-serif font-bold text-forest-800 text-center mb-6">
@@ -170,7 +157,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-forest-700">Choose a mode</h4>
                 <p className="text-sm text-forest-600 leading-relaxed">
-                  Daily Mystery or Custom Challenge.
+                  Daily Challenge or Custom Challenge.
                 </p>
               </div>
               <div className="text-center space-y-3">
@@ -195,23 +182,7 @@ export default function Home() {
           </PaperSurface>
         </motion.div>
 
-        {import.meta.env.MODE === 'development' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-            className="text-center mt-4"
-          >
-            <Link
-              to="/dev"
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-ink-muted/20 hover:bg-ink-muted/30 text-ink-primary text-xs rounded-lg transition-colors"
-            >
-              <Settings size={14} />
-              Dev Tools
-            </Link>
-          </motion.div>
-        )}
-      </motion.div>
+      </div>
 
       <Footer />
     </div>
