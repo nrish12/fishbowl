@@ -559,9 +559,9 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Previous Attempts - Above the phase breadcrumb */}
+            {/* Previous Attempts - Above the phase breadcrumb, aligned left */}
             {wrongGuesses.length > 0 && (
-              <div className="mb-4 flex flex-wrap justify-center gap-1.5 sm:gap-2">
+              <div className="mb-2 flex flex-wrap justify-start gap-1.5 sm:gap-2">
                 {wrongGuesses.map((guess, idx) => {
                   const score = guessScores[guess];
                   const displayScore = score !== undefined ? score : null;
