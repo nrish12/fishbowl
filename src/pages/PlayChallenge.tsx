@@ -544,7 +544,7 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Tagline, Timer, and Previous Attempts */}
+            {/* Tagline and Timer */}
             <div className="mb-4 space-y-2">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
@@ -559,26 +559,28 @@ export default function PlayChallenge() {
                   </div>
                 )}
               </div>
-              {wrongGuesses.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-                  {wrongGuesses.map((guess, idx) => {
-                    const score = guessScores[guess];
-                    const displayScore = score !== undefined ? score : null;
-                    const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                                   score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                   'bg-red-100 border-red-400 text-red-800';
-                    return (
-                      <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
-                        <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
-                        {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
             </div>
 
-            {/* Folded Letter Paper */}
+            {/* Previous Attempts - Moved above phase selector */}
+            {wrongGuesses.length > 0 && (
+              <div className="mb-4 flex flex-wrap justify-center gap-1.5 sm:gap-2">
+                {wrongGuesses.map((guess, idx) => {
+                  const score = guessScores[guess];
+                  const displayScore = score !== undefined ? score : null;
+                  const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                                 score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                                 'bg-red-100 border-red-400 text-red-800';
+                  return (
+                    <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
+                      <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
+                      {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Mystery Clues */}
             <FoldedLetter
               phase={selectedCategory ? phase : Math.max(1, phase)}
               wrongGuessShake={shouldShake}
@@ -617,7 +619,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase - 1);
                       }}
-                      className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-xl sm:text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
+                      className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-4 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-2xl z-10 text-2xl sm:text-4xl font-bold border-2 sm:border-3 border-gold-300/50 hover:scale-110 hover:border-gold-400"
                     >
                       ←
                     </button>
@@ -629,7 +631,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase + 1);
                       }}
-                      className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-xl z-10 text-xl sm:text-3xl font-bold border-2 border-gold-300/30 hover:scale-110"
+                      className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-2xl z-10 text-2xl sm:text-4xl font-bold border-2 sm:border-3 border-gold-300/50 hover:scale-110 hover:border-gold-400"
                     >
                       →
                     </button>

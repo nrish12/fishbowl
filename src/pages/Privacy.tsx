@@ -19,7 +19,7 @@ export default function Privacy() {
           <section>
             <h2 className="text-2xl font-semibold text-forest-800 mt-8 mb-4">Introduction</h2>
             <p>
-              Five Fold operates the fivefold.com website. This page informs you of our policies
+              Mystle operates the mystle.app website. This page informs you of our policies
               regarding the collection, use, and disclosure of personal data when you use our
               service and the choices you have associated with that data.
             </p>
@@ -42,7 +42,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="text-2xl font-semibold text-forest-800 mt-8 mb-4">Use of Data</h2>
-            <p>Five Fold uses the collected data for various purposes:</p>
+            <p>Mystle uses the collected data for various purposes:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>To provide and maintain our service</li>
               <li>To notify you about changes to our service</li>

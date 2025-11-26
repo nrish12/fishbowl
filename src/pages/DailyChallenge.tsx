@@ -11,7 +11,7 @@ export default function DailyChallenge() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUnfolding, setIsUnfolding] = useState(false);
+  const [isRevealing, setIsRevealing] = useState(false);
 
   useEffect(() => {
     loadDailyChallenge();
@@ -36,7 +36,7 @@ export default function DailyChallenge() {
       const data = await response.json();
 
       if (data.token) {
-        setIsUnfolding(true);
+        setIsRevealing(true);
         setTimeout(() => {
           navigate(`/play?t=${data.token}`);
         }, 1200);
@@ -49,7 +49,7 @@ export default function DailyChallenge() {
     }
   };
 
-  if (loading && !isUnfolding) {
+  if (loading && !isRevealing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute inset-0 paper-texture opacity-30" />
@@ -89,7 +89,7 @@ export default function DailyChallenge() {
     );
   }
 
-  if (isUnfolding) {
+  if (isRevealing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute inset-0 paper-texture opacity-30" />

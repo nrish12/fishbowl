@@ -10,9 +10,9 @@ export default function PhaseChips({ words, revealed }: PhaseChipsProps) {
     <div className="space-y-3 sm:space-y-6">
       <div className="text-center space-y-1 sm:space-y-2 animate-fade-in">
         <h2 className="text-lg sm:text-2xl font-serif font-bold text-forest-800">
-          Five Revealing Words
+          Five Key Words
         </h2>
-        <p className="text-xs sm:text-sm text-forest-600 italic">The note opens further</p>
+        <p className="text-xs sm:text-sm text-forest-600 italic">The mystery deepens</p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 max-w-3xl mx-auto">

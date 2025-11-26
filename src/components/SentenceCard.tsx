@@ -14,7 +14,7 @@ export default function SentenceCard({ sentence, revealed }: SentenceCardProps) 
     <div className="space-y-3 sm:space-y-4">
       <div className="text-center space-y-1 sm:space-y-2">
         <h2 className="text-lg sm:text-2xl font-serif font-bold text-forest-800">
-          The Second Fold Opens
+          The Essential Clue
         </h2>
         <p className="text-xs sm:text-sm text-forest-600 italic">One revealing sentence</p>
       </div>

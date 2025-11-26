@@ -13,7 +13,7 @@ export default function Footer() {
         </Link>
         <span className="hidden sm:inline text-forest-300">•</span>
         <span className="text-forest-500">
-          © {new Date().getFullYear()} Five Fold
+          © {new Date().getFullYear()} Mystle
         </span>
       </div>
     </footer>

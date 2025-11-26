@@ -57,7 +57,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ perspective: '1500px' }}>
-      {/* Compact horizontal breadcrumb - previous phases */}
+      {/* Previous clues breadcrumb */}
       {phase > 1 && (
         <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
           <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
@@ -77,7 +77,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
         </div>
       )}
 
-      {/* Current unfolding panel */}
+      {/* Current clue panel */}
       <div className="relative z-10 flex items-start justify-center">
         <div
           ref={currentPanelRef}
@@ -88,7 +88,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
             willChange: 'transform',
           }}
         >
-          {/* Fold crease marks */}
+          {/* Decorative lines */}
           <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-forest-300/20 to-transparent" />
           <div className="absolute bottom-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-forest-300/20 to-transparent" />
 
@@ -106,7 +106,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
           {/* Paper texture overlay */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-amber-100/20 pointer-events-none" />
 
-          {/* Corner fold effect */}
+          {/* Corner decoration */}
           <div
             className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-amber-200 to-amber-300 opacity-60"
             style={{
