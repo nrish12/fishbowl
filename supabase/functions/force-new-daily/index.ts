@@ -120,7 +120,7 @@ Respond with ONLY a JSON object:
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-5.1-chat-latest",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
