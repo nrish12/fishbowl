@@ -46,9 +46,7 @@ ${hintsSummary}
 Wrong guesses:
 ${guessesSummary}
 
-Write a 12-word hint connecting their guesses to the answer without revealing it.
-
-Example: "Across your guesses you've chased sound, size, and signal—all that's left is what fits in your hand."
+Write a 12-word hint that connects their guesses to the answer without revealing it.
 
 JSON:
 {

@@ -44,20 +44,16 @@ ${hints.phase4_nudge ? `Phase 4 (nudge): ${hints.phase4_nudge}` : ''}
 Hints: ${hintsSummary}
 Guesses: ${guessesSummary}
 
-Rate each guess 0-100 (conceptual similarity, category overlap, themes). Never use these words: ${bannedWords}
+Rate each guess 0-100 based on conceptual similarity, category overlap, and thematic connections.
+NEVER use these words: ${bannedWords}
 
-Example JSON:
+Return JSON:
 {
-  "semantic_scores": [
-    {"guess": "telephone", "score": 85, "reason": "Communication device, very similar function"},
-    {"guess": "computer", "score": 70, "reason": "Modern tech, similar capabilities"}
-  ],
-  "connections": [
-    {"guess": "telephone", "hint": "phase2", "pattern": "Communication aspect"}
-  ],
-  "synthesis": "Across your guesses you've chased sound and signal—all that's left is what fits in your hand.",
-  "themes_identified": ["Communication", "Wireless tech"],
-  "themes_missing": ["Portable", "Handheld"]
+  "semantic_scores": [{"guess": "...", "score": 0-100, "reason": "..."}],
+  "connections": [{"guess": "...", "hint": "phase#", "pattern": "..."}],
+  "synthesis": "One sentence connecting their attempts",
+  "themes_identified": ["theme1", "theme2"],
+  "themes_missing": ["theme1", "theme2"]
 }`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {

@@ -158,17 +158,6 @@ Consider conceptual similarity, category overlap, thematic connections:
 - 0 = completely unrelated
 - 100 = extremely close (but not the answer)
 
-Score examples:
-- "telephone" vs "cell phone" = 85 (same function, very similar)
-- "computer" vs "cell phone" = 70 (modern tech, overlapping capabilities)
-- "radio" vs "cell phone" = 60 (both wireless communication)
-- "satellite" vs "cell phone" = 50 (wireless signal tech)
-- "tower" vs "cell phone" = 40 (communication infrastructure)
-
-- "hendrix" vs "Bob Marley" = 75 (both legendary musicians, similar era/cultural impact)
-- "elvis" vs "Bob Marley" = 60 (both music icons, different genres/eras)
-- "michael jordan" vs "Bob Marley" = 30 (both famous, totally different domains)
-
 TYPO DETECTION:
 - Only suggest corrections for clear misspellings (1-3 char differences)
 - NEVER suggest "${payload.target}" as correction
