@@ -64,7 +64,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg sm:rounded-xl border border-forest-200 p-2 sm:p-3 max-h-[280px] overflow-y-auto">
+      <div className="bg-white rounded-lg sm:rounded-xl border border-forest-200 p-2 sm:p-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
         {activeTab === 'guesses' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {data.semantic_scores && data.semantic_scores.map((item, idx) => (
