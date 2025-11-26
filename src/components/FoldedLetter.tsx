@@ -59,63 +59,49 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ perspective: '1500px' }}>
-      {/* Grid layout: wrong guesses above phase tabs */}
+      {/* Previous clues breadcrumb */}
       {phase > 1 && (
-        <div className="mb-3 space-y-2">
-          {/* Wrong guesses row - aligned with phase tabs below */}
+        <div className="relative mb-3" style={{ paddingTop: wrongGuesses.length > 0 ? '36px' : '0' }}>
+          {/* Absolutely positioned guess pills overlay - doesn't affect tab sizing */}
           {wrongGuesses.length > 0 && (
-            <div className="flex items-start gap-2">
+            <div className="absolute left-0 right-0 top-0 flex items-center gap-2 z-10">
               <div className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none" aria-hidden="true">
                 Previous:
               </div>
-              <div className="flex-1 flex gap-2">
-                {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => {
-                  const guessForPhase = wrongGuesses.find(wg => wg.phaseGuessed === p);
-                  return (
-                    <div key={p} className="flex-1 min-w-0">
-                      {guessForPhase ? (
-                        <div className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm flex items-center justify-center gap-1 ${
-                          guessForPhase.score && guessForPhase.score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                          guessForPhase.score && guessForPhase.score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                          'bg-red-100 border-red-400 text-red-800'
-                        }`}>
-                          <span className="truncate">{guessForPhase.guess}</span>
-                          {guessForPhase.score !== null && <span className="opacity-80 whitespace-nowrap">{guessForPhase.score}%</span>}
-                        </div>
-                      ) : (
-                        <div className="h-6 sm:h-7"></div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="flex gap-2 flex-wrap">
+                {wrongGuesses.map((wg, idx) => (
+                  <div key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm flex items-center gap-1 whitespace-nowrap ${
+                    wg.score && wg.score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                    wg.score && wg.score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                    'bg-red-100 border-red-400 text-red-800'
+                  }`}>
+                    <span className="truncate max-w-[120px]">{wg.guess}</span>
+                    {wg.score !== null && <span className="opacity-80">{wg.score}%</span>}
+                  </div>
+                ))}
               </div>
-              {mysteryContent && (
-                <div className="flex-shrink-0">
-                  {mysteryContent}
-                </div>
-              )}
             </div>
           )}
 
-          {/* Phase tabs row */}
+          {/* Phase tabs row - natural sizing, not forced to stretch */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
               Previous:
             </span>
-            <div className="flex-1 flex gap-2">
+            <div className="flex gap-2">
               {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
                 <button
                   key={p}
                   onClick={() => onPhaseClick?.(p)}
-                  className="flex-1 px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap text-center"
+                  className="px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap min-w-[120px] max-w-[200px]"
                 >
                   <span className="font-bold">{p}</span>
                   <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
                 </button>
               ))}
             </div>
-            {!wrongGuesses.length && mysteryContent && (
-              <div className="flex-shrink-0">
+            {mysteryContent && (
+              <div className="flex-shrink-0 ml-auto">
                 {mysteryContent}
               </div>
             )}
