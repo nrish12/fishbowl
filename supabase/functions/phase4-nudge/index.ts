@@ -38,34 +38,23 @@ Phase 3 (5 categories): ${JSON.stringify(hints.phase3)}
 
     const guessesSummary = guesses.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n');
 
-    const prompt = `You are helping a player in a deduction game where they must guess: ${target} (a ${type}).
+    const prompt = `Answer: ${target} (${type})
 
-They have seen these hints:
+Hints seen:
 ${hintsSummary}
 
-They have made these guesses:
+Wrong guesses:
 ${guessesSummary}
 
-YOUR TASK:
-1. Pick 2-3 keywords from the hints and guesses
-2. Calculate their semantic overlap with the correct answer
-3. Order them from most→least relevant
-4. Write ONE sentence (exactly 12 words) that synthesizes the pattern and nudges them closer to the answer
+Write a 12-word hint connecting their guesses to the answer without revealing it.
 
-The sentence should:
-- Be conversational, like you're speaking to them directly
-- Connect the dots between what they've guessed and what they haven't figured out
-- NOT give away the answer, but make them think "Ohh, I need to think about X"
-- Be exactly 12 words
+Example: "Across your guesses you've chased sound, size, and signal—all that's left is what fits in your hand."
 
-EXAMPLE for "cell phone":
-"Across your guesses you've chased sound, size, and signal—all that's left is what fits in your hand."
-
-Respond with ONLY a JSON object:
+JSON:
 {
-  "nudge": "your 12-word sentence here",
+  "nudge": "12-word sentence",
   "keywords": ["keyword1", "keyword2", "keyword3"],
-  "relevance_order": ["most relevant", "medium relevant", "least relevant"]
+  "relevance_order": ["most", "medium", "least"]
 }`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -77,10 +66,11 @@ Respond with ONLY a JSON object:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.8,
+        max_tokens: 150,
         messages: [
           {
             role: "system",
-            content: "You are a creative game assistant who provides helpful nudges without giving away answers."
+            content: "You create helpful game hints. Be concise."
           },
           { role: "user", content: prompt }
         ],

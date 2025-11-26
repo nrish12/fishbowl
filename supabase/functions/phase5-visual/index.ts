@@ -39,69 +39,26 @@ ${hints.phase4_nudge ? `Phase 4 (nudge): ${hints.phase4_nudge}` : ''}
 
     const guessesSummary = guesses.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n');
 
-    const prompt = `You are helping a player in a deduction game where they must guess a ${type}. The answer is "${target}".
+    const bannedWords = target.toLowerCase().split(/\s+/).filter((w: string) => w.length >= 3).join(', ');
+    const prompt = `Answer: ${target} (${type})
+Hints: ${hintsSummary}
+Guesses: ${guessesSummary}
 
-They have seen these hints:
-${hintsSummary}
+Rate each guess 0-100 (conceptual similarity, category overlap, themes). Never use these words: ${bannedWords}
 
-They have made these wrong guesses:
-${guessesSummary}
-
-YOUR TASK - Create a visual connection analysis:
-
-1. SEMANTIC ANALYSIS: Rate each guess on how semantically close it is to the answer on a scale of 0-100
-   - Consider conceptual similarity, category overlap, thematic connections
-   - 0 = completely unrelated
-   - 100 = extremely close (but not the answer)
-
-2. CONNECTION MAPPING: Identify what connects each guess to the hints
-   - Which hint led them to this guess?
-   - What partial pattern did they identify?
-
-3. SYNTHESIS SENTENCE: Write ONE powerful sentence that:
-   - Describes the pattern shift they need to make
-   - Connects all their attempts to the final answer WITHOUT revealing it
-   - Is poetic but clear
-   - Follows this format: "Across your guesses you've chased [theme1], [theme2], and [theme3]—all that's left is [final hint]"
-   - MUST NOT contain ANY word from "${target}" (not even individual words!)
-
-4. THEMES: Identify 2-3 themes they captured correctly, and 2-3 themes they missed
-   - MUST NOT contain ANY word from "${target}" in any theme
-
-CRITICAL RULES:
-- NEVER mention the answer "${target}" in any reason, explanation, synthesis, or theme
-- NEVER use ANY individual word from "${target}" anywhere in your response
-- For "${target}", do not use any of these words: ${target.toLowerCase().split(/\s+/).filter((w: string) => w.length >= 3).join(', ')}
-- Keep explanations focused on WHY the guess is close/far, not on comparing it to the answer by name
-- Use general terms like "the answer", "the target", "it" instead of the actual name or any words from it
-
-EXAMPLE for "cell phone" with guesses ["telephone", "radio", "computer", "tower", "satellite"]:
+Example JSON:
 {
   "semantic_scores": [
-    {"guess": "telephone", "score": 85, "reason": "Communication device with very similar function"},
-    {"guess": "computer", "score": 70, "reason": "Modern technology with similar capabilities"},
-    {"guess": "radio", "score": 60, "reason": "Wireless communication technology"},
-    {"guess": "satellite", "score": 50, "reason": "Wireless signal transmission system"},
-    {"guess": "tower", "score": 40, "reason": "Communication infrastructure component"}
+    {"guess": "telephone", "score": 85, "reason": "Communication device, very similar function"},
+    {"guess": "computer", "score": 70, "reason": "Modern tech, similar capabilities"}
   ],
   "connections": [
-    {"guess": "telephone", "hint": "phase2", "pattern": "Identified communication aspect"},
-    {"guess": "radio", "hint": "phase1", "pattern": "Picked up on wireless theme"},
-    {"guess": "computer", "hint": "phase3", "pattern": "Connected to modern technology"},
-    {"guess": "tower", "hint": "phase3", "pattern": "Focused on infrastructure"},
-    {"guess": "satellite", "hint": "phase1", "pattern": "Signal and transmission"}
+    {"guess": "telephone", "hint": "phase2", "pattern": "Communication aspect"}
   ],
-  "synthesis": "Across your guesses you've chased sound, size, and signal—all that's left is what fits in your hand.",
-  "themes_identified": ["Communication", "Wireless technology", "Modern devices"],
-  "themes_missing": ["Personal/portable", "Handheld size", "Multi-function tool"]
-}
-
-IMPORTANT:
-- You MUST include themes_identified and themes_missing arrays with 2-3 items each
-- NEVER use the answer's name OR any individual word from it in any explanation, synthesis, or theme
-- Focus on characteristics, not comparisons to the specific answer
-- Double-check your entire response to ensure NO words from "${target}" appear anywhere
-Respond with ONLY a JSON object in this exact format.`;
+  "synthesis": "Across your guesses you've chased sound and signal—all that's left is what fits in your hand.",
+  "themes_identified": ["Communication", "Wireless tech"],
+  "themes_missing": ["Portable", "Handheld"]
+}`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -112,10 +69,11 @@ Respond with ONLY a JSON object in this exact format.`;
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.7,
+        max_tokens: 500,
         messages: [
           {
             role: "system",
-            content: "You are a semantic analysis expert for a deduction game. Provide insightful connections and helpful guidance. Always include themes_identified and themes_missing in your response. CRITICAL: NEVER use the target answer OR any individual word from the answer in your explanations, synthesis sentence, or themes. This is absolutely forbidden."
+            content: "You analyze guesses semantically. Be concise. Never use banned words."
           },
           { role: "user", content: prompt }
         ],

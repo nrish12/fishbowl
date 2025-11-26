@@ -145,34 +145,39 @@ Deno.serve(async (req: Request) => {
             },
             body: JSON.stringify({
               model: "gpt-4o-mini",
-              temperature: 0.1,
+              temperature: 0.3,
               messages: [{
+                role: "system",
+                content: "You are a semantic analysis expert. Rate guesses based on conceptual similarity, category overlap, and thematic connections. Be consistent with your scoring."
+              }, {
                 role: "user",
-                content: `Analyze the guess "${guess}" in relation to the answer "${payload.target}".
+                content: `Rate how semantically close "${guess}" is to "${payload.target}" on a scale of 0-100.
 
-SCORING GUIDELINES (0-100):
-- 90-100: Extremely close conceptually, different form/name of same thing
-- 75-89: Very closely related, same category/domain with strong connection
-- 55-74: Moderately related, shares significant themes or characteristics
-- 30-54: Some connection but different domains or weak relationship
-- 0-29: Unrelated or completely different concepts
+SEMANTIC SCORING (0-100):
+Consider conceptual similarity, category overlap, thematic connections:
+- 0 = completely unrelated
+- 100 = extremely close (but not the answer)
+
+Score examples:
+- "telephone" vs "cell phone" = 85 (same function, very similar)
+- "computer" vs "cell phone" = 70 (modern tech, overlapping capabilities)
+- "radio" vs "cell phone" = 60 (both wireless communication)
+- "satellite" vs "cell phone" = 50 (wireless signal tech)
+- "tower" vs "cell phone" = 40 (communication infrastructure)
+
+- "hendrix" vs "Bob Marley" = 75 (both legendary musicians, similar era/cultural impact)
+- "elvis" vs "Bob Marley" = 60 (both music icons, different genres/eras)
+- "michael jordan" vs "Bob Marley" = 30 (both famous, totally different domains)
 
 TYPO DETECTION:
-- Only suggest corrections for clear misspellings (1-3 character differences)
-- NEVER suggest "${payload.target}" itself as a correction
-- If semantically different, return null for suggestion
+- Only suggest corrections for clear misspellings (1-3 char differences)
+- NEVER suggest "${payload.target}" as correction
+- If semantically different, return null
 
-Respond ONLY with valid JSON:
-{"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}
-
-Examples:
-- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 30}
-- "jonas brothers" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 90}
-- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 60}
-- "actor" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}
-- "Nick Jonass" for "Nick Jonas" → {"is_match": "NO", "suggestion": "Nick Jonas", "similarity_score": 95}`
+Respond with valid JSON:
+{"is_match": "YES" or "NO", "suggestion": "corrected spelling or null", "similarity_score": 0-100, "reason": "brief explanation"}`
               }],
-              max_tokens: 100,
+              max_tokens: 150,
             }),
           });
 
