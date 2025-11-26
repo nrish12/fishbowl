@@ -157,9 +157,6 @@ SCORING GUIDELINES (0-100):
 - 30-54: Some connection but different domains or weak relationship
 - 0-29: Unrelated or completely different concepts
 
-IMPORTANT: Be generous with scores for people/things in the same domain.
-Examples: Jimi Hendrix vs Bob Marley (both legendary musicians, same era) = 65-70
-
 TYPO DETECTION:
 - Only suggest corrections for clear misspellings (1-3 character differences)
 - NEVER suggest "${payload.target}" itself as a correction
@@ -169,10 +166,9 @@ Respond ONLY with valid JSON:
 {"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}
 
 Examples:
-- "hendrix" for "Bob Marley" → {"is_match": "NO", "suggestion": null, "similarity_score": 68}
-- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 35}
+- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 30}
 - "jonas brothers" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 90}
-- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 62}
+- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 60}
 - "actor" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}
 - "Nick Jonass" for "Nick Jonas" → {"is_match": "NO", "suggestion": "Nick Jonas", "similarity_score": 95}`
               }],

@@ -392,6 +392,16 @@ export default function PlayChallenge() {
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
                 setPhase5Data(visualData);
+
+                // Update guessScores with the semantic scores from Phase 5
+                if (visualData?.semantic_scores) {
+                  const updatedScores: Record<string, number> = { ...guessScores };
+                  visualData.semantic_scores.forEach((item: { guess: string; score: number }) => {
+                    updatedScores[item.guess] = item.score;
+                  });
+                  setGuessScores(updatedScores);
+                }
+
                 setPhase(5);
               } else {
                 const errorText = await phase5Response.text();
@@ -575,7 +585,7 @@ export default function PlayChallenge() {
                 <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
                   {wrongGuesses.map((guess, idx) => {
                     const score = guessScores[guess];
-                    const displayScore = score !== undefined && score >= 30 ? score : null;
+                    const displayScore = score !== undefined ? score : null;
                     const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
                                    score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
                                    'bg-red-100 border-red-400 text-red-800';
@@ -795,6 +805,15 @@ export default function PlayChallenge() {
                             if (phase5Response.ok) {
                               const phase5Resp = await phase5Response.json();
                               setPhase5Data(phase5Resp);
+
+                              // Update guessScores with the semantic scores from Phase 5
+                              if (phase5Resp?.semantic_scores) {
+                                const updatedScores: Record<string, number> = { ...guessScores };
+                                phase5Resp.semantic_scores.forEach((item: { guess: string; score: number }) => {
+                                  updatedScores[item.guess] = item.score;
+                                });
+                                setGuessScores(updatedScores);
+                              }
                             }
                           } catch (err) {
                             console.error('[Phase 5] Error fetching visual:', err);
