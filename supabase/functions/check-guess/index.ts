@@ -157,7 +157,7 @@ Deno.serve(async (req: Request) => {
                 content: "You are a semantic analysis expert. Rate guesses based on conceptual similarity, category overlap, and thematic connections. Be consistent with your scoring."
               }, {
                 role: "user",
-                content: `Rate how semantically close "${guess}" is to "${payload.target}" on a scale of 0-100.\n\nSEMANTIC SCORING (0-100):\nConsider conceptual similarity, category overlap, thematic connections:\n- 0 = completely unrelated\n- 100 = extremely close (but not the answer)\n\nTYPO DETECTION:\n- Only suggest corrections for clear misspellings (1-3 char differences)\n- NEVER suggest "${payload.target}" as correction\n- If semantically different, return null\n\nRespond with valid JSON:\n{\"is_match\": \"YES\" or \"NO\", \"suggestion\": \"corrected spelling or null\", \"similarity_score\": 0-100, \"reason\": \"brief explanation\"}`
+                content: `Rate semantic similarity between \"${guess}\" and \"${payload.target}\" (0-95 scale).\n\nIMPORTANT: These are DIFFERENT answers. Only detect typos, NOT semantic matches.\n\nSIMILARITY SCORING (0-95):\n- 0 = unrelated\n- 25 = same broad category\n- 50 = same subcategory  \n- 75 = very similar context\n- 95 = almost identical (but still different)\n\nTYPO DETECTION:\n- Only if \"${guess}\" is a misspelling of \"${payload.target}\" (1-2 char diff)\n- If different names/things, return null\n\nJSON:\n{\"suggestion\": \"typo correction or null\", \"similarity_score\": 0-95, \"reason\": \"brief\"}`
               }],
               max_tokens: 150,
               response_format: { type: "json_object" },
@@ -169,16 +169,17 @@ Deno.serve(async (req: Request) => {
             const content = aiData.choices[0].message.content.trim();
             const parsed = JSON.parse(content);
 
-            if (parsed.is_match === "YES") {
-              isCorrect = true;
-            }
-
-            if (parsed.suggestion && parsed.suggestion !== guess && normalizeGuess(parsed.suggestion) !== normalizedTarget) {
-              suggestion = parsed.suggestion;
+            // Only accept typo suggestions if they actually match the target answer
+            if (parsed.suggestion && parsed.suggestion !== guess) {
+              const normalizedSuggestion = normalizeGuess(parsed.suggestion);
+              // Verify the suggestion matches the target (real typo correction)
+              if (normalizedSuggestion === normalizedTarget || normalizedAliases.includes(normalizedSuggestion)) {
+                suggestion = parsed.suggestion;
+              }
             }
 
             if (parsed.similarity_score !== undefined) {
-              similarityScore = parsed.similarity_score;
+              similarityScore = Math.min(95, parsed.similarity_score);
             }
           }
         } catch (aiError) {
