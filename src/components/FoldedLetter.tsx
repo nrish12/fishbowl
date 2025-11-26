@@ -111,7 +111,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
       {/* Show mystery content when phase === 1 */}
       {phase === 1 && mysteryContent && (
-        <div className="mb-3 flex justify-end">
+        <div className="mb-3 flex justify-center sm:justify-end">
           {mysteryContent}
         </div>
       )}
