@@ -559,7 +559,30 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Previous Attempts - Moved above phase selector */}
+            {/* Previous Phases Breadcrumb */}
+            {phase > 1 && (
+              <div className="mb-3 flex items-center gap-2 justify-center overflow-x-auto pb-2">
+                <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
+                  Previous:
+                </span>
+                {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => {
+                  const phaseLabels = ['Choose Category', 'The Essence', 'Key Words', 'AI Nudge', 'Final Clue'];
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setViewingPhase(p)}
+                      className="group relative px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap"
+                      title={`Phase ${p}: ${phaseLabels[p - 1]}`}
+                    >
+                      <span className="font-bold">{p}</span>
+                      <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Previous Attempts */}
             {wrongGuesses.length > 0 && (
               <div className="mb-4 flex flex-wrap justify-center gap-1.5 sm:gap-2">
                 {wrongGuesses.map((guess, idx) => {
