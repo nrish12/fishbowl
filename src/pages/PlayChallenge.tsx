@@ -575,7 +575,7 @@ export default function PlayChallenge() {
                 <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
                   {wrongGuesses.map((guess, idx) => {
                     const score = guessScores[guess];
-                    const displayScore = score !== undefined ? score : null;
+                    const displayScore = score !== undefined && score >= 30 ? score : null;
                     const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
                                    score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
                                    'bg-red-100 border-red-400 text-red-800';

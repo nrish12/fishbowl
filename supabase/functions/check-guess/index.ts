@@ -144,7 +144,8 @@ Deno.serve(async (req: Request) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "gpt-5-mini",
+              model: "gpt-4o-mini",
+              temperature: 0.1,
               messages: [{
                 role: "user",
                 content: `Analyze the guess "${guess}" in relation to the answer "${payload.target}".
@@ -156,6 +157,9 @@ SCORING GUIDELINES (0-100):
 - 30-54: Some connection but different domains or weak relationship
 - 0-29: Unrelated or completely different concepts
 
+IMPORTANT: Be generous with scores for people/things in the same domain.
+Examples: Jimi Hendrix vs Bob Marley (both legendary musicians, same era) = 65-70
+
 TYPO DETECTION:
 - Only suggest corrections for clear misspellings (1-3 character differences)
 - NEVER suggest "${payload.target}" itself as a correction
@@ -165,9 +169,10 @@ Respond ONLY with valid JSON:
 {"is_match": "YES" or "NO", "suggestion": "corrected spelling if clear typo, otherwise null", "similarity_score": 0-100}
 
 Examples:
-- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 30}
+- "hendrix" for "Bob Marley" → {"is_match": "NO", "suggestion": null, "similarity_score": 68}
+- "elvis" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 35}
 - "jonas brothers" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 90}
-- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 60}
+- "backstreet boys" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 62}
 - "actor" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}
 - "Nick Jonass" for "Nick Jonas" → {"is_match": "NO", "suggestion": "Nick Jonas", "similarity_score": 95}`
               }],

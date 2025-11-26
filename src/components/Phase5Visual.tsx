@@ -97,7 +97,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
                     }}
                   />
                 </div>
-                <p className="text-[10px] sm:text-xs text-gray-600 italic leading-tight line-clamp-2">
+                <p className="text-[10px] sm:text-xs text-gray-600 italic leading-tight">
                   {item.reason}
                 </p>
               </div>
