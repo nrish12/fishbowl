@@ -525,25 +525,13 @@ export default function PlayChallenge() {
 
           return (
           <>
-            {/* Header - Centered Logo with absolute positioned category badge */}
-            <div className="relative mb-2 sm:mb-3">
-              {/* Centered Logo */}
-              <div className="flex justify-center">
-                <div className="hidden sm:block">
-                  <Logo size="lg" showTagline={false} />
-                </div>
-                <div className="block sm:hidden scale-90">
-                  <Logo size="md" showTagline={false} />
-                </div>
+            {/* Header - Centered Logo */}
+            <div className="flex justify-center mb-2 sm:mb-3">
+              <div className="hidden sm:block">
+                <Logo size="lg" showTagline={false} />
               </div>
-
-              {/* Compact Category Badge - Top Right */}
-              <div className="absolute top-0 right-0 px-3 py-1.5 sm:px-4 sm:py-2 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-[9px] sm:text-[10px] font-bold text-gold-200 uppercase tracking-wide text-center relative z-10">The mystery is a</p>
-                <p className="text-base sm:text-xl font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap relative z-10">
-                  {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
-                </p>
+              <div className="block sm:hidden scale-90">
+                <Logo size="md" showTagline={false} />
               </div>
             </div>
 
@@ -564,10 +552,9 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Previous Attempts - Wrapped in container to align with PREVIOUS label */}
+            {/* Previous Wrong Guesses */}
             {wrongGuesses.length > 0 && (
-              <div className="mb-2">
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <div className="mb-2 flex flex-wrap gap-1.5 sm:gap-2">
                 {wrongGuesses.map((guess, idx) => {
                   const score = guessScores[guess];
                   const displayScore = score !== undefined ? score : null;
@@ -581,7 +568,6 @@ export default function PlayChallenge() {
                     </span>
                   );
                 })}
-                </div>
               </div>
             )}
 
@@ -590,6 +576,15 @@ export default function PlayChallenge() {
               phase={selectedCategory ? phase : Math.max(1, phase)}
               wrongGuessShake={shouldShake}
               onPhaseClick={(p) => setViewingPhase(p)}
+              mysteryContent={
+                <div className="relative px-3 py-1 sm:px-4 sm:py-1.5 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800">
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                  <p className="text-[8px] sm:text-[9px] font-bold text-gold-200 uppercase tracking-wide text-center relative z-10 leading-tight">Mystery is a</p>
+                  <p className="text-xs sm:text-base font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap relative z-10">
+                    {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
+                  </p>
+                </div>
+              }
             >
               {phaseContent}
             </FoldedLetter>

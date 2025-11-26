@@ -6,9 +6,10 @@ interface FoldedLetterProps {
   children: React.ReactNode[];
   wrongGuessShake?: boolean;
   onPhaseClick?: (phase: number) => void;
+  mysteryContent?: React.ReactNode;
 }
 
-export default function FoldedLetter({ phase, children, wrongGuessShake, onPhaseClick }: FoldedLetterProps) {
+export default function FoldedLetter({ phase, children, wrongGuessShake, onPhaseClick, mysteryContent }: FoldedLetterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentPanelRef = useRef<HTMLDivElement>(null);
   const prevPhaseRef = useRef(phase);
@@ -57,22 +58,29 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ perspective: '1500px' }}>
-      {/* Previous clues breadcrumb */}
+      {/* Previous clues breadcrumb with mystery content */}
       {phase > 1 && (
-        <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-2">
-          <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
-            Previous:
-          </span>
-          {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => onPhaseClick?.(p)}
-              className="group relative px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap"
-            >
-              <span className="font-bold">{p}</span>
-              <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
-            </button>
-          ))}
+        <div className="mb-3 flex items-center justify-between gap-3 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2 flex-1">
+            <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
+              Previous:
+            </span>
+            {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => onPhaseClick?.(p)}
+                className="group relative px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap"
+              >
+                <span className="font-bold">{p}</span>
+                <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
+              </button>
+            ))}
+          </div>
+          {mysteryContent && (
+            <div className="flex-shrink-0">
+              {mysteryContent}
+            </div>
+          )}
         </div>
       )}
 
