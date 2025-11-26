@@ -84,24 +84,26 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
           )}
 
           {/* Phase tabs row - natural sizing, not forced to stretch */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
-              Previous:
-            </span>
-            <div className="flex gap-2">
-              {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => onPhaseClick?.(p)}
-                  className="px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap min-w-[120px] max-w-[200px]"
-                >
-                  <span className="font-bold">{p}</span>
-                  <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
-                </button>
-              ))}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
+                Previous:
+              </span>
+              <div className="flex gap-2 flex-wrap">
+                {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => onPhaseClick?.(p)}
+                    className="px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap min-w-[120px] max-w-[200px]"
+                  >
+                    <span className="font-bold">{p}</span>
+                    <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             {mysteryContent && (
-              <div className="flex-shrink-0 ml-auto">
+              <div className="flex-shrink-0 sm:ml-auto">
                 {mysteryContent}
               </div>
             )}
