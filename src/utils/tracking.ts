@@ -85,23 +85,46 @@ export async function updateSessionMetrics(): Promise<void> {
     if (!visitStart) return;
 
     const totalTimeSeconds = Math.floor((Date.now() - parseInt(visitStart)) / 1000);
+    const sessionId = getSessionId();
 
-    await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/session_metrics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'apikey': SUPABASE_ANON_KEY,
-        'Prefer': 'resolution=merge-duplicates',
-      },
-      body: JSON.stringify({
-        session_id: getSessionId(),
-        last_activity: new Date().toISOString(),
-        total_time_seconds: totalTimeSeconds,
-        referrer_source: document.referrer ? new URL(document.referrer).hostname : null,
-      }),
-      timeout: 5000,
-    });
+    // Use PATCH with filter to update existing or ignore if doesn't exist
+    const updateResponse = await fetchWithTimeout(
+      `${SUPABASE_URL}/rest/v1/session_metrics?session_id=eq.${sessionId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          last_activity: new Date().toISOString(),
+          total_time_seconds: totalTimeSeconds,
+        }),
+        timeout: 5000,
+      }
+    );
+
+    // If no rows were updated (first visit), insert new record
+    if (updateResponse.status === 200 && updateResponse.headers.get('content-range') === '0-0/*') {
+      await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/session_metrics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          last_activity: new Date().toISOString(),
+          total_time_seconds: totalTimeSeconds,
+          referrer_source: document.referrer ? new URL(document.referrer).hostname : null,
+        }),
+        timeout: 5000,
+      });
+    }
   } catch (error) {
     // Fail silently
   }
