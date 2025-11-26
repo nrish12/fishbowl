@@ -525,18 +525,23 @@ export default function PlayChallenge() {
 
           return (
           <>
-            {/* Header - Logo + Mystery Box Side by Side */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-between gap-2 mb-2 sm:mb-3">
-              <div className="hidden sm:block">
-                <Logo size="lg" showTagline={false} />
+            {/* Header - Centered Logo with absolute positioned category badge */}
+            <div className="relative mb-2 sm:mb-3">
+              {/* Centered Logo */}
+              <div className="flex justify-center">
+                <div className="hidden sm:block">
+                  <Logo size="lg" showTagline={false} />
+                </div>
+                <div className="block sm:hidden scale-90">
+                  <Logo size="md" showTagline={false} />
+                </div>
               </div>
-              <div className="block sm:hidden scale-90">
-                <Logo size="md" showTagline={false} />
-              </div>
-              <div className="px-4 py-2 sm:px-6 sm:py-3 bg-forest-700 rounded-lg sm:rounded-xl secret-note-shadow paper-texture relative border-2 border-forest-800">
-                <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                <p className="text-[10px] sm:text-xs font-bold text-gold-200 uppercase tracking-wide sm:tracking-wider mb-0.5 sm:mb-1 text-center">The mystery is a</p>
-                <p className="text-xl sm:text-3xl font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap">
+
+              {/* Compact Category Badge - Top Right */}
+              <div className="absolute top-0 right-0 px-3 py-1.5 sm:px-4 sm:py-2 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800">
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                <p className="text-[9px] sm:text-[10px] font-bold text-gold-200 uppercase tracking-wide text-center relative z-10">The mystery is a</p>
+                <p className="text-base sm:text-xl font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap relative z-10">
                   {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                 </p>
               </div>
@@ -559,9 +564,10 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Previous Attempts - Aligned with content */}
+            {/* Previous Attempts - Wrapped in container to align with PREVIOUS label */}
             {wrongGuesses.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-1.5 sm:gap-2">
+              <div className="mb-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {wrongGuesses.map((guess, idx) => {
                   const score = guessScores[guess];
                   const displayScore = score !== undefined ? score : null;
@@ -575,6 +581,7 @@ export default function PlayChallenge() {
                     </span>
                   );
                 })}
+                </div>
               </div>
             )}
 
@@ -617,7 +624,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase - 1);
                       }}
-                      className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-4 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-2xl z-10 text-2xl sm:text-4xl font-bold border-2 sm:border-3 border-gold-300/50 hover:scale-110 hover:border-gold-400"
+                      className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
                     >
                       ←
                     </button>
@@ -629,7 +636,7 @@ export default function PlayChallenge() {
                         e.stopPropagation();
                         setViewingPhase(viewingPhase + 1);
                       }}
-                      className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-2xl z-10 text-2xl sm:text-4xl font-bold border-2 sm:border-3 border-gold-300/50 hover:scale-110 hover:border-gold-400"
+                      className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
                     >
                       →
                     </button>
