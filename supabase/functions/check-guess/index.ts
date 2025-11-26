@@ -171,7 +171,6 @@ Examples:
 - "actor" for "Nick Jonas" → {"is_match": "NO", "suggestion": null, "similarity_score": 45}
 - "Nick Jonass" for "Nick Jonas" → {"is_match": "NO", "suggestion": "Nick Jonas", "similarity_score": 95}`
               }],
-              temperature: 0.1,
               max_tokens: 100,
             }),
           });

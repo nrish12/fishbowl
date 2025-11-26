@@ -129,7 +129,6 @@ Respond with ONLY a JSON object:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 1.1,
       response_format: { type: "json_object" },
     }),
   });

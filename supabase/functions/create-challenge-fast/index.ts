@@ -151,7 +151,6 @@ Respond with ONLY a JSON object:
           { role: "system", content: "You are a helpful assistant that responds in JSON format." },
           { role: "user", content: scorePrompt }
         ],
-        temperature: 0.3,
         response_format: { type: "json_object" },
       }),
     });
@@ -376,7 +375,6 @@ Respond with ONLY valid JSON:
             { role: "system", content: "You are a helpful assistant that responds in JSON format." },
             { role: "user", content: validationPrompt }
           ],
-          temperature: 0.3,
           response_format: { type: "json_object" },
         }),
       }),
@@ -396,7 +394,6 @@ Respond with ONLY valid JSON:
             },
             { role: "user", content: hintPrompt }
           ],
-          temperature: 0.9,
           response_format: { type: "json_object" },
         }),
       }),

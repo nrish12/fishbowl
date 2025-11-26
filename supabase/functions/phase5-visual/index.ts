@@ -118,7 +118,6 @@ Respond with ONLY a JSON object in this exact format.`;
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7,
         response_format: { type: "json_object" },
       }),
     });
