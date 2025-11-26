@@ -69,6 +69,7 @@ export default function PlayChallenge() {
   const [isThinking, setIsThinking] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [guessScores, setGuessScores] = useState<Record<string, number>>({});
+  const [guessPhases, setGuessPhases] = useState<Record<string, number>>({});
   const [suggestedCorrection, setSuggestedCorrection] = useState<string | null>(null);
   const [pendingGuess, setPendingGuess] = useState<string | null>(null);
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
@@ -98,6 +99,7 @@ export default function PlayChallenge() {
       guesses,
       wrongGuesses,
       guessScores,
+      guessPhases,
       startTime,
       selectedCategory,
       phase4Nudge,
@@ -178,6 +180,7 @@ export default function PlayChallenge() {
         setGuesses(progress.guesses);
         setWrongGuesses(progress.wrongGuesses);
         if (progress.guessScores) setGuessScores(progress.guessScores);
+        if (progress.guessPhases) setGuessPhases(progress.guessPhases);
         setStartTime(progress.startTime);
         setSelectedCategory(progress.selectedCategory);
         if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
@@ -192,7 +195,7 @@ export default function PlayChallenge() {
     } else if (gameState === 'solved' || gameState === 'failed') {
       clearProgress();
     }
-  }, [gameState, phase, guesses, wrongGuesses, selectedCategory, phase4Nudge, phase5Data]);
+  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data]);
 
   const loadChallenge = async () => {
     try {
@@ -289,6 +292,7 @@ export default function PlayChallenge() {
       } else {
         setLastGuessResult('incorrect');
         setWrongGuesses(prev => [...prev, guess]);
+        setGuessPhases(prev => ({ ...prev, [guess]: phase }));
         setGuesses(prev => prev + 1);
         setShouldShake(true);
         setTimeout(() => setShouldShake(false), 400);
@@ -552,35 +556,21 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Previous Wrong Guesses */}
-            {wrongGuesses.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-1.5 sm:gap-2">
-                {wrongGuesses.map((guess, idx) => {
-                  const score = guessScores[guess];
-                  const displayScore = score !== undefined ? score : null;
-                  const bgColor = score && score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                                 score && score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                                 'bg-red-100 border-red-400 text-red-800';
-                  return (
-                    <span key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm ${bgColor} flex items-center gap-1 whitespace-nowrap`}>
-                      <span className="truncate max-w-[80px] sm:max-w-none">{guess}</span>
-                      {displayScore !== null && <span className="opacity-80">{displayScore}%</span>}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Mystery Clues */}
+            {/* Mystery Clues with aligned guesses */}
             <FoldedLetter
               phase={selectedCategory ? phase : Math.max(1, phase)}
               wrongGuessShake={shouldShake}
               onPhaseClick={(p) => setViewingPhase(p)}
+              wrongGuesses={wrongGuesses.map(guess => ({
+                guess,
+                score: guessScores[guess] ?? null,
+                phaseGuessed: guessPhases[guess] ?? 1
+              }))}
               mysteryContent={
-                <div className="relative px-3 py-1 sm:px-4 sm:py-1.5 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800">
+                <div className="relative px-2 py-1 sm:px-3 sm:py-1.5 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800">
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                  <p className="text-[8px] sm:text-[9px] font-bold text-gold-200 uppercase tracking-wide text-center relative z-10 leading-tight">Mystery is a</p>
-                  <p className="text-xs sm:text-base font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap relative z-10">
+                  <p className="text-[7px] sm:text-[8px] font-bold text-gold-200 uppercase tracking-wide text-center relative z-10 leading-tight">Mystery is</p>
+                  <p className="text-[10px] sm:text-xs font-serif font-bold text-white drop-shadow-lg text-center whitespace-nowrap relative z-10">
                     {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
                   </p>
                 </div>
@@ -688,6 +678,7 @@ export default function PlayChallenge() {
                       setLastGuessResult('incorrect');
                       if (pendingGuess) {
                         setWrongGuesses(prev => [...prev, pendingGuess]);
+                        setGuessPhases(prev => ({ ...prev, [pendingGuess]: phase }));
                         setGuesses(prev => prev + 1);
                         if (guessScores[pendingGuess]) {
                           setGuessScores(prev => ({ ...prev, [pendingGuess]: guessScores[pendingGuess] }));

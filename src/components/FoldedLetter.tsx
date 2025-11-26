@@ -7,9 +7,10 @@ interface FoldedLetterProps {
   wrongGuessShake?: boolean;
   onPhaseClick?: (phase: number) => void;
   mysteryContent?: React.ReactNode;
+  wrongGuesses?: Array<{ guess: string; score: number | null; phaseGuessed: number }>;
 }
 
-export default function FoldedLetter({ phase, children, wrongGuessShake, onPhaseClick, mysteryContent }: FoldedLetterProps) {
+export default function FoldedLetter({ phase, children, wrongGuessShake, onPhaseClick, mysteryContent, wrongGuesses = [] }: FoldedLetterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentPanelRef = useRef<HTMLDivElement>(null);
   const prevPhaseRef = useRef(phase);
@@ -58,29 +59,74 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ perspective: '1500px' }}>
-      {/* Previous clues breadcrumb with mystery content */}
+      {/* Grid layout: wrong guesses above phase tabs */}
       {phase > 1 && (
-        <div className="mb-3 flex items-center justify-between gap-3 overflow-x-auto pb-2">
-          <div className="flex items-center gap-2 flex-1">
+        <div className="mb-3 space-y-2">
+          {/* Wrong guesses row - aligned with phase tabs below */}
+          {wrongGuesses.length > 0 && (
+            <div className="flex items-start gap-2">
+              <div className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none" aria-hidden="true">
+                Previous:
+              </div>
+              <div className="flex-1 flex gap-2">
+                {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => {
+                  const guessForPhase = wrongGuesses.find(wg => wg.phaseGuessed === p);
+                  return (
+                    <div key={p} className="flex-1 min-w-0">
+                      {guessForPhase ? (
+                        <div className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm flex items-center justify-center gap-1 ${
+                          guessForPhase.score && guessForPhase.score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
+                          guessForPhase.score && guessForPhase.score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
+                          'bg-red-100 border-red-400 text-red-800'
+                        }`}>
+                          <span className="truncate">{guessForPhase.guess}</span>
+                          {guessForPhase.score !== null && <span className="opacity-80 whitespace-nowrap">{guessForPhase.score}%</span>}
+                        </div>
+                      ) : (
+                        <div className="h-6 sm:h-7"></div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {mysteryContent && (
+                <div className="flex-shrink-0">
+                  {mysteryContent}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Phase tabs row */}
+          <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
               Previous:
             </span>
-            {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => onPhaseClick?.(p)}
-                className="group relative px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap"
-              >
-                <span className="font-bold">{p}</span>
-                <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
-              </button>
-            ))}
-          </div>
-          {mysteryContent && (
-            <div className="flex-shrink-0">
-              {mysteryContent}
+            <div className="flex-1 flex gap-2">
+              {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => onPhaseClick?.(p)}
+                  className="flex-1 px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap text-center"
+                >
+                  <span className="font-bold">{p}</span>
+                  <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>
+                </button>
+              ))}
             </div>
-          )}
+            {!wrongGuesses.length && mysteryContent && (
+              <div className="flex-shrink-0">
+                {mysteryContent}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Show mystery content when phase === 1 */}
+      {phase === 1 && mysteryContent && (
+        <div className="mb-3 flex justify-end">
+          {mysteryContent}
         </div>
       )}
 
