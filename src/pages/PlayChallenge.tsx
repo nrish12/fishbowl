@@ -567,12 +567,12 @@ export default function PlayChallenge() {
                 phaseGuessed: guessPhases[guess] ?? 1
               }))}
               mysteryContent={
-                <div className="relative px-8 py-2 sm:px-12 sm:py-2.5 bg-forest-700 rounded-lg secret-note-shadow paper-texture border-2 border-forest-800 inline-flex items-center gap-3 sm:gap-4 min-w-[200px] sm:min-w-[280px]">
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                  <p className="text-[10px] sm:text-xs font-bold text-gold-200 uppercase tracking-wide relative z-10 leading-tight whitespace-nowrap">The mystery is a</p>
-                  <p className="text-xl sm:text-2xl font-serif font-bold text-white drop-shadow-lg relative z-10 leading-none whitespace-nowrap">
+                <div className="relative px-4 py-1.5 sm:px-5 sm:py-2 bg-forest-700 rounded-md secret-note-shadow paper-texture border-2 border-forest-800 inline-flex items-center gap-2 sm:gap-2.5">
+                  <div className="absolute inset-0 rounded-md bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-gold-200/90 uppercase tracking-wider relative z-10 whitespace-nowrap">Mystery:</span>
+                  <span className="text-sm sm:text-base font-serif font-bold text-white relative z-10 whitespace-nowrap">
                     {challengeType.charAt(0).toUpperCase() + challengeType.slice(1)}
-                  </p>
+                  </span>
                 </div>
               }
             >
