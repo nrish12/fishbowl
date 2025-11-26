@@ -157,22 +157,10 @@ Deno.serve(async (req: Request) => {
                 content: "You are a semantic analysis expert. Rate guesses based on conceptual similarity, category overlap, and thematic connections. Be consistent with your scoring."
               }, {
                 role: "user",
-                content: `Rate how semantically close "${guess}" is to "${payload.target}" on a scale of 0-100.
-
-SEMANTIC SCORING (0-100):
-Consider conceptual similarity, category overlap, thematic connections:
-- 0 = completely unrelated
-- 100 = extremely close (but not the answer)
-
-TYPO DETECTION:
-- Only suggest corrections for clear misspellings (1-3 char differences)
-- NEVER suggest "${payload.target}" as correction
-- If semantically different, return null
-
-Respond with valid JSON:
-{"is_match": "YES" or "NO", "suggestion": "corrected spelling or null", "similarity_score": 0-100, "reason": "brief explanation"}`
+                content: `Rate how semantically close "${guess}" is to "${payload.target}" on a scale of 0-100.\n\nSEMANTIC SCORING (0-100):\nConsider conceptual similarity, category overlap, thematic connections:\n- 0 = completely unrelated\n- 100 = extremely close (but not the answer)\n\nTYPO DETECTION:\n- Only suggest corrections for clear misspellings (1-3 char differences)\n- NEVER suggest "${payload.target}" as correction\n- If semantically different, return null\n\nRespond with valid JSON:\n{\"is_match\": \"YES\" or \"NO\", \"suggestion\": \"corrected spelling or null\", \"similarity_score\": 0-100, \"reason\": \"brief explanation\"}`
               }],
               max_tokens: 150,
+              response_format: { type: "json_object" },
             }),
           });
 
@@ -216,7 +204,7 @@ Respond with valid JSON:
         phase: phase || 1,
         player_fingerprint,
       },
-    }).catch(e => console.error("Event log failed:", e));
+    }).then(() => {}).catch(e => console.error("Event log failed:", e));
 
     const t4 = Date.now();
     console.log(`[PERF] check-guess | jwt:${t1-t0}ms match:${t2-t1}ms openai:${t3-t2}ms db:${t4-t3}ms total:${t4-t0}ms`);
