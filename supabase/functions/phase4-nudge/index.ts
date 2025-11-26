@@ -12,15 +12,80 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  try {
-    const { target, type, guesses, hints } = await req.json();
+  const t0 = Date.now();
 
-    if (!target || !type || !guesses || !hints) {
+  try {
+    let { token, guesses, hints } = await req.json();
+
+    if (!token || !guesses || !hints) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: target, type, guesses, hints" }),
+        JSON.stringify({ error: "Missing required fields: token, guesses, hints" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Decode token to get target and type
+    try {
+      token = decodeURIComponent(token);
+    } catch {
+      // If decoding fails, use original token
+    }
+
+    const secret = Deno.env.get("CHALLENGE_SIGNING_SECRET");
+    if (!secret) {
+      throw new Error("JWT signing secret not configured");
+    }
+
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token format" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const [encodedHeader, encodedPayload, encodedSignature] = parts;
+
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const signatureData = encoder.encode(`${encodedHeader}.${encodedPayload}`);
+    const signature = Uint8Array.from(
+      atob(encodedSignature.replace(/-/g, "+").replace(/_/g, "/")),
+      (c) => c.charCodeAt(0)
+    );
+
+    const isValid = await crypto.subtle.verify("HMAC", key, signature, signatureData);
+
+    if (!isValid) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const payloadJson = atob(encodedPayload.padEnd(encodedPayload.length + (4 - encodedPayload.length % 4) % 4, "="));
+    const payload = JSON.parse(payloadJson);
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      return new Response(
+        JSON.stringify({ error: "Token expired" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const target = payload.target;
+    const type = payload.type || "unknown";
+
+    const t1 = Date.now();
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) {
@@ -83,6 +148,9 @@ JSON:
 
     const data = await response.json();
     const result = JSON.parse(data.choices[0].message.content);
+
+    const t2 = Date.now();
+    console.log(`[PERF] phase4-nudge | jwt:${t1-t0}ms openai:${t2-t1}ms total:${t2-t0}ms`);
 
     return new Response(
       JSON.stringify({

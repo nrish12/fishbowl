@@ -22,6 +22,8 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
+  const t0 = Date.now();
+
   try {
     let { token, guess, phase, player_fingerprint } = await req.json();
 
@@ -90,6 +92,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const t1 = Date.now();
+
     if (guess === "__reveal__") {
       return new Response(
         JSON.stringify({ canonical: payload.target }),
@@ -129,6 +133,8 @@ Deno.serve(async (req: Request) => {
           }
         }
       }
+
+    const t2 = Date.now();
 
     let suggestion = null;
     let similarityScore = 0;
@@ -193,12 +199,15 @@ Respond with valid JSON:
       }
     }
 
+    const t3 = Date.now();
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    await supabase.from("events").insert({
+    // Fire-and-forget DB write (non-blocking)
+    supabase.from("events").insert({
       challenge_id: payload.id,
       kind: "guess",
       meta: {
@@ -207,7 +216,10 @@ Respond with valid JSON:
         phase: phase || 1,
         player_fingerprint,
       },
-    });
+    }).catch(e => console.error("Event log failed:", e));
+
+    const t4 = Date.now();
+    console.log(`[PERF] check-guess | jwt:${t1-t0}ms match:${t2-t1}ms openai:${t3-t2}ms db:${t4-t3}ms total:${t4-t0}ms`);
 
     return new Response(
       JSON.stringify({

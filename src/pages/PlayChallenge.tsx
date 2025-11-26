@@ -318,16 +318,6 @@ export default function PlayChallenge() {
           } else if (phase === 3) {
             console.log('[Advancing] Phase 3 → Phase 4 (Fetching AI nudge...)');
             try {
-              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({ token, guess: '__reveal__', phase }),
-              });
-              const answerData = await answerResponse.json();
-              const targetAnswer = answerData.canonical || 'Unknown';
               const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
                 method: 'POST',
                 headers: {
@@ -335,8 +325,7 @@ export default function PlayChallenge() {
                   'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 },
                 body: JSON.stringify({
-                  target: targetAnswer,
-                  type: challengeType,
+                  token,
                   guesses: [...wrongGuesses, guess],
                   hints: hints,
                 }),
@@ -361,16 +350,6 @@ export default function PlayChallenge() {
           } else if (phase === 4) {
             console.log('[Advancing] Phase 4 → Phase 5 (Fetching visual...)');
             try {
-              const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({ token, guess: '__reveal__', phase }),
-              });
-              const answerData = await answerResponse.json();
-              const targetAnswer = answerData.canonical || 'Unknown';
               const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
                 method: 'POST',
                 headers: {
@@ -378,8 +357,7 @@ export default function PlayChallenge() {
                   'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 },
                 body: JSON.stringify({
-                  target: targetAnswer,
-                  type: challengeType,
+                  token,
                   guesses: [...wrongGuesses, guess],
                   hints: {
                     ...hints,

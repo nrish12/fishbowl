@@ -472,32 +472,35 @@ Respond with ONLY valid JSON:
     // Enhance aliases with common variations
     const enhancedAliases = enhanceAliases(target, hints.aliases || [], type);
 
-    const qualityScore = await scoreHintQuality(hints, target, type, openaiKey);
-
-    console.log(`Quality score for "${target}": ${qualityScore.score}/100`);
-
-    if (qualityScore.score < 70) {
-      console.log("Low quality hints detected:", qualityScore.issues);
-    }
-
     const challengeId = crypto.randomUUID();
 
-    fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/challenge_quality_scores`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": Deno.env.get("SUPABASE_ANON_KEY") || "",
-        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-        "Prefer": "return=minimal",
-      },
-      body: JSON.stringify({
-        challenge_id: challengeId,
-        quality_score: qualityScore.score,
-        issues: qualityScore.issues,
-        strengths: qualityScore.strengths,
-        regenerated: false,
-      }),
-    }).catch(err => console.warn("Failed to store quality score:", err));
+    // Fire-and-forget quality scoring in background (non-blocking)
+    scoreHintQuality(hints, target, type, openaiKey)
+      .then(qualityScore => {
+        console.log(`Quality score for "${target}": ${qualityScore.score}/100`);
+        if (qualityScore.score < 70) {
+          console.log("Low quality hints detected:", qualityScore.issues);
+        }
+
+        // Store quality score
+        return fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/challenge_quality_scores`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": Deno.env.get("SUPABASE_ANON_KEY") || "",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            "Prefer": "return=minimal",
+          },
+          body: JSON.stringify({
+            challenge_id: challengeId,
+            quality_score: qualityScore.score,
+            issues: qualityScore.issues,
+            strengths: qualityScore.strengths,
+            regenerated: false,
+          }),
+        });
+      })
+      .catch(err => console.warn("Quality scoring failed:", err));
 
     return new Response(
       JSON.stringify({
@@ -509,7 +512,6 @@ Respond with ONLY valid JSON:
         phase2_options: hints.phase2_options,
         phase3: hints.phase3,
         aliases: enhancedAliases,
-        quality_score: qualityScore.score,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
