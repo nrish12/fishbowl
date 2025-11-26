@@ -130,11 +130,11 @@ Return JSON:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 350,
         messages: [
           {
             role: "system",
-            content: "You analyze guesses semantically. Be concise. Never use banned words."
+            content: "Analyze guesses. Brief reasons. Never use banned words. Return JSON fast."
           },
           { role: "user", content: prompt }
         ],

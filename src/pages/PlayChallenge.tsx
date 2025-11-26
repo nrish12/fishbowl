@@ -369,17 +369,15 @@ export default function PlayChallenge() {
 
               if (phase5Response.ok) {
                 const visualData = await phase5Response.json();
-                setPhase5Data(visualData);
-
-                // Update guessScores with the semantic scores from Phase 5
+                // Merge existing scores with phase5 analysis
                 if (visualData?.semantic_scores) {
-                  const updatedScores: Record<string, number> = { ...guessScores };
-                  visualData.semantic_scores.forEach((item: { guess: string; score: number }) => {
-                    updatedScores[item.guess] = item.score;
-                  });
-                  setGuessScores(updatedScores);
+                  const mergedScores = visualData.semantic_scores.map((item: any) => ({
+                    ...item,
+                    score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
+                  }));
+                  visualData.semantic_scores = mergedScores;
                 }
-
+                setPhase5Data(visualData);
                 setPhase(5);
               } else {
                 const errorText = await phase5Response.text();
@@ -763,16 +761,15 @@ export default function PlayChallenge() {
 
                             if (phase5Response.ok) {
                               const phase5Resp = await phase5Response.json();
-                              setPhase5Data(phase5Resp);
-
-                              // Update guessScores with the semantic scores from Phase 5
+                              // Merge existing scores with phase5 analysis
                               if (phase5Resp?.semantic_scores) {
-                                const updatedScores: Record<string, number> = { ...guessScores };
-                                phase5Resp.semantic_scores.forEach((item: { guess: string; score: number }) => {
-                                  updatedScores[item.guess] = item.score;
-                                });
-                                setGuessScores(updatedScores);
+                                const mergedScores = phase5Resp.semantic_scores.map((item: any) => ({
+                                  ...item,
+                                  score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
+                                }));
+                                phase5Resp.semantic_scores = mergedScores;
                               }
+                              setPhase5Data(phase5Resp);
                             }
                           } catch (err) {
                             console.error('[Phase 5] Error fetching visual:', err);

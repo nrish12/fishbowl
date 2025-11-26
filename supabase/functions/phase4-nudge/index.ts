@@ -129,11 +129,11 @@ JSON:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.8,
-        max_tokens: 150,
+        max_tokens: 80,
         messages: [
           {
             role: "system",
-            content: "You create helpful game hints. Be concise."
+            content: "Create 12-word hint. Return JSON fast."
           },
           { role: "user", content: prompt }
         ],

@@ -154,12 +154,12 @@ Deno.serve(async (req: Request) => {
               temperature: 0.3,
               messages: [{
                 role: "system",
-                content: "You are a semantic analysis expert. Rate guesses based on conceptual similarity, category overlap, and thematic connections. Be consistent with your scoring."
+                content: "Rate guess similarity to target. Return JSON only. Be fast."
               }, {
                 role: "user",
-                content: `Rate semantic similarity between \"${guess}\" and \"${payload.target}\" (0-95 scale).\n\nIMPORTANT: These are DIFFERENT answers. Only detect typos, NOT semantic matches.\n\nSIMILARITY SCORING (0-95):\n- 0 = unrelated\n- 25 = same broad category\n- 50 = same subcategory  \n- 75 = very similar context\n- 95 = almost identical (but still different)\n\nTYPO DETECTION:\n- Only if \"${guess}\" is a misspelling of \"${payload.target}\" (1-2 char diff)\n- If different names/things, return null\n\nJSON:\n{\"suggestion\": \"typo correction or null\", \"similarity_score\": 0-95, \"reason\": \"brief\"}`
+                content: `Guess: \"${guess}\"\nTarget: \"${payload.target}\"\n\nRate 0-95 (0=unrelated, 25=broad category, 50=subcategory, 75=close, 95=almost same)\nIf ${guess} is typo of ${payload.target} (1-2 chars), suggest correction, else null.\n\nJSON: {\"suggestion\": null|\"correction\", \"similarity_score\": 0-95, \"reason\": \"5 words\"}`
               }],
-              max_tokens: 150,
+              max_tokens: 60,
               response_format: { type: "json_object" },
             }),
           });
