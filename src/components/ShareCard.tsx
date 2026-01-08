@@ -16,9 +16,10 @@ interface ShareCardProps {
   shareUrl?: string;
   challengeId?: string;
   isDaily?: boolean;
+  category?: string | null;
 }
 
-export default function ShareCard({ rank, solved, answer, guesses, phase, shareUrl, challengeId, isDaily = false }: ShareCardProps) {
+export default function ShareCard({ rank, solved, answer, guesses, phase, shareUrl, challengeId, isDaily = false, category }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   const rankConfig = {
@@ -51,6 +52,7 @@ export default function ShareCard({ rank, solved, answer, guesses, phase, shareU
           share_method: navigator.share ? 'native' : 'clipboard',
           rank,
           solved,
+          category,
         });
       }
     }

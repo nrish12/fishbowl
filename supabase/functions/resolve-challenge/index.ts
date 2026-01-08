@@ -96,6 +96,8 @@ Deno.serve(async (req: Request) => {
         hints: payload.hints,
         version: payload.ver,
         expires_at: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
+        is_daily: payload.isDaily || false,
+        category: payload.category || null,
       }),
       {
         status: 200,

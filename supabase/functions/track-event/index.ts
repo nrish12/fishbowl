@@ -23,6 +23,7 @@ Deno.serve(async (req: Request) => {
   try {
     const body: TrackEventRequest = await req.json();
     const { event_type, challenge_id, session_id, data } = body;
+    const category = data?.category || null;
 
     if (!event_type || !challenge_id || !session_id) {
       return new Response(
@@ -46,6 +47,7 @@ Deno.serve(async (req: Request) => {
             challenge_id,
             session_id,
             referrer: data?.referrer,
+            category,
           })
           .select()
           .single();
@@ -66,6 +68,7 @@ Deno.serve(async (req: Request) => {
             guess_text: data.guess_text,
             phase_revealed: data.phase_revealed,
             is_correct: data.is_correct || false,
+            category,
           })
           .select()
           .single();
@@ -86,6 +89,7 @@ Deno.serve(async (req: Request) => {
             completed_phase: data.completed_phase,
             total_attempts: data.total_attempts || 1,
             time_taken_seconds: data.time_taken_seconds,
+            category,
           })
           .select()
           .single();
@@ -98,6 +102,7 @@ Deno.serve(async (req: Request) => {
             challenge_id,
             sharer_session_id: session_id,
             share_method: data?.share_method || "clipboard",
+            category,
           })
           .select()
           .single();

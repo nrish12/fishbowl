@@ -5,6 +5,7 @@ import { ArrowLeft, Film, Landmark, Trophy, Globe, Sparkles } from 'lucide-react
 import Logo from '../components/Logo';
 import PaperSurface from '../components/paper/PaperSurface';
 import Footer from '../components/Footer';
+import { trackInteraction } from '../utils/tracking';
 
 export type DailyCategory = 'pop_culture' | 'history_science' | 'sports' | 'geography';
 
@@ -70,6 +71,14 @@ export default function DailyCategoryPicker() {
   const handleCategorySelect = (categoryId: DailyCategory) => {
     setSelectedCategory(categoryId);
     setIsLoading(true);
+
+    const categoryOption = categories.find(c => c.id === categoryId);
+    trackInteraction('daily_category_select', categoryId, categoryOption?.name, {
+      category: categoryId,
+      category_name: categoryOption?.name,
+      date: new Date().toISOString().split('T')[0],
+    });
+
     navigate(`/daily/${categoryId}`);
   };
 

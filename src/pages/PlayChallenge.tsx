@@ -80,6 +80,7 @@ export default function PlayChallenge() {
   const [viewingPhase, setViewingPhase] = useState<number | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
+  const [dailyCategory, setDailyCategory] = useState<string | null>(null);
   const [playerFingerprint] = useState(() => {
     try {
       return getSessionId();
@@ -215,12 +216,14 @@ export default function PlayChallenge() {
       setChallengeType(data.type);
       setChallengeId(data.id);
       setExpiresAt(data.expires_at);
+      setDailyCategory(data.category || null);
       setGameState('playing');
       setStartTime(Date.now());
 
       if (data.id) {
         await trackEvent('visit', data.id, {
           referrer: document.referrer || 'direct',
+          category: data.category || null,
         });
       }
     } catch (err: any) {
@@ -274,6 +277,7 @@ export default function PlayChallenge() {
         guess_text: guess,
         phase_revealed: phase,
         is_correct: isCorrect,
+        category: dailyCategory,
       });
 
       if (isCorrect) {
@@ -288,6 +292,7 @@ export default function PlayChallenge() {
           completed_phase: phase,
           total_attempts: guesses + 1,
           time_taken_seconds: timeElapsed,
+          category: dailyCategory,
         });
       } else {
         setLastGuessResult('incorrect');
@@ -799,6 +804,7 @@ export default function PlayChallenge() {
               phase={phase}
               shareUrl={token ? window.location.href : undefined}
               challengeId={challengeId || undefined}
+              category={dailyCategory}
             />
             {challengeId && <Leaderboard challengeId={challengeId} />}
           </>
