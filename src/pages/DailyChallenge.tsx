@@ -1,32 +1,55 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Calendar, ArrowLeft } from 'lucide-react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+const VALID_CATEGORIES = ['pop_culture', 'history_science', 'sports', 'geography'] as const;
+type DailyCategory = typeof VALID_CATEGORIES[number];
+
+const CATEGORY_NAMES: Record<DailyCategory, string> = {
+  pop_culture: 'Pop Culture',
+  history_science: 'History & Science',
+  sports: 'Sports',
+  geography: 'Geography',
+};
+
 export default function DailyChallenge() {
   const navigate = useNavigate();
+  const { category } = useParams<{ category: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
 
+  const isValidCategory = category && VALID_CATEGORIES.includes(category as DailyCategory);
+  const categoryName = isValidCategory ? CATEGORY_NAMES[category as DailyCategory] : '';
+
   useEffect(() => {
+    if (!isValidCategory) {
+      navigate('/daily', { replace: true });
+      return;
+    }
     loadDailyChallenge();
-  }, []);
+  }, [category]);
 
   const loadDailyChallenge = async () => {
+    if (!isValidCategory) return;
+
     try {
-      const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/daily-challenge`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        timeout: 30000,
-      });
+      const response = await fetchWithTimeout(
+        `${SUPABASE_URL}/functions/v1/daily-challenge?category=${category}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          timeout: 30000,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -73,7 +96,7 @@ export default function DailyChallenge() {
 
                 <div className="space-y-2">
                   <p className="text-xl font-serif font-bold text-forest-800">
-                    Loading Today's Mystery
+                    Loading {categoryName} Mystery
                   </p>
                   <div className="flex justify-center gap-2">
                     <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -97,7 +120,7 @@ export default function DailyChallenge() {
         <div className="relative z-10 w-full max-w-2xl">
           <div className="text-center space-y-8">
             <Logo loading={true} />
-            <p className="text-2xl font-serif font-semibold text-forest-700">Loading Today's Mystery...</p>
+            <p className="text-2xl font-serif font-semibold text-forest-700">Loading {categoryName} Mystery...</p>
           </div>
         </div>
       </div>
@@ -108,9 +131,9 @@ export default function DailyChallenge() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-paper-50 via-paper-100 to-paper-200 flex items-center justify-center p-6">
         <div className="max-w-md w-full space-y-6 animate-paper-unfold">
-          <Link to="/" className="flex items-center gap-2 text-ink-300 hover:text-ink-500 transition-colors">
+          <Link to="/daily" className="flex items-center gap-2 text-forest-600 hover:text-forest-800 transition-colors">
             <ArrowLeft size={20} />
-            <span>Back</span>
+            <span>Choose Another Category</span>
           </Link>
 
           <div className="bg-white rounded-2xl p-8 paper-shadow paper-texture text-center space-y-4 border-2 border-red-200">

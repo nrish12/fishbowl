@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { usePageTracking } from './hooks/usePageTracking';
 import Home from './pages/Home';
+import DailyCategoryPicker from './pages/DailyCategoryPicker';
 import DailyChallenge from './pages/DailyChallenge';
 import CreateChallenge from './pages/CreateChallenge';
 import PlayChallenge from './pages/PlayChallenge';
@@ -17,7 +18,8 @@ function AppRoutes() {
   return (
     <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/daily" element={<DailyChallenge />} />
+        <Route path="/daily" element={<DailyCategoryPicker />} />
+        <Route path="/daily/:category" element={<DailyChallenge />} />
         <Route path="/create" element={<CreateChallenge />} />
         <Route path="/play" element={<PlayChallenge />} />
         <Route path="/s/:code" element={<ShortUrlRedirect />} />

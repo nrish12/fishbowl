@@ -8,7 +8,133 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-async function getRecentSubjects(supabase: any, days: number = 14): Promise<string[]> {
+type DailyCategory = "pop_culture" | "history_science" | "sports" | "geography";
+
+const VALID_CATEGORIES: DailyCategory[] = ["pop_culture", "history_science", "sports", "geography"];
+
+interface CategoryConfig {
+  name: string;
+  types: ("person" | "place" | "thing")[];
+  typeWeights: number[];
+  subjectPrompt: string;
+  systemPrompt: string;
+}
+
+const CATEGORY_CONFIGS: Record<DailyCategory, CategoryConfig> = {
+  pop_culture: {
+    name: "Pop Culture",
+    types: ["person", "thing", "place"],
+    typeWeights: [0.6, 0.3, 0.1],
+    subjectPrompt: `You are picking a famous POP CULTURE subject for a daily guessing game.
+
+FOCUS AREAS:
+- Celebrities (actors, musicians, TV personalities, influencers)
+- Movies and TV shows (iconic films, hit series, franchises)
+- Music (famous songs, albums, bands, musical phenomena)
+- Viral moments and internet culture
+- Entertainment industry icons
+
+EXAMPLES OF GOOD PICKS:
+- People: Tom Hanks, Taylor Swift, Oprah Winfrey, The Rock, Will Smith, Beyonce, Keanu Reeves
+- Things: Star Wars, The Simpsons, Friends (TV show), TikTok, Netflix, Harry Potter, Marvel Cinematic Universe
+- Places: Hollywood Sign, Broadway, Graceland, Abbey Road
+
+AVOID:
+- Obscure indie artists or underground culture
+- Reality TV stars with short fame spans
+- Highly controversial recent events`,
+    systemPrompt: "You pick mainstream pop culture subjects that anyone who watches TV, movies, or follows entertainment would recognize. Think household names and cultural phenomena that cross generations."
+  },
+  history_science: {
+    name: "History & Science",
+    types: ["person", "thing", "place"],
+    typeWeights: [0.5, 0.35, 0.15],
+    subjectPrompt: `You are picking a famous HISTORY or SCIENCE subject for a daily guessing game.
+
+FOCUS AREAS:
+- Historical figures (leaders, explorers, revolutionaries)
+- Scientists and inventors
+- Major inventions and discoveries
+- Historical events and eras
+- Scientific concepts everyone learns in school
+
+EXAMPLES OF GOOD PICKS:
+- People: Marie Curie, Leonardo da Vinci, Cleopatra, Neil Armstrong, Benjamin Franklin, Rosa Parks
+- Things: The Printing Press, Penicillin, The Lightbulb, DNA, The Internet, Telescope
+- Places: Pompeii, The Colosseum, Machu Picchu, The Titanic (wreck site), Pearl Harbor
+
+CRITICAL RULES:
+- Pick subjects taught in HIGH SCHOOL, not graduate-level history
+- Everyone should have heard of them at least once
+- Avoid niche academic subjects
+
+AVOID:
+- Obscure historical figures only historians know
+- Complex scientific theories (string theory, quantum mechanics)
+- Regional history that isn't globally known`,
+    systemPrompt: "You pick history and science subjects that are part of general education. If it's not in a typical high school curriculum or popular science documentary, it's too obscure."
+  },
+  sports: {
+    name: "Sports",
+    types: ["person", "place", "thing"],
+    typeWeights: [0.7, 0.15, 0.15],
+    subjectPrompt: `You are picking a famous SPORTS subject for a daily guessing game.
+
+FOCUS AREAS:
+- Legendary athletes across all major sports
+- Iconic sports teams
+- Famous stadiums and venues
+- Historic sporting events and moments
+- Sports equipment and concepts
+
+EXAMPLES OF GOOD PICKS:
+- People: Michael Jordan, Serena Williams, Muhammad Ali, Babe Ruth, Pele, Tiger Woods, Tom Brady, Usain Bolt
+- Things: The Super Bowl, The Olympics, FIFA World Cup, The Stanley Cup, March Madness, The Kentucky Derby
+- Places: Madison Square Garden, Wembley Stadium, Augusta National, Wimbledon, Yankee Stadium
+
+CRITICAL RULES:
+- Focus on athletes who transcended their sport into mainstream fame
+- Include sports from around the world, not just American sports
+- Pick subjects that even non-sports fans would recognize
+
+AVOID:
+- Current players who might not have lasting fame
+- Niche sports with limited followings
+- Recent controversies`,
+    systemPrompt: "You pick sports legends and iconic moments that even people who don't follow sports would recognize. Michael Jordan, Olympics, Super Bowl level of fame."
+  },
+  geography: {
+    name: "Geography",
+    types: ["place", "thing", "person"],
+    typeWeights: [0.7, 0.2, 0.1],
+    subjectPrompt: `You are picking a famous GEOGRAPHY subject for a daily guessing game.
+
+FOCUS AREAS:
+- Famous cities and countries
+- Natural wonders and landmarks
+- World-famous tourist destinations
+- Geographic features (mountains, rivers, deserts)
+- Iconic structures and monuments
+
+EXAMPLES OF GOOD PICKS:
+- Places: The Amazon Rainforest, Mount Everest, The Grand Canyon, Tokyo, The Great Barrier Reef, Venice, Niagara Falls
+- Things: The Northern Lights, The Sahara Desert, The Mississippi River, The Alps, Route 66
+- People: Marco Polo, Christopher Columbus, Amelia Earhart (explorers who discovered/traveled places)
+
+CRITICAL RULES:
+- Focus on places that appear in travel shows and bucket lists
+- Include natural wonders AND man-made landmarks
+- Vary between continents and regions
+
+AVOID:
+- Small towns or regional places
+- Places only known locally
+- Controversial territorial disputes`,
+    systemPrompt: "You pick geographic wonders and famous locations that everyone dreams of visiting or has seen in movies and documentaries. World-famous bucket list destinations."
+  }
+};
+
+async function getRecentSubjects(supabase: any, category: DailyCategory, days: number = 14): Promise<string[]> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoff = cutoffDate.toISOString().split("T")[0];
@@ -16,6 +142,7 @@ async function getRecentSubjects(supabase: any, days: number = 14): Promise<stri
   const { data, error } = await supabase
     .from("daily_challenges")
     .select("challenges(target)")
+    .eq("category", category)
     .gte("challenge_date", cutoff);
 
   if (error || !data) return [];
@@ -25,89 +152,38 @@ async function getRecentSubjects(supabase: any, days: number = 14): Promise<stri
     .filter((target: string | null) => target != null);
 }
 
-async function generateRandomSubject(
+function selectTypeByWeight(types: string[], weights: number[]): "person" | "place" | "thing" {
+  const random = Math.random();
+  let cumulative = 0;
+  for (let i = 0; i < types.length; i++) {
+    cumulative += weights[i];
+    if (random < cumulative) {
+      return types[i] as "person" | "place" | "thing";
+    }
+  }
+  return types[0] as "person" | "place" | "thing";
+}
+
+async function generateCategorySubject(
+  category: DailyCategory,
   type: string,
   previousTarget: string | null,
   recentSubjects: string[],
   openaiKey: string
 ): Promise<string> {
+  const config = CATEGORY_CONFIGS[category];
   const excludeList = [previousTarget, ...recentSubjects].filter(Boolean).join(", ");
 
-  const prompt = `You are an AI picking a random famous ${type} for a daily guessing game. This is an AI-POWERED game where you bring creativity and variety to each day's challenge.
+  const prompt = `${config.subjectPrompt}
 
-YOUR ROLE: Pick something that feels right for TODAY. Use your AI judgment to select subjects that are:
-
-THE FAMILY FEUD STANDARD (Your Target Zone):
-- Fame Level: 70-85% recognition among general public (FAMILY FEUD LEVEL!)
-- NOT the most obvious #1 answers (Einstein, Eiffel Tower, Mona Lisa)
-- NOT obscure or specialized knowledge (Hedy Lamarr, Yayoi Kusama, Billie Holiday, Great Wave off Kanagawa)
-- JUST RIGHT: Would appear on Family Feud - recognizable but not #1 answer
-- TEST: If you asked 100 random people at a shopping mall, would 70+ know it? If no, REJECT IT.
-- CRITICAL: If it's an art piece, historical figure, or cultural reference that only educated/art enthusiasts would know - REJECT IT!
+TYPE TO PICK: ${type}
 
 ${excludeList ? `EXCLUSIONS - Do NOT pick any of these (used recently): ${excludeList}` : ''}
 
-VARIETY PHILOSOPHY:
-This is a DAILY game. Show your range! Don't default to "safe" picks.
-- Rotate through different eras (ancient, medieval, modern, contemporary)
-- Rotate through different regions (Europe, Asia, Americas, Africa, Middle East)
-- Rotate through different fields (science, arts, politics, sports, culture)
-- Make each day feel fresh and different
-
-${type === 'person' ? `
-PERSON EXAMPLES (use these as inspiration, not a limit):
-Sweet Spot Range:
-- Historical: Cleopatra, Genghis Khan, Queen Victoria, Joan of Arc, Frederick Douglass
-- Scientists: Marie Curie, Nikola Tesla, Jane Goodall, Carl Sagan, Stephen Hawking
-- Artists: Frida Kahlo, Salvador Dali, Pablo Picasso, Vincent van Gogh, Bob Ross
-- Writers: Maya Angelou, Edgar Allan Poe, J.K. Rowling, Dr. Seuss, Roald Dahl
-- Musicians: Elvis Presley, Michael Jackson, Madonna, Beyoncé, Johnny Cash, Aretha Franklin
-- Athletes: Jackie Robinson, Usain Bolt, Simone Biles, Muhammad Ali, Serena Williams
-- Leaders: Dalai Lama, Malala Yousafzai, Nelson Mandela, Susan B. Anthony, Martin Luther King Jr
-- Entertainers: Charlie Chaplin, Lucille Ball, Robin Williams, Mr. Rogers, Betty White, Oprah Winfrey
-
-TOO OBVIOUS (avoid these defaults): Einstein, Washington, Lincoln, Shakespeare, Jesus
-TOO OBSCURE (avoid these - NEVER use): Billie Holiday, Hedy Lamarr, Yayoi Kusama, Rachel Carson, Cesar Chavez, any jazz musicians, any artists known only to art students, any historical figures known only to history majors` : ''}
-
-${type === 'place' ? `
-PLACE EXAMPLES (use these as inspiration, not a limit):
-Sweet Spot Range:
-- Ancient Sites: Angkor Wat, Petra, Mesa Verde, Teotihuacan, Pompeii
-- Natural Wonders: Victoria Falls, Giant's Causeway, Aurora Borealis, Dead Sea, Galapagos Islands
-- Modern Landmarks: Space Needle, Gateway Arch, CN Tower, Burj Khalifa, Opera House
-- Historic Sites: Alcatraz, Pearl Harbor, Berlin Wall, Gettysburg, Chernobyl
-- Cultural: Hollywood Walk of Fame, Bourbon Street, Abbey Road, Times Square, Red Square
-- Unique: Area 51, Loch Ness, Bermuda Triangle, Route 66, Silk Road
-
-TOO OBVIOUS (avoid these defaults): Eiffel Tower, Statue of Liberty, Great Wall, Pyramids
-TOO OBSCURE (avoid these): Regional parks, small monuments, local landmarks` : ''}
-
-${type === 'thing' ? `
-THING EXAMPLES (use these as inspiration, not a limit):
-Sweet Spot Range:
-- Inventions: Microwave, Post-it Notes, Velcro, Zipper, Safety Pin, Lightbulb, Telephone
-- Cultural Icons: Barbie, Rubik's Cube, Slinky, Etch A Sketch, Smiley Face, Pac-Man, Frisbee
-- Symbols: Peace Sign, Yin Yang, Recycling Symbol, Smiley Face, Heart Symbol, Dollar Sign
-- Historic Objects: Liberty Bell, Hope Diamond, Rosetta Stone, Crown Jewels
-- Modern Tech: USB Drive, QR Code, Hashtag, Bluetooth, WiFi, Emoji, Selfie Stick
-- Everyday Objects: Paperclip, Stapler, Pencil, Scissors, Calculator, Stopwatch
-
-WARNING ON ART: Avoid specific artwork titles unless MEGA famous (Mona Lisa, The Thinker, Statue of David level)
-- NEVER USE: The Great Wave off Kanagawa, American Gothic, The Scream, Starry Night, any specific painting
-- NEVER USE: Jazz-era cultural items, specific art movements, niche historical artifacts
-- INSTEAD prefer: Famous inventions, everyday objects, well-known symbols, modern tech everyone uses
-
-TOO OBVIOUS (avoid these defaults): Mona Lisa, iPhone, Coca-Cola, McDonald's Logo
-TOO OBSCURE (avoid these - NEVER use): The Great Wave off Kanagawa, any specific paintings/artwork, art movement references, niche artifacts, regional items, insider references, anything requiring art/history education to know` : ''}
-
-YOUR AI DECISION PROCESS:
-1. Consider what day it is, what you've generated recently
-2. Think about variety - balance eras, regions, fields
-3. Pick something in the SWEET SPOT range
-4. Avoid both extremes (too obvious AND too obscure)
-5. Trust your AI judgment to select something interesting
-
-CRITICAL: You are FREE to pick ANY subject in the sweet spot range. The examples above are inspiration, not limitations. Use your creativity!
+THE FAMILY FEUD STANDARD:
+- Fame Level: 70-85% recognition among general public
+- Would appear on Family Feud - recognizable but not the #1 obvious answer
+- TEST: If you asked 100 random people at a shopping mall, would 70+ know it?
 
 Respond with ONLY a JSON object:
 {
@@ -121,12 +197,9 @@ Respond with ONLY a JSON object:
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-5.1-chat-latest",
+      model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "You are an AI curator for a daily guessing game that MUST follow the FAMILY FEUD standard. Your job is to pick subjects that 70-85% of random people at a shopping mall would know. NO art pieces, NO jazz musicians, NO historical figures requiring education to know. Think: Would my grandmother know this? Would a teenager know this? If not, REJECT IT. You MUST stay in the mainstream recognition zone - no niche knowledge allowed."
-        },
+        { role: "system", content: config.systemPrompt },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
@@ -134,7 +207,7 @@ Respond with ONLY a JSON object:
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate random subject");
+    throw new Error("Failed to generate category subject");
   }
 
   const data = await response.json();
@@ -149,9 +222,7 @@ function base64UrlEncode(str: string): string {
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-async function createToken(challenge: any): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-
+async function createToken(challenge: any, category: DailyCategory): Promise<string> {
   const payload = {
     ver: 1,
     id: challenge.id,
@@ -161,6 +232,7 @@ async function createToken(challenge: any): Promise<string> {
     hints: challenge.hints || {},
     createdAt: Math.floor(new Date(challenge.created_at).getTime() / 1000),
     isDaily: true,
+    category,
   };
 
   const secret = Deno.env.get("CHALLENGE_SIGNING_SECRET");
@@ -192,12 +264,27 @@ async function createToken(challenge: any): Promise<string> {
 }
 
 Deno.serve(async (req: Request) => {
-
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
+    const url = new URL(req.url);
+    const categoryParam = url.searchParams.get("category");
+
+    if (!categoryParam || !VALID_CATEGORIES.includes(categoryParam as DailyCategory)) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid or missing category parameter",
+          valid_categories: VALID_CATEGORIES
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const category = categoryParam as DailyCategory;
+    const categoryConfig = CATEGORY_CONFIGS[category];
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -214,6 +301,7 @@ Deno.serve(async (req: Request) => {
       .from("daily_challenges")
       .select("challenge_id, challenges(*)")
       .eq("challenge_date", today)
+      .eq("category", category)
       .maybeSingle();
 
     if (fetchError) {
@@ -222,7 +310,7 @@ Deno.serve(async (req: Request) => {
 
     if (existing && existing.challenges) {
       const challenge = existing.challenges as any;
-      const token = await createToken(challenge);
+      const token = await createToken(challenge, category);
 
       return new Response(
         JSON.stringify({
@@ -230,22 +318,22 @@ Deno.serve(async (req: Request) => {
           token,
           date: today,
           type: challenge.type,
+          category,
+          category_name: categoryConfig.name,
           message: "Daily challenge retrieved"
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get recent subjects to avoid repetition (last 14 days)
-    const recentSubjects = await getRecentSubjects(supabase, 14);
-    console.log(`Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
+    const recentSubjects = await getRecentSubjects(supabase, category, 14);
+    console.log(`[${category}] Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
 
-    // Randomly pick type
-    const types = ["person", "place", "thing"];
-    const type = types[Math.floor(Math.random() * types.length)] as "person" | "place" | "thing";
+    const type = selectTypeByWeight(categoryConfig.types, categoryConfig.typeWeights);
+    console.log(`[${category}] Selected type: ${type}`);
 
-    // Generate random subject using AI with exclusion list
-    const target = await generateRandomSubject(type, null, recentSubjects, openaiKey);
+    const target = await generateCategorySubject(category, type, null, recentSubjects, openaiKey);
+    console.log(`[${category}] Generated target: ${target}`);
 
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
     let challengeData = null;
@@ -270,16 +358,14 @@ Deno.serve(async (req: Request) => {
         break;
       } else {
         const errorData = await createResponse.json();
-        console.log(`Attempt ${attempts} failed for ${currentTarget}:`, errorData.error || errorData.reason);
+        console.log(`[${category}] Attempt ${attempts} failed for ${currentTarget}:`, errorData.error || errorData.reason);
         if (attempts >= maxAttempts) {
           throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
         }
-        // Try a different target with exclusions
-        currentTarget = await generateRandomSubject(type, currentTarget, recentSubjects, openaiKey);
+        currentTarget = await generateCategorySubject(category, type, currentTarget, recentSubjects, openaiKey);
       }
     }
 
-    // Randomly select difficulty levels (0 = easier, 1 = medium, 2 = harder)
     const selectedPhase1Index = Math.floor(Math.random() * 3);
     const selectedPhase2Index = Math.floor(Math.random() * 3);
 
@@ -309,13 +395,14 @@ Deno.serve(async (req: Request) => {
       .insert({
         challenge_date: today,
         challenge_id: challengeData.challenge_id,
+        category,
       });
 
     if (dailyInsertError) {
       throw dailyInsertError;
     }
 
-    const token = await createToken(newChallenge);
+    const token = await createToken(newChallenge, category);
 
     return new Response(
       JSON.stringify({
@@ -323,6 +410,8 @@ Deno.serve(async (req: Request) => {
         token,
         date: today,
         type,
+        category,
+        category_name: categoryConfig.name,
         message: "New daily challenge generated"
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -335,4 +424,3 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
-
