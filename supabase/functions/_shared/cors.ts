@@ -8,7 +8,11 @@ export function getCorsHeaders(
   origin: string | null,
   overrides: Record<string, string> = {},
 ) {
-  const baseOrigin = origin && allowedOrigins.includes(origin)
+  const isLocalhost = origin && (origin.includes("localhost") || origin.includes("127.0.0.1"));
+  const isPreview = origin && (origin.includes("webcontainer") || origin.includes("stackblitz"));
+  const isAllowed = origin && allowedOrigins.includes(origin);
+
+  const baseOrigin = (isLocalhost || isPreview || isAllowed) && origin
     ? origin
     : allowedOrigins[allowedOrigins.length - 1];
 
