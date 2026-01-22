@@ -218,7 +218,13 @@ Respond with ONLY a JSON object:
 function base64UrlEncode(str: string): string {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
-  const base64 = btoa(String.fromCharCode(...data));
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < data.length; i += chunkSize) {
+    const chunk = data.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  const base64 = btoa(binary);
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
