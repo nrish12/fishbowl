@@ -103,21 +103,35 @@ Phase 3 (5 categories): ${JSON.stringify(hints.phase3)}
 
     const guessesSummary = guesses.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n');
 
-    const prompt = `Answer: ${target} (${type})
+    const prompt = `You are helping a player in a guessing game. The correct answer is "${target}" (a ${type}).
 
-Hints seen:
+The player has seen these hints:
 ${hintsSummary}
 
-Wrong guesses:
+The player has made these WRONG guesses:
 ${guessesSummary}
 
-Write a 12-word hint that connects their guesses to the answer without revealing it.
+Your task: Analyze WHY the player is guessing wrong and guide them toward the correct answer.
 
-JSON:
+ANALYSIS STEPS:
+1. Look at what the wrong guesses have in COMMON - this shows the player's thinking pattern
+2. Identify what DISTINGUISHES the correct answer (${target}) from their guesses
+3. Find a connection between their guesses and the real answer that could help them pivot
+
+For example:
+- If they guessed "Lady Gaga" and "Beyonce" but answer is "Ariana Grande" - they're thinking female pop stars, guide them to think about: vocal range, Disney/Nickelodeon origins, ponytail signature
+- If they guessed "Paris" and "London" but answer is "Rome" - they're thinking European capitals, guide them to: ancient history, Vatican, Colosseum
+
+Write a HELPFUL 15-20 word nudge that:
+1. Acknowledges their thinking pattern WITHOUT saying "you're close" or "you're on the right track"
+2. Gives a SPECIFIC distinguishing detail about ${target} that separates it from their guesses
+3. Does NOT reveal the answer directly
+
+Return JSON:
 {
-  "nudge": "12-word sentence",
-  "keywords": ["keyword1", "keyword2", "keyword3"],
-  "relevance_order": ["most", "medium", "least"]
+  "nudge": "Your 15-20 word personalized hint based on their guesses",
+  "keywords": ["3 keywords that distinguish ${target} from their guesses"],
+  "pattern_identified": "What the player seems to be thinking"
 }`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -128,12 +142,12 @@ JSON:
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.8,
-        max_tokens: 80,
+        temperature: 0.7,
+        max_tokens: 200,
         messages: [
           {
             role: "system",
-            content: "Create 12-word hint. Return JSON fast."
+            content: "You are a helpful game master who gives personalized hints based on player behavior. Analyze their wrong guesses to understand their thinking, then guide them toward the answer without revealing it."
           },
           { role: "user", content: prompt }
         ],
@@ -155,8 +169,8 @@ JSON:
     return new Response(
       JSON.stringify({
         nudge: result.nudge,
-        keywords: result.keywords,
-        relevance_order: result.relevance_order,
+        keywords: result.keywords || [],
+        pattern_identified: result.pattern_identified || null,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

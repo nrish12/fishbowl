@@ -151,15 +151,31 @@ Deno.serve(async (req: Request) => {
             },
             body: JSON.stringify({
               model: "gpt-4o-mini",
-              temperature: 0.3,
+              temperature: 0.2,
               messages: [{
                 role: "system",
-                content: "Rate guess similarity to target. Return JSON only. Be fast."
+                content: "You are a semantic similarity expert. Rate how close guesses are to targets with precise scores. Be specific and accurate - avoid defaulting to 50%."
               }, {
                 role: "user",
-                content: `Guess: \"${guess}\"\nTarget: \"${payload.target}\"\n\nRate 0-95 (0=unrelated, 25=broad category, 50=subcategory, 75=close, 95=almost same)\nIf ${guess} is typo of ${payload.target} (1-2 chars), suggest correction, else null.\n\nJSON: {\"suggestion\": null|\"correction\", \"similarity_score\": 0-95, \"reason\": \"5 words\"}`
+                content: `The player guessed "${guess}" but the correct answer is "${payload.target}".
+
+Rate the semantic similarity on this SPECIFIC scale:
+- 0-15: Completely unrelated (different domain entirely)
+- 16-30: Same broad category only (both are musicians, both are cities, etc.)
+- 31-45: Same subcategory with weak connection (same genre, same era, same region)
+- 46-60: Moderate connection (collaborated together, similar style, same movement)
+- 61-75: Strong connection (same group/team, direct relationship, very similar)
+- 76-90: Very close (alternative name, close associate, almost correct)
+- 91-95: Near-identical (typo, nickname, partial name)
+
+Think about the SPECIFIC relationship between "${guess}" and "${payload.target}".
+
+If "${guess}" appears to be a typo/misspelling of "${payload.target}" (1-2 character difference), provide the correction in "suggestion". Otherwise null.
+
+Return ONLY this JSON:
+{"suggestion": null, "similarity_score": <number 0-95>, "reason": "<brief explanation>"}`
               }],
-              max_tokens: 60,
+              max_tokens: 100,
               response_format: { type: "json_object" },
             }),
           });

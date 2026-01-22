@@ -61,28 +61,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
     <div ref={containerRef} className="relative w-full" style={{ perspective: '1500px' }}>
       {/* Previous clues breadcrumb */}
       {phase > 1 && (
-        <div className="relative mb-3" style={{ paddingTop: wrongGuesses.length > 0 ? '36px' : '0' }}>
-          {/* Absolutely positioned guess pills overlay - doesn't affect tab sizing */}
-          {wrongGuesses.length > 0 && (
-            <div className="absolute left-0 right-0 top-0 flex items-center gap-2 z-10">
-              <div className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none" aria-hidden="true">
-                Previous:
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {wrongGuesses.map((wg, idx) => (
-                  <div key={idx} className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border sm:border-2 shadow-sm flex items-center gap-1 whitespace-nowrap ${
-                    wg.score && wg.score >= 75 ? 'bg-green-100 border-green-400 text-green-800' :
-                    wg.score && wg.score >= 55 ? 'bg-amber-100 border-amber-400 text-amber-800' :
-                    'bg-red-100 border-red-400 text-red-800'
-                  }`}>
-                    <span className="truncate max-w-[120px]">{wg.guess}</span>
-                    {wg.score !== null && <span className="opacity-80">{wg.score}%</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+        <div className="mb-3">
           {/* Mystery badge - centered and prominent */}
           {mysteryContent && (
             <div className="mb-4 flex justify-center">
@@ -90,17 +69,48 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
             </div>
           )}
 
+          {/* Wrong guesses - centered below mystery badge */}
+          {wrongGuesses.length > 0 && (
+            <div className="mb-4 flex flex-col items-center gap-2">
+              <span className="text-[10px] sm:text-xs font-semibold text-ink-400 uppercase tracking-wider">
+                Your Guesses
+              </span>
+              <div className="flex gap-2 flex-wrap justify-center max-w-lg">
+                {wrongGuesses.map((wg, idx) => (
+                  <div key={idx} className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold border-2 shadow-md flex items-center gap-2 ${
+                    wg.score && wg.score >= 75 ? 'bg-green-50 border-green-400 text-green-800' :
+                    wg.score && wg.score >= 50 ? 'bg-amber-50 border-amber-400 text-amber-800' :
+                    wg.score && wg.score >= 25 ? 'bg-orange-50 border-orange-400 text-orange-800' :
+                    'bg-red-50 border-red-400 text-red-800'
+                  }`}>
+                    <span className="truncate max-w-[140px]">{wg.guess}</span>
+                    {wg.score !== null && (
+                      <span className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
+                        wg.score >= 75 ? 'bg-green-200 text-green-900' :
+                        wg.score >= 50 ? 'bg-amber-200 text-amber-900' :
+                        wg.score >= 25 ? 'bg-orange-200 text-orange-900' :
+                        'bg-red-200 text-red-900'
+                      }`}>
+                        {wg.score}%
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Phase tabs row */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-bold text-forest-600 uppercase tracking-wider whitespace-nowrap">
               Previous:
             </span>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap justify-center">
               {Array.from({ length: phase - 1 }, (_, idx) => idx + 1).map((p) => (
                 <button
                   key={p}
                   onClick={() => onPhaseClick?.(p)}
-                  className="px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap min-w-[120px] max-w-[200px]"
+                  className="px-3 py-1.5 bg-forest-100 hover:bg-forest-200 text-forest-700 rounded-lg text-xs font-medium transition-all border border-forest-300/30 hover:border-forest-400 hover:shadow-md whitespace-nowrap"
                 >
                   <span className="font-bold">{p}</span>
                   <span className="hidden sm:inline ml-1 text-[10px] opacity-70">· {phaseLabels[p - 1]}</span>

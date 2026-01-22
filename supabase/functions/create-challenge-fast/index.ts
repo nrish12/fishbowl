@@ -16,6 +16,41 @@ function extractJSON(text: string): any {
   return JSON.parse(text);
 }
 
+function getAnswerWords(target: string): Set<string> {
+  const words = new Set<string>();
+  const targetLower = target.toLowerCase();
+  targetLower.split(/[\s\-_]+/).forEach(word => {
+    const clean = word.replace(/[^a-z]/g, '');
+    if (clean.length >= 3) words.add(clean);
+  });
+  words.add(targetLower.replace(/[^a-z]/g, ''));
+  return words;
+}
+
+function validateAndFilterHints(hints: any, target: string, sentence: string): any {
+  const answerWords = getAnswerWords(target);
+  const sentenceWords = new Set<string>();
+  sentence.toLowerCase().split(/\s+/).forEach(word => {
+    const clean = word.replace(/[^a-z]/g, '');
+    if (clean.length >= 3) sentenceWords.add(clean);
+  });
+
+  const forbiddenWords = new Set([...answerWords, ...sentenceWords]);
+
+  const filterPhase1 = (words: string[]): string[] => {
+    return words.filter(word => {
+      const wordLower = word.toLowerCase().replace(/[^a-z]/g, '');
+      return !forbiddenWords.has(wordLower) && wordLower.length >= 2;
+    });
+  };
+
+  if (hints.phase1_options) {
+    hints.phase1_options = hints.phase1_options.map((option: string[]) => filterPhase1(option));
+  }
+
+  return hints;
+}
+
 function enhanceAliases(target: string, aiAliases: string[], type: string): string[] {
   const aliases = new Set<string>();
 
@@ -467,7 +502,11 @@ Respond with ONLY valid JSON:
 
     const hintData = await hintResponse.json();
     const hintContent = hintData.choices[0].message.content;
-    const hints = extractJSON(hintContent);
+    let hints = extractJSON(hintContent);
+
+    // Validate and filter hints to remove any words from the answer or sentence
+    const phase2Sentence = hints.phase2_options?.[1] || hints.phase2_options?.[0] || '';
+    hints = validateAndFilterHints(hints, target, phase2Sentence);
 
     // Enhance aliases with common variations
     const enhancedAliases = enhanceAliases(target, hints.aliases || [], type);
