@@ -231,8 +231,21 @@ Deno.serve(async (req: Request) => {
     }
 
     // Randomly choose difficulty
-    const selectedPhase1Index = Math.floor(Math.random() * 3);
-    const selectedPhase2Index = Math.floor(Math.random() * 3);
+    const difficulties = ["easy", "medium", "hard"] as const;
+    const difficultyWeights = [0.25, 0.50, 0.25];
+    let random = Math.random();
+    let cumulative = 0;
+    let difficulty = "medium";
+    for (let i = 0; i < difficulties.length; i++) {
+      cumulative += difficultyWeights[i];
+      if (random < cumulative) {
+        difficulty = difficulties[i];
+        break;
+      }
+    }
+
+    const selectedPhase1Index = difficulties.indexOf(difficulty as any);
+    const selectedPhase2Index = difficulties.indexOf(difficulty as any);
 
     const { data: newChallenge, error: challengeInsertError } = await supabase
       .from("challenges")
@@ -256,6 +269,8 @@ Deno.serve(async (req: Request) => {
     await supabase.from("daily_challenges").insert({
       challenge_id: newChallenge.id,
       challenge_date: today,
+      category: "pop_culture",
+      difficulty,
     });
 
     return new Response(
