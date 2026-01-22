@@ -1,0 +1,42 @@
+<svg width="1920" height="600" viewBox="0 0 1920 600" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .logo-text3 {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 700;
+            font-size: 216px;
+            letter-spacing: -9px;
+        }
+    </style>
+
+    <!-- Centered M Constellation (scaled 3x, centered) -->
+    <g id="m-constellation" transform="translate(480, 150)">
+        <!-- Lines -->
+        <line x1="60" y1="225" x2="114" y2="75" stroke="#D4AF37" stroke-width="13.5" fill="none" />
+        <line x1="114" y1="75" x2="174" y2="165" stroke="#D4AF37" stroke-width="13.5" fill="none" />
+        <line x1="174" y1="165" x2="234" y2="75" stroke="#D4AF37" stroke-width="13.5" fill="none" />
+        <line x1="234" y1="75" x2="288" y2="225" stroke="#D4AF37" stroke-width="13.5" fill="none" />
+
+        <!-- Node 1: Rich green -->
+        <circle cx="60" cy="225" r="25.5" fill="#3E6B48"/>
+
+        <!-- Node 2: Vibrant gold -->
+        <circle cx="114" cy="75" r="31.5" fill="#D4AF37"/>
+
+        <!-- Node 3: Center keyhole -->
+        <g>
+            <circle cx="174" cy="165" r="48" fill="#3E6B48"/>
+            <circle cx="174" cy="156" r="21" fill="#FFFFFF"/>
+            <rect x="163.5" y="156" width="21" height="33" fill="#FFFFFF"/>
+        </g>
+
+        <!-- Node 4: Vibrant gold -->
+        <circle cx="234" cy="75" r="31.5" fill="#D4AF37"/>
+
+        <!-- Node 5: Rich green -->
+        <circle cx="288" cy="225" r="25.5" fill="#3E6B48"/>
+
+        <!-- Text: YSTLE -->
+        <text x="315" y="210" class="logo-text3" fill="#3E6B48">YSTL</text>
+        <text x="756" y="210" class="logo-text3" fill="#D4AF37">E</text>
+    </g>
+</svg>
