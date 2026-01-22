@@ -83,9 +83,9 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
             </div>
           )}
 
-          {/* Mystery badge - positioned above tabs */}
+          {/* Mystery badge - centered and prominent */}
           {mysteryContent && (
-            <div className="mb-2 flex justify-start">
+            <div className="mb-4 flex justify-center">
               {mysteryContent}
             </div>
           )}
@@ -113,7 +113,7 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
 
       {/* Show mystery content when phase === 1 */}
       {phase === 1 && mysteryContent && (
-        <div className="mb-3 flex justify-start">
+        <div className="mb-4 flex justify-center">
           {mysteryContent}
         </div>
       )}
@@ -157,47 +157,6 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
         </div>
       </div>
 
-      {/* Clickable phase indicators */}
-      <div className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 z-20">
-        {[1, 2, 3, 4, 5].map((p) => {
-          const isCompleted = p < phase;
-          const isCurrent = p === phase;
-          const isClickable = p < phase;
-
-          return (
-            <button
-              key={p}
-              onClick={() => isClickable && onPhaseClick?.(p)}
-              disabled={!isClickable}
-              className={`relative group transition-all duration-300 ${
-                isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'
-              }`}
-              title={isClickable ? `View Phase ${p}: ${phaseLabels[p - 1]}` : undefined}
-            >
-              <div
-                className={`w-2 h-8 sm:w-3 sm:h-12 rounded-full transition-all duration-500 ${
-                  isCurrent
-                    ? 'bg-gradient-to-b from-gold-400 to-gold-600 shadow-lg ring-2 ring-gold-300/50'
-                    : isCompleted
-                    ? 'bg-gradient-to-b from-forest-500 to-forest-700 shadow-md hover:shadow-lg'
-                    : 'bg-stone-300 opacity-30'
-                }`}
-                style={{
-                  transform: p <= phase ? 'scaleY(1)' : 'scaleY(0.5)',
-                }}
-              />
-
-              {isClickable && (
-                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                  <div className="bg-forest-700 text-white text-xs px-2 py-1 rounded shadow-lg">
-                    {phaseLabels[p - 1]}
-                  </div>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Desk surface ambiance */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-amber-100 via-stone-100 to-amber-50 opacity-30 blur-3xl pointer-events-none" />
