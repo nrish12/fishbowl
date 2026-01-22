@@ -9,6 +9,8 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 interface Stats {
   total_challenges: number;
   daily_challenges: number;
+  daily_by_category: Record<string, number>;
+  todays_challenges: any[];
   total_attempts: number;
   avg_quality_score: number;
   recent_challenges: any[];
@@ -111,27 +113,38 @@ export default function DevTools() {
     }
   };
 
-  const forceNewDailyChallenge = async () => {
-    if (confirm('Force generate a new daily challenge for today? This will replace the existing one.')) {
+  const forceNewDailyChallenge = async (category?: string) => {
+    const categories = ['pop_culture', 'history_science', 'sports', 'geography'];
+    const targetCategories = category ? [category] : categories;
+
+    const confirmMsg = category
+      ? `Force generate a new ${category.replace('_', ' ')} challenge for today? This will replace the existing one.`
+      : 'Force generate NEW challenges for ALL 4 categories today? This will replace ALL existing daily challenges.';
+
+    if (confirm(confirmMsg)) {
       setLoading(true);
       try {
-        // Call force-new-daily function which handles deletion and AI generation
-        const createResponse = await fetch(`${SUPABASE_URL}/functions/v1/force-new-daily`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        });
+        const results = [];
+        for (const cat of targetCategories) {
+          const createResponse = await fetch(`${SUPABASE_URL}/functions/v1/force-new-daily?category=${cat}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+          });
 
-        if (createResponse.ok) {
-          const data = await createResponse.json();
-          alert(`New daily challenge created!\nType: ${data.type}\nTarget: ${data.target}`);
-          loadStats();
-        } else {
-          const errorData = await createResponse.json();
-          throw new Error(errorData.error || 'Failed to generate new daily challenge');
+          if (createResponse.ok) {
+            const data = await createResponse.json();
+            results.push(`✓ ${cat}: ${data.target} (${data.type})`);
+          } else {
+            const errorData = await createResponse.json();
+            results.push(`✗ ${cat}: ${errorData.error || 'Failed'}`);
+          }
         }
+
+        alert(`Results:\n\n${results.join('\n')}`);
+        loadStats();
       } catch (error) {
         alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
@@ -219,6 +232,59 @@ export default function DevTools() {
             </div>
 
             <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
+              <h3 className="text-xl font-bold mb-4">Today's Daily Challenges</h3>
+              {stats?.todays_challenges && stats.todays_challenges.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-3">
+                  {stats.todays_challenges.map((dc: any) => (
+                    <div key={dc.category} className="p-4 bg-neutral-900 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-semibold capitalize text-gold">
+                            {dc.category?.replace('_', ' ') || 'Unknown'}
+                          </div>
+                          <div className="text-sm text-neutral-400 capitalize">
+                            {dc.challenges?.type || 'N/A'}: {dc.challenges?.target || 'N/A'}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs px-2 py-1 bg-neutral-800 rounded capitalize">
+                            {dc.difficulty || 'medium'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => forceNewDailyChallenge(dc.category)}
+                        className="w-full mt-2 px-3 py-2 bg-red-900/20 hover:bg-red-900/30 border border-red-700 rounded text-xs transition-colors"
+                      >
+                        Regenerate This Category
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-neutral-400">
+                  No daily challenges for today yet
+                </div>
+              )}
+            </div>
+
+            <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
+              <h3 className="text-xl font-bold mb-4">Daily Challenges by Category</h3>
+              <div className="grid md:grid-cols-4 gap-3">
+                {['pop_culture', 'history_science', 'sports', 'geography'].map((cat) => (
+                  <div key={cat} className="p-4 bg-neutral-900 rounded-lg text-center">
+                    <div className="text-neutral-400 text-sm mb-1 capitalize">
+                      {cat.replace('_', ' ')}
+                    </div>
+                    <div className="text-2xl font-bold text-gold">
+                      {stats?.daily_by_category?.[cat] || 0}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
               <h3 className="text-xl font-bold mb-4">Environment Variables</h3>
               <div className="space-y-2 font-mono text-sm">
                 <div className="flex justify-between items-center p-3 bg-neutral-900 rounded">
@@ -255,12 +321,12 @@ export default function DevTools() {
                   Clear API Cache
                 </button>
                 <button
-                  onClick={forceNewDailyChallenge}
+                  onClick={() => forceNewDailyChallenge()}
                   disabled={loading}
                   className="px-4 py-3 bg-green-900/20 hover:bg-green-900/30 border border-green-700 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                  Force New Daily
+                  Regenerate ALL Categories
                 </button>
                 <Link
                   to="/create"
@@ -346,13 +412,13 @@ export default function DevTools() {
                   SELECT COUNT(*) FROM challenges;
                 </div>
                 <div className="p-3 bg-neutral-900 rounded font-mono">
-                  SELECT type, COUNT(*) FROM challenges GROUP BY type;
+                  SELECT category, difficulty, COUNT(*) FROM daily_challenges GROUP BY category, difficulty;
                 </div>
                 <div className="p-3 bg-neutral-900 rounded font-mono">
                   SELECT * FROM challenge_quality_scores WHERE quality_score {'<'} 70;
                 </div>
                 <div className="p-3 bg-neutral-900 rounded font-mono">
-                  SELECT * FROM daily_challenges ORDER BY challenge_date DESC;
+                  SELECT dc.*, c.target, c.type FROM daily_challenges dc JOIN challenges c ON dc.challenge_id = c.id WHERE dc.challenge_date = CURRENT_DATE;
                 </div>
               </div>
             </div>
@@ -495,19 +561,25 @@ export default function DevTools() {
             </div>
 
             <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
-              <h3 className="text-lg font-bold mb-4">Recent Challenges</h3>
+              <h3 className="text-lg font-bold mb-4">Recent Daily Challenges</h3>
               {stats?.recent_challenges && stats.recent_challenges.length > 0 ? (
                 <div className="space-y-2">
-                  {stats.recent_challenges.map((challenge: any) => (
-                    <div key={challenge.id} className="p-3 bg-neutral-900 rounded-lg flex justify-between items-center">
+                  {stats.recent_challenges.map((challenge: any, idx: number) => (
+                    <div key={`${challenge.challenge_date}-${challenge.category}-${idx}`} className="p-3 bg-neutral-900 rounded-lg flex justify-between items-center">
                       <div>
-                        <div className="font-semibold">{challenge.target}</div>
-                        <div className="text-sm text-neutral-400 capitalize">{challenge.type}</div>
+                        <div className="font-semibold">{challenge.target || 'N/A'}</div>
+                        <div className="text-sm text-neutral-400">
+                          <span className="capitalize">{challenge.category?.replace('_', ' ')}</span>
+                          {' • '}
+                          <span className="capitalize">{challenge.type}</span>
+                          {' • '}
+                          <span className="capitalize">{challenge.difficulty}</span>
+                        </div>
                       </div>
                       <div className="text-right text-sm">
-                        <div className="text-gold">Fame: {challenge.fame_score}</div>
+                        <div className="text-gold">Fame: {challenge.fame_score || 'N/A'}</div>
                         <div className="text-xs text-neutral-400">
-                          {new Date(challenge.created_at).toLocaleDateString()}
+                          {challenge.challenge_date}
                         </div>
                       </div>
                     </div>

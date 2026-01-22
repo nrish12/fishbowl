@@ -40,6 +40,23 @@ Deno.serve(async (req: Request) => {
       .from("daily_challenges")
       .select("*", { count: "exact", head: true });
 
+    const { data: dailyByCategory } = await supabase
+      .from("daily_challenges")
+      .select("category")
+      .not("category", "is", null);
+
+    const categoryCounts = dailyByCategory?.reduce((acc: Record<string, number>, row: any) => {
+      acc[row.category] = (acc[row.category] || 0) + 1;
+      return acc;
+    }, {}) || {};
+
+    const today = new Date().toISOString().split("T")[0];
+    const { data: todaysChallenges } = await supabase
+      .from("daily_challenges")
+      .select("category, difficulty, challenge_id, challenges(target, type)")
+      .eq("challenge_date", today)
+      .order("category");
+
     const { count: totalAttempts } = await supabase
       .from("challenge_attempts")
       .select("*", { count: "exact", head: true });
@@ -53,10 +70,21 @@ Deno.serve(async (req: Request) => {
       : 0;
 
     const { data: recentChallenges } = await supabase
-      .from("challenges")
-      .select("id, type, target, fame_score, created_at")
-      .order("created_at", { ascending: false })
-      .limit(10);
+      .from("daily_challenges")
+      .select(`
+        challenge_date,
+        category,
+        difficulty,
+        challenges (
+          id,
+          type,
+          target,
+          fame_score,
+          created_at
+        )
+      `)
+      .order("challenge_date", { ascending: false })
+      .limit(20);
 
     const { data: difficultyStats } = await supabase
       .from("difficulty_performance")
@@ -65,13 +93,26 @@ Deno.serve(async (req: Request) => {
       .order("completion_rate", { ascending: false })
       .limit(10);
 
+    const formattedRecent = recentChallenges?.map((dc: any) => ({
+      challenge_date: dc.challenge_date,
+      category: dc.category,
+      difficulty: dc.difficulty,
+      id: dc.challenges?.id,
+      type: dc.challenges?.type,
+      target: dc.challenges?.target,
+      fame_score: dc.challenges?.fame_score,
+      created_at: dc.challenges?.created_at,
+    })) || [];
+
     return new Response(
       JSON.stringify({
         total_challenges: totalChallenges || 0,
         daily_challenges: dailyChallenges || 0,
+        daily_by_category: categoryCounts,
+        todays_challenges: todaysChallenges || [],
         total_attempts: totalAttempts || 0,
         avg_quality_score: avgQuality,
-        recent_challenges: recentChallenges || [],
+        recent_challenges: formattedRecent,
         difficulty_stats: difficultyStats || [],
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

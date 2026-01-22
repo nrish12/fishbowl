@@ -160,29 +160,47 @@ Deno.serve(async (req: Request) => {
       throw new Error("OpenAI API key not configured");
     }
 
+    const url = new URL(req.url);
+    const categoryParam = url.searchParams.get("category");
+    const validCategories = ["pop_culture", "history_science", "sports", "geography"];
+
+    if (!categoryParam || !validCategories.includes(categoryParam)) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid or missing category parameter",
+          valid_categories: validCategories
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const category = categoryParam;
     const today = new Date().toISOString().split("T")[0];
 
     // Get recent subjects to avoid repetition
     const recentSubjects = await getRecentSubjects(supabase, 14);
-    console.log(`Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
+    console.log(`[${category}] Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
 
-    // Get existing daily challenge
+    // Get existing daily challenge for this category
     const { data: existing } = await supabase
       .from("daily_challenges")
       .select("challenge_id, challenges(target, type)")
       .eq("challenge_date", today)
+      .eq("category", category)
       .maybeSingle();
 
     let previousTarget = null;
     if (existing) {
       const challenge = existing.challenges as any;
       previousTarget = challenge?.target;
+      console.log(`[${category}] Deleting existing challenge: ${previousTarget}`);
 
-      // Delete from daily_challenges
+      // Delete from daily_challenges (only this category)
       await supabase
         .from("daily_challenges")
         .delete()
-        .eq("challenge_date", today);
+        .eq("challenge_date", today)
+        .eq("category", category);
 
       // Delete the actual challenge
       await supabase
@@ -191,8 +209,14 @@ Deno.serve(async (req: Request) => {
         .eq("id", existing.challenge_id);
     }
 
-    // Randomly pick type
-    const types = ["person", "place", "thing"] as const;
+    // Pick type based on category
+    const categoryTypes: Record<string, string[]> = {
+      pop_culture: ["person", "thing", "place"],
+      history_science: ["person", "thing", "place"],
+      sports: ["person", "place", "thing"],
+      geography: ["place", "thing", "person"],
+    };
+    const types = categoryTypes[category] || ["person", "place", "thing"];
     const type = types[Math.floor(Math.random() * types.length)];
 
     // Generate random subject using AI with exclusions
@@ -269,7 +293,7 @@ Deno.serve(async (req: Request) => {
     await supabase.from("daily_challenges").insert({
       challenge_id: newChallenge.id,
       challenge_date: today,
-      category: "pop_culture",
+      category,
       difficulty,
     });
 
@@ -279,6 +303,8 @@ Deno.serve(async (req: Request) => {
         challenge_id: newChallenge.id,
         type: newChallenge.type,
         target: newChallenge.target,
+        category,
+        difficulty,
         date: today,
       }),
       {
