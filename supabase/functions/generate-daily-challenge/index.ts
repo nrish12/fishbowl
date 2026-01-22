@@ -8,6 +8,25 @@ const corsHeaders = {
 };
 
 const CATEGORIES = ["pop_culture", "history_science", "sports", "geography"] as const;
+type Difficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTY_WEIGHTS: Record<Difficulty, number> = {
+  easy: 0.25,
+  medium: 0.50,
+  hard: 0.25,
+};
+
+function selectDifficulty(): Difficulty {
+  const random = Math.random();
+  let cumulative = 0;
+  for (const [difficulty, weight] of Object.entries(DIFFICULTY_WEIGHTS)) {
+    cumulative += weight;
+    if (random < cumulative) {
+      return difficulty as Difficulty;
+    }
+  }
+  return "medium";
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -49,8 +68,9 @@ Deno.serve(async (req: Request) => {
         continue;
       }
 
-      console.log(`[Scheduled] Generating ${category} challenge...`);
-      const dailyChallengeUrl = `${supabaseUrl}/functions/v1/daily-challenge?category=${category}`;
+      const difficulty = selectDifficulty();
+      console.log(`[Scheduled] Generating ${category} challenge with difficulty: ${difficulty}...`);
+      const dailyChallengeUrl = `${supabaseUrl}/functions/v1/daily-challenge?category=${category}&difficulty=${difficulty}`;
 
       try {
         const response = await fetch(dailyChallengeUrl, {

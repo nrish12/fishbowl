@@ -4,8 +4,16 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit, getClientIdentifier } from "../_shared/rateLimit.ts";
 
 type DailyCategory = "pop_culture" | "history_science" | "sports" | "geography";
+type Difficulty = "easy" | "medium" | "hard";
 
 const VALID_CATEGORIES: DailyCategory[] = ["pop_culture", "history_science", "sports", "geography"];
+const VALID_DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
+
+const DIFFICULTY_TO_INDEX: Record<Difficulty, number> = {
+  easy: 0,
+  medium: 1,
+  hard: 2,
+};
 
 interface CategoryConfig {
   name: string;
@@ -223,7 +231,7 @@ function base64UrlEncode(str: string): string {
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-async function createToken(challenge: any, category: DailyCategory): Promise<string> {
+async function createToken(challenge: any, category: DailyCategory, difficulty: Difficulty): Promise<string> {
   const payload = {
     ver: 1,
     id: challenge.id,
@@ -234,6 +242,7 @@ async function createToken(challenge: any, category: DailyCategory): Promise<str
     createdAt: Math.floor(new Date(challenge.created_at).getTime() / 1000),
     isDaily: true,
     category,
+    difficulty,
   };
 
   const secret = Deno.env.get("CHALLENGE_SIGNING_SECRET");
@@ -288,6 +297,7 @@ Deno.serve(async (req: Request) => {
 
     const url = new URL(req.url);
     const categoryParam = url.searchParams.get("category");
+    const difficultyParam = url.searchParams.get("difficulty");
 
     if (!categoryParam || !VALID_CATEGORIES.includes(categoryParam as DailyCategory)) {
       return new Response(
@@ -300,6 +310,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const category = categoryParam as DailyCategory;
+    const difficulty: Difficulty = (difficultyParam && VALID_DIFFICULTIES.includes(difficultyParam as Difficulty))
+      ? difficultyParam as Difficulty
+      : "medium";
     const categoryConfig = CATEGORY_CONFIGS[category];
 
     const supabase = createClient(
@@ -316,7 +329,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: existing, error: fetchError } = await supabase
       .from("daily_challenges")
-      .select("challenge_id, challenges(*)")
+      .select("challenge_id, difficulty, challenges(*)")
       .eq("challenge_date", today)
       .eq("category", category)
       .maybeSingle();
@@ -327,7 +340,8 @@ Deno.serve(async (req: Request) => {
 
     if (existing && existing.challenges) {
       const challenge = existing.challenges as any;
-      const token = await createToken(challenge, category);
+      const existingDifficulty = (existing as any).difficulty || "medium";
+      const token = await createToken(challenge, category, existingDifficulty as Difficulty);
 
       return new Response(
         JSON.stringify({
@@ -337,6 +351,7 @@ Deno.serve(async (req: Request) => {
           type: challenge.type,
           category,
           category_name: categoryConfig.name,
+          difficulty: existingDifficulty,
           message: "Daily challenge retrieved"
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -383,8 +398,9 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const selectedPhase1Index = Math.floor(Math.random() * 3);
-    const selectedPhase2Index = Math.floor(Math.random() * 3);
+    const hintIndex = DIFFICULTY_TO_INDEX[difficulty];
+    const selectedPhase1Index = hintIndex;
+    const selectedPhase2Index = hintIndex;
 
     const { data: newChallenge, error: challengeInsertError } = await supabase
       .from("challenges")
@@ -413,13 +429,14 @@ Deno.serve(async (req: Request) => {
         challenge_date: today,
         challenge_id: challengeData.challenge_id,
         category,
+        difficulty,
       });
 
     if (dailyInsertError) {
       throw dailyInsertError;
     }
 
-    const token = await createToken(newChallenge, category);
+    const token = await createToken(newChallenge, category, difficulty);
 
     return new Response(
       JSON.stringify({
@@ -429,6 +446,7 @@ Deno.serve(async (req: Request) => {
         type,
         category,
         category_name: categoryConfig.name,
+        difficulty,
         message: "New daily challenge generated"
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
