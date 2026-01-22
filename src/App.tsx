@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { usePageTracking } from './hooks/usePageTracking';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import DailyCategoryPicker from './pages/DailyCategoryPicker';
 import DailyChallenge from './pages/DailyChallenge';
@@ -35,7 +36,9 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

@@ -77,6 +77,7 @@ export default function PlayChallenge() {
   const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
   const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
   const [shouldShake, setShouldShake] = useState(false);
+  const [guessError, setGuessError] = useState<string | null>(null);
   const [viewingPhase, setViewingPhase] = useState<number | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
@@ -402,6 +403,8 @@ export default function PlayChallenge() {
       }
     } catch (err) {
       console.error('Guess error:', err);
+      setGuessError('Something went wrong. Please try again.');
+      setTimeout(() => setGuessError(null), 4000);
     } finally {
       setTimeout(() => {
         setIsThinking(false);
@@ -782,6 +785,12 @@ export default function PlayChallenge() {
                     No, use "{pendingGuess}"
                   </button>
                 </div>
+              </div>
+            )}
+
+            {guessError && (
+              <div className="mb-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center animate-pulse">
+                {guessError}
               </div>
             )}
 

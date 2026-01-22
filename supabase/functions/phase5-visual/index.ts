@@ -57,10 +57,18 @@ Deno.serve(async (req: Request) => {
     );
 
     const signatureData = encoder.encode(`${encodedHeader}.${encodedPayload}`);
-    const signature = Uint8Array.from(
-      atob(encodedSignature.replace(/-/g, "+").replace(/_/g, "/")),
-      (c) => c.charCodeAt(0)
-    );
+
+    let signature: Uint8Array;
+    try {
+      const sigBase64 = encodedSignature.replace(/-/g, "+").replace(/_/g, "/");
+      const sigPadded = sigBase64.padEnd(sigBase64.length + (4 - sigBase64.length % 4) % 4, "=");
+      signature = Uint8Array.from(atob(sigPadded), (c) => c.charCodeAt(0));
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Failed to decode signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const isValid = await crypto.subtle.verify("HMAC", key, signature, signatureData);
 
@@ -71,8 +79,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const payloadJson = atob(encodedPayload.padEnd(encodedPayload.length + (4 - encodedPayload.length % 4) % 4, "="));
-    const payload = JSON.parse(payloadJson);
+    let payload: any;
+    try {
+      const payloadBase64 = encodedPayload.replace(/-/g, "+").replace(/_/g, "/");
+      const payloadPadded = payloadBase64.padEnd(payloadBase64.length + (4 - payloadBase64.length % 4) % 4, "=");
+      const payloadJson = atob(payloadPadded);
+      payload = JSON.parse(payloadJson);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Failed to decode token payload" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const now = Math.floor(Date.now() / 1000);
     if (payload.exp && payload.exp < now) {
