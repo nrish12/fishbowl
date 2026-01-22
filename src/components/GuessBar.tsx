@@ -31,14 +31,17 @@ export default function GuessBar({ onSubmit, disabled = false, placeholder = "Ty
             placeholder={placeholder}
             disabled={disabled}
             maxLength={50}
+            aria-label="Enter your guess"
+            autoComplete="off"
             className="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-transparent text-sm sm:text-base text-ink-charcoal placeholder-forest-400 focus:outline-none disabled:opacity-50 font-medium"
           />
           <button
             type="submit"
             disabled={!guess.trim() || disabled}
+            aria-label="Submit guess"
             className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-forest-500 to-forest-600 text-gold-100 rounded-full hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 hover:from-forest-600 hover:to-forest-700"
           >
-            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
           </button>
         </div>
       </div>

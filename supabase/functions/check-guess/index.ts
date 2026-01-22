@@ -1,11 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { checkRateLimit, getClientIdentifier } from "../_shared/rateLimit.ts";
 
 function normalizeGuess(text: string): string {
   let normalized = text.toLowerCase().trim();
@@ -17,6 +13,8 @@ function normalizeGuess(text: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin, { "Access-Control-Allow-Methods": "POST, OPTIONS" });
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -25,6 +23,19 @@ Deno.serve(async (req: Request) => {
   const t0 = Date.now();
 
   try {
+    const clientId = getClientIdentifier(req);
+    const rateLimit = await checkRateLimit(clientId, {
+      maxRequests: 30,
+      windowMs: 60000,
+    });
+
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     let { token, guess, phase, player_fingerprint } = await req.json();
 
     if (!token || !guess) {
@@ -256,7 +267,7 @@ Return ONLY this JSON:
   } catch (error) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ error: "An error occurred processing your guess" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

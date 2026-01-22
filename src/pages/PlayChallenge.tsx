@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
 import PhaseChips from '../components/PhaseChips';
 import SentenceCard from '../components/SentenceCard';
@@ -90,10 +90,13 @@ export default function PlayChallenge() {
     }
   });
 
+  const isSubmittingRef = useRef(false);
+  const progressLoadedRef = useRef(false);
+
   const STORAGE_KEY_PREFIX = 'mystle_progress_';
   const DAILY_CHALLENGE_DATE_KEY = 'mystle_daily_date';
 
-  const saveProgress = () => {
+  const saveProgress = useCallback(() => {
     if (!token) return;
 
     const progress = {
@@ -115,9 +118,9 @@ export default function PlayChallenge() {
     } catch (error) {
       console.warn('Failed to save progress:', error);
     }
-  };
+  }, [token, phase, guesses, wrongGuesses, guessScores, guessPhases, startTime, selectedCategory, phase4Nudge, phase5Data, challengeId]);
 
-  const loadProgress = () => {
+  const loadProgress = useCallback(() => {
     if (!token) return null;
 
     try {
@@ -125,10 +128,6 @@ export default function PlayChallenge() {
       if (!saved) return null;
 
       const progress = JSON.parse(saved);
-
-      if (gameState === 'solved' || gameState === 'failed') {
-        return null;
-      }
 
       const hoursSinceSave = (Date.now() - progress.timestamp) / (1000 * 60 * 60);
       if (hoursSinceSave > 24) {
@@ -141,27 +140,124 @@ export default function PlayChallenge() {
       console.warn('Failed to load progress:', error);
       return null;
     }
-  };
+  }, [token]);
 
-  const clearProgress = () => {
+  const clearProgress = useCallback(() => {
     if (!token) return;
-    localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
-  };
-
-  const checkAndClearDailyChallenge = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const lastDaily = localStorage.getItem(DAILY_CHALLENGE_DATE_KEY);
-
-    if (lastDaily !== today) {
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith(STORAGE_KEY_PREFIX)) {
-          localStorage.removeItem(key);
-        }
-      });
-      localStorage.setItem(DAILY_CHALLENGE_DATE_KEY, today);
+    try {
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
+    } catch (error) {
+      console.warn('Failed to clear progress:', error);
     }
-  };
+  }, [token]);
+
+  const checkAndClearDailyChallenge = useCallback(() => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const lastDaily = localStorage.getItem(DAILY_CHALLENGE_DATE_KEY);
+
+      if (lastDaily !== today) {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith(STORAGE_KEY_PREFIX)) {
+            localStorage.removeItem(key);
+          }
+        });
+        localStorage.setItem(DAILY_CHALLENGE_DATE_KEY, today);
+      }
+    } catch (error) {
+      console.warn('Failed to check daily challenge:', error);
+    }
+  }, []);
+
+  const revealAnswer = useCallback(async () => {
+    try {
+      const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ token, guess: '__reveal__', phase }),
+      });
+      if (!answerResponse.ok) {
+        throw new Error('Failed to reveal answer');
+      }
+      const answerData = await answerResponse.json();
+      setAnswer(answerData.canonical || 'Unknown');
+    } catch (err) {
+      console.error('Failed to reveal answer:', err);
+      setAnswer('Unknown');
+    }
+    setGameState('failed');
+  }, [token, phase]);
+
+  const advancePhase = useCallback(async (_currentGuess: string, allWrongGuesses: string[]) => {
+    if (phase === 1) {
+      setPhase(2);
+    } else if (phase === 2) {
+      setPhase(3);
+    } else if (phase === 3) {
+      try {
+        const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            token,
+            guesses: allWrongGuesses,
+            hints: hints,
+          }),
+          timeout: 45000,
+        });
+
+        if (phase4Response.ok) {
+          const nudgeData = await phase4Response.json();
+          setPhase4Nudge(nudgeData.nudge);
+          setPhase4Keywords(nudgeData.keywords || []);
+        }
+      } catch (err) {
+        console.error('[Phase 4] Error:', err);
+      }
+      setPhase(4);
+    } else if (phase === 4) {
+      try {
+        const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            token,
+            guesses: allWrongGuesses,
+            hints: {
+              ...hints,
+              phase4_nudge: phase4Nudge,
+            },
+          }),
+          timeout: 45000,
+        });
+
+        if (phase5Response.ok) {
+          const visualData = await phase5Response.json();
+          if (visualData?.semantic_scores) {
+            const mergedScores = visualData.semantic_scores.map((item: any) => ({
+              ...item,
+              score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
+            }));
+            visualData.semantic_scores = mergedScores;
+          }
+          setPhase5Data(visualData);
+        }
+      } catch (err) {
+        console.error('[Phase 5] Error:', err);
+      }
+      setPhase(5);
+    }
+  }, [token, hints, phase, phase4Nudge, guessScores]);
 
   useEffect(() => {
     if (!token) {
@@ -172,32 +268,33 @@ export default function PlayChallenge() {
 
     checkAndClearDailyChallenge();
     loadChallenge();
-  }, [token]);
+  }, [token, checkAndClearDailyChallenge]);
 
   useEffect(() => {
-    if (token && gameState === 'playing' && challengeId) {
+    if (token && gameState === 'playing' && challengeId && !progressLoadedRef.current) {
       const progress = loadProgress();
-      if (progress) {
+      if (progress && progress.challengeId === challengeId) {
+        progressLoadedRef.current = true;
         setPhase(progress.phase);
         setGuesses(progress.guesses);
-        setWrongGuesses(progress.wrongGuesses);
+        setWrongGuesses(progress.wrongGuesses || []);
         if (progress.guessScores) setGuessScores(progress.guessScores);
         if (progress.guessPhases) setGuessPhases(progress.guessPhases);
-        setStartTime(progress.startTime);
+        if (progress.startTime) setStartTime(progress.startTime);
         setSelectedCategory(progress.selectedCategory);
         if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
         if (progress.phase5Data) setPhase5Data(progress.phase5Data);
       }
     }
-  }, [challengeId]);
+  }, [challengeId, gameState, token, loadProgress]);
 
   useEffect(() => {
-    if (gameState === 'playing') {
+    if (gameState === 'playing' && progressLoadedRef.current) {
       saveProgress();
     } else if (gameState === 'solved' || gameState === 'failed') {
       clearProgress();
     }
-  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data]);
+  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data, saveProgress, clearProgress]);
 
   const loadChallenge = async () => {
     try {
@@ -233,14 +330,19 @@ export default function PlayChallenge() {
     }
   };
 
-  const handleGuess = async (guess: string) => {
+  const handleGuess = useCallback(async (guess: string) => {
     if (!token || !hints || !challengeId) return;
+    if (isSubmittingRef.current) return;
 
+    const trimmedGuess = guess.trim();
+    if (!trimmedGuess) return;
+
+    isSubmittingRef.current = true;
     setIsThinking(true);
     setLastGuessResult(null);
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
+      const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/check-guess`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -248,10 +350,11 @@ export default function PlayChallenge() {
         },
         body: JSON.stringify({
           token,
-          guess,
+          guess: trimmedGuess,
           phase,
           player_fingerprint: playerFingerprint,
         }),
+        timeout: 30000,
       });
 
       if (!response.ok) {
@@ -262,24 +365,24 @@ export default function PlayChallenge() {
       const data = await response.json();
       const isCorrect = data.result === 'correct';
 
-      if (data.suggestion && data.suggestion !== guess) {
-        setPendingGuess(guess);
+      if (data.suggestion && data.suggestion !== trimmedGuess) {
+        setPendingGuess(trimmedGuess);
         setSuggestedCorrection(data.suggestion);
         setIsThinking(false);
+        isSubmittingRef.current = false;
         return;
       }
 
       if (data.similarity_score !== undefined) {
-        console.log(`Setting similarity score for "${guess}": ${data.similarity_score}%`);
-        setGuessScores(prev => ({ ...prev, [guess]: data.similarity_score }));
+        setGuessScores(prev => ({ ...prev, [trimmedGuess]: data.similarity_score }));
       }
 
-      await trackEvent('attempt', challengeId, {
-        guess_text: guess,
+      trackEvent('attempt', challengeId, {
+        guess_text: trimmedGuess,
         phase_revealed: phase,
         is_correct: isCorrect,
         category: dailyCategory,
-      });
+      }).catch(() => {});
 
       if (isCorrect) {
         setLastGuessResult('correct');
@@ -289,116 +392,25 @@ export default function PlayChallenge() {
         setTimeout(() => setGameState('solved'), 800);
 
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-        await trackEvent('completion', challengeId, {
+        trackEvent('completion', challengeId, {
           completed_phase: phase,
           total_attempts: guesses + 1,
           time_taken_seconds: timeElapsed,
           category: dailyCategory,
-        });
+        }).catch(() => {});
       } else {
         setLastGuessResult('incorrect');
-        setWrongGuesses(prev => [...prev, guess]);
-        setGuessPhases(prev => ({ ...prev, [guess]: phase }));
+        const newWrongGuesses = [...wrongGuesses, trimmedGuess];
+        setWrongGuesses(newWrongGuesses);
+        setGuessPhases(prev => ({ ...prev, [trimmedGuess]: phase }));
         setGuesses(prev => prev + 1);
         setShouldShake(true);
         setTimeout(() => setShouldShake(false), 400);
 
-        console.log('[Phase Logic] Wrong guess. Current phase:', phase, 'Wrong guess count:', wrongGuesses.length + 1);
-
-        if (wrongGuesses.length + 1 >= 5 && phase >= 5) {
-          console.log('[Game Over] Reached 5 wrong guesses at phase 5, revealing answer');
-          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({ token, guess: '__reveal__', phase }),
-          });
-          const answerData = await answerResponse.json();
-          setAnswer(answerData.canonical || 'Unknown');
-          setGameState('failed');
-        } else {
-          if (phase === 1) {
-            console.log('[Advancing] Phase 1 → Phase 2');
-            setPhase(2);
-          } else if (phase === 2) {
-            console.log('[Advancing] Phase 2 → Phase 3');
-            setPhase(3);
-          } else if (phase === 3) {
-            console.log('[Advancing] Phase 3 → Phase 4 (Fetching AI nudge...)');
-            try {
-              const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({
-                  token,
-                  guesses: [...wrongGuesses, guess],
-                  hints: hints,
-                }),
-                timeout: 45000, // 45 second timeout for OpenAI call
-              });
-
-              if (phase4Response.ok) {
-                const nudgeData = await phase4Response.json();
-                console.log('[Phase 4] Success! Nudge data:', nudgeData);
-                setPhase4Nudge(nudgeData.nudge);
-                setPhase4Keywords(nudgeData.keywords || []);
-                setPhase(4);
-              } else {
-                const errorText = await phase4Response.text();
-                console.error('[Phase 4] Failed to fetch nudge. Status:', phase4Response.status, 'Response:', errorText);
-                setPhase(4);
-              }
-            } catch (err) {
-              console.error('[Phase 4] Error:', err);
-              setPhase(4);
-            }
-          } else if (phase === 4) {
-            console.log('[Advancing] Phase 4 → Phase 5 (Fetching visual...)');
-            try {
-              const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({
-                  token,
-                  guesses: [...wrongGuesses, guess],
-                  hints: {
-                    ...hints,
-                    phase4_nudge: phase4Nudge,
-                  },
-                }),
-                timeout: 45000, // 45 second timeout for OpenAI call
-              });
-
-              if (phase5Response.ok) {
-                const visualData = await phase5Response.json();
-                // Merge existing scores with phase5 analysis
-                if (visualData?.semantic_scores) {
-                  const mergedScores = visualData.semantic_scores.map((item: any) => ({
-                    ...item,
-                    score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
-                  }));
-                  visualData.semantic_scores = mergedScores;
-                }
-                setPhase5Data(visualData);
-                setPhase(5);
-              } else {
-                const errorText = await phase5Response.text();
-                console.error('[Phase 5] Failed to fetch visual. Status:', phase5Response.status, 'Response:', errorText);
-                setPhase(5);
-              }
-            } catch (err) {
-              console.error('[Phase 5] Error:', err);
-              setPhase(5);
-            }
-          }
+        if (newWrongGuesses.length >= 5 && phase === 5) {
+          await revealAnswer();
+        } else if (phase < 5) {
+          await advancePhase(trimmedGuess, newWrongGuesses);
         }
       }
     } catch (err) {
@@ -409,13 +421,80 @@ export default function PlayChallenge() {
       setTimeout(() => {
         setIsThinking(false);
         setLastGuessResult(null);
+        isSubmittingRef.current = false;
       }, 1500);
     }
-  };
+  }, [token, hints, challengeId, phase, playerFingerprint, wrongGuesses, guesses, startTime, dailyCategory, revealAnswer, advancePhase]);
 
   const handleSelectCategory = useCallback((category: string) => {
     setSelectedCategory(category);
   }, []);
+
+  const handleExpired = useCallback(() => setIsExpired(true), []);
+  const handlePhaseClick = useCallback((p: number) => setViewingPhase(p), []);
+  const handleCloseModal = useCallback(() => setViewingPhase(null), []);
+
+  const phaseContent = useMemo(() => {
+    if (!hints) return [];
+    return [
+      <div key="phase1">
+        {selectedCategory ? (
+          <CategoryPicker
+            categories={hints.phase3}
+            revealed={true}
+            selectedCategory={selectedCategory}
+          />
+        ) : (
+          <CategoryPicker
+            categories={hints.phase3}
+            revealed={false}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+          />
+        )}
+      </div>,
+      <div key="phase2">
+        <SentenceCard
+          sentence={hints.phase2}
+          revealed={true}
+          onReveal={undefined}
+        />
+      </div>,
+      <div key="phase3">
+        <PhaseChips words={hints.phase1} revealed={true} />
+      </div>,
+      <div key="phase4">
+        {phase4Nudge ? (
+          <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="text-5xl animate-pulse">!</div>
+            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
+            <p className="text-ink-400">Loading personalized nudge...</p>
+          </div>
+        )}
+      </div>,
+      <div key="phase5">
+        {phase5Data ? (
+          <Phase5Visual data={phase5Data} />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="text-5xl animate-pulse">?</div>
+            <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
+            <p className="text-ink-400">Loading complete visual breakdown...</p>
+          </div>
+        )}
+      </div>,
+    ];
+  }, [hints, selectedCategory, handleSelectCategory, phase4Nudge, phase4Keywords, phase5Data]);
+
+  const mappedWrongGuesses = useMemo(() =>
+    wrongGuesses.map(guess => ({
+      guess,
+      score: guessScores[guess] ?? null,
+      phaseGuessed: guessPhases[guess] ?? 1
+    })),
+  [wrongGuesses, guessScores, guessPhases]);
 
   if (gameState === 'loading') {
     return (
@@ -483,61 +562,8 @@ export default function PlayChallenge() {
           </Link>
         </div>
 
-        {gameState === 'playing' && hints && (() => {
-          const phaseContent = [
-            <div key="phase1">
-              {selectedCategory ? (
-                <CategoryPicker
-                  categories={hints.phase3}
-                  revealed={true}
-                  selectedCategory={selectedCategory}
-                />
-              ) : (
-                <CategoryPicker
-                  categories={hints.phase3}
-                  revealed={false}
-                  selectedCategory={selectedCategory}
-                  onSelectCategory={handleSelectCategory}
-                />
-              )}
-            </div>,
-            <div key="phase2">
-              <SentenceCard
-                sentence={hints.phase2}
-                revealed={true}
-                onReveal={undefined}
-              />
-            </div>,
-            <div key="phase3">
-              <PhaseChips words={hints.phase1} revealed={true} />
-            </div>,
-            <div key="phase4">
-              {phase4Nudge ? (
-                <Phase4Nudge nudge={phase4Nudge} keywords={phase4Keywords} />
-              ) : (
-                <div className="text-center space-y-4">
-                  <div className="text-5xl animate-pulse">💡</div>
-                  <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 4: AI Reflection</h3>
-                  <p className="text-ink-400">Loading personalized nudge...</p>
-                </div>
-              )}
-            </div>,
-            <div key="phase5">
-              {phase5Data ? (
-                <Phase5Visual data={phase5Data} />
-              ) : (
-                <div className="text-center space-y-4">
-                  <div className="text-5xl animate-pulse">🔮</div>
-                  <h3 className="text-2xl font-serif font-bold text-ink-500">Phase 5: Final Chance</h3>
-                  <p className="text-ink-400">Loading complete visual breakdown...</p>
-                </div>
-              )}
-            </div>,
-          ];
-
-          return (
+        {gameState === 'playing' && hints && (
           <>
-            {/* Header - Centered Logo */}
             <div className="flex justify-center mb-2 sm:mb-3">
               <div className="hidden sm:block">
                 <Logo size="lg" showTagline={false} />
@@ -547,7 +573,6 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Tagline and Timer */}
             <div className="mb-3 space-y-2">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-[11px] sm:text-sm text-forest-700 font-medium italic text-center">
@@ -555,7 +580,7 @@ export default function PlayChallenge() {
                 </p>
                 {expiresAt && !isExpired && (
                   <div className="flex flex-col items-center gap-1">
-                    <ChallengeTimer expiresAt={expiresAt} onExpired={() => setIsExpired(true)} />
+                    <ChallengeTimer expiresAt={expiresAt} onExpired={handleExpired} />
                     <p className="text-[10px] sm:text-xs text-ink-300 text-center">
                       Send to friends before time runs out!
                     </p>
@@ -564,16 +589,11 @@ export default function PlayChallenge() {
               </div>
             </div>
 
-            {/* Mystery Clues with aligned guesses */}
             <FoldedLetter
               phase={selectedCategory ? phase : Math.max(1, phase)}
               wrongGuessShake={shouldShake}
-              onPhaseClick={(p) => setViewingPhase(p)}
-              wrongGuesses={wrongGuesses.map(guess => ({
-                guess,
-                score: guessScores[guess] ?? null,
-                phaseGuessed: guessPhases[guess] ?? 1
-              }))}
+              onPhaseClick={handlePhaseClick}
+              wrongGuesses={mappedWrongGuesses}
               mysteryContent={
                 <div className="relative px-6 py-3 sm:px-8 sm:py-4 bg-forest-700 rounded-xl secret-note-shadow paper-texture border-2 border-forest-800 inline-flex items-center gap-3 sm:gap-4 shadow-xl">
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
@@ -587,21 +607,21 @@ export default function PlayChallenge() {
               {phaseContent}
             </FoldedLetter>
 
-            {/* Phase Review Modal */}
             {viewingPhase && viewingPhase < phase && (
               <div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
-                onClick={() => setViewingPhase(null)}
+                onClick={handleCloseModal}
               >
                 <div
                   className="bg-paper-cream rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 max-w-3xl w-full max-h-[80vh] overflow-y-auto border-2 sm:border-4 border-amber-200/50 paper-texture relative"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
-                    onClick={() => setViewingPhase(null)}
+                    onClick={handleCloseModal}
                     className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-forest-600 hover:bg-forest-700 text-white rounded-full transition-colors shadow-lg z-10 text-sm sm:text-base"
+                    aria-label="Close modal"
                   >
-                    ✕
+                    X
                   </button>
 
                   <div className="mb-3 sm:mb-4">
@@ -618,8 +638,9 @@ export default function PlayChallenge() {
                         setViewingPhase(viewingPhase - 1);
                       }}
                       className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
+                      aria-label="Previous phase"
                     >
-                      ←
+                      &larr;
                     </button>
                   )}
 
@@ -630,16 +651,16 @@ export default function PlayChallenge() {
                         setViewingPhase(viewingPhase + 1);
                       }}
                       className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
+                      aria-label="Next phase"
                     >
-                      →
+                      &rarr;
                     </button>
                   )}
                 </div>
               </div>
             )}
           </>
-          );
-        })()}
+        )}
 
         {gameState === 'playing' && hints && ((phase === 1 && selectedCategory) || phase > 1) && (
           <div className="space-y-1.5 sm:space-y-2">
@@ -685,97 +706,17 @@ export default function PlayChallenge() {
                       setSuggestedCorrection(null);
                       setLastGuessResult('incorrect');
                       if (pendingGuess) {
-                        setWrongGuesses(prev => [...prev, pendingGuess]);
+                        const newWrongGuesses = [...wrongGuesses, pendingGuess];
+                        setWrongGuesses(newWrongGuesses);
                         setGuessPhases(prev => ({ ...prev, [pendingGuess]: phase }));
                         setGuesses(prev => prev + 1);
-                        if (guessScores[pendingGuess]) {
-                          setGuessScores(prev => ({ ...prev, [pendingGuess]: guessScores[pendingGuess] }));
-                        }
+                        setShouldShake(true);
+                        setTimeout(() => setShouldShake(false), 400);
 
-                        const currentWrongGuessCount = wrongGuesses.length + 1;
-                        console.log('[Phase Logic] Wrong guess rejected. Current phase:', phase, 'Wrong guess count:', currentWrongGuessCount);
-
-                        if (phase >= 5) {
-                          console.log('[Game Over] Reached phase 5, revealing answer');
-                          const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            },
-                            body: JSON.stringify({ token, guess: '__reveal__', phase }),
-                          });
-                          const answerData = await answerResponse.json();
-                          setAnswer(answerData.canonical || 'Unknown');
-                          setGameState('failed');
-                        } else if (phase === 1) {
-                          console.log('[Advancing] Phase 1 → Phase 2');
-                          setPhase(2);
-                        } else if (phase === 2) {
-                          console.log('[Advancing] Phase 2 → Phase 3');
-                          setPhase(3);
-                        } else if (phase === 3) {
-                          console.log('[Advancing] Phase 3 → Phase 4');
-                          try {
-                            const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                              },
-                              body: JSON.stringify({
-                                token,
-                                guesses: wrongGuesses,
-                                hints: hints,
-                              }),
-                              timeout: 45000,
-                            });
-
-                            if (phase4Response.ok) {
-                              const phase4Data = await phase4Response.json();
-                              setPhase4Nudge(phase4Data.nudge);
-                              setPhase4Keywords(phase4Data.keywords || []);
-                            }
-                          } catch (err) {
-                            console.error('[Phase 4] Error fetching nudge:', err);
-                          }
-                          setPhase(4);
-                        } else if (phase === 4) {
-                          console.log('[Advancing] Phase 4 → Phase 5');
-                          try {
-                            const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                              },
-                              body: JSON.stringify({
-                                token,
-                                guesses: wrongGuesses,
-                                hints: {
-                                  ...hints,
-                                  phase4_nudge: phase4Nudge,
-                                },
-                              }),
-                              timeout: 45000,
-                            });
-
-                            if (phase5Response.ok) {
-                              const phase5Resp = await phase5Response.json();
-                              // Merge existing scores with phase5 analysis
-                              if (phase5Resp?.semantic_scores) {
-                                const mergedScores = phase5Resp.semantic_scores.map((item: any) => ({
-                                  ...item,
-                                  score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
-                                }));
-                                phase5Resp.semantic_scores = mergedScores;
-                              }
-                              setPhase5Data(phase5Resp);
-                            }
-                          } catch (err) {
-                            console.error('[Phase 5] Error fetching visual:', err);
-                          }
-                          setPhase(5);
+                        if (newWrongGuesses.length >= 5 && phase === 5) {
+                          await revealAnswer();
+                        } else if (phase < 5) {
+                          await advancePhase(pendingGuess, newWrongGuesses);
                         }
                       }
                       setPendingGuess(null);

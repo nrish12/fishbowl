@@ -63,8 +63,13 @@ export function ChallengeTimer({ expiresAt, onExpired }: ChallengeTimerProps) {
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${colors[urgency]} font-medium text-sm`}>
-      <Clock className={`w-4 h-4 ${iconColors[urgency]}`} />
+    <div
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${colors[urgency]} font-medium text-sm`}
+      role="timer"
+      aria-live="polite"
+      aria-label={`Time remaining: ${timeLeft}`}
+    >
+      <Clock className={`w-4 h-4 ${iconColors[urgency]}`} aria-hidden="true" />
       <span>{timeLeft} left</span>
     </div>
   );

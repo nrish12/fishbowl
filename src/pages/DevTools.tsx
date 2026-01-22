@@ -67,7 +67,7 @@ export default function DevTools() {
       const data = await response.json();
       setQueryResult(data);
     } catch (error) {
-      setQueryResult({ error: error.message });
+      setQueryResult({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function DevTools() {
         data,
       });
     } catch (error) {
-      setFunctionResult({ error: error.message });
+      setFunctionResult({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
@@ -133,7 +133,7 @@ export default function DevTools() {
           throw new Error(errorData.error || 'Failed to generate new daily challenge');
         }
       } catch (error) {
-        alert(`Error: ${error.message}`);
+        alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         setLoading(false);
       }

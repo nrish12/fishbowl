@@ -24,7 +24,6 @@ export default function FiveFoldNote({
     }
   }, [wrongGuessShake]);
 
-  // Animation variants for the main container
   const containerVariants = {
     initial: {
       opacity: 0,
@@ -37,14 +36,16 @@ export default function FiveFoldNote({
       rotateX: 0,
       transition: {
         duration: prefersReducedMotion ? 0.3 : 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
       }
     },
-    shake: prefersReducedMotion ? {} : {
+    shake: prefersReducedMotion ? {
+      x: 0,
+    } : {
       x: [0, -10, 10, -8, 8, -4, 4, 0],
       transition: {
         duration: 0.4,
-        ease: "easeInOut"
+        ease: "easeInOut" as const,
       }
     },
     solved: {
@@ -52,7 +53,7 @@ export default function FiveFoldNote({
       rotateZ: prefersReducedMotion ? 0 : [0, -1, 1, 0],
       transition: {
         duration: 0.6,
-        ease: "easeOut"
+        ease: "easeOut" as const,
       }
     },
     failed: {

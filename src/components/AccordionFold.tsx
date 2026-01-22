@@ -37,7 +37,6 @@ export default function AccordionFold({ phase, children, wrongGuessShake }: Acco
         {/* Accordion panels */}
         {children.map((child, index) => {
           const isUnfolded = index < phase;
-          const panelPhase = index + 1;
 
           return (
             <motion.div

@@ -20,8 +20,15 @@ export default function FoldedLetter({ phase, children, wrongGuessShake, onPhase
   useEffect(() => {
     if (wrongGuessShake && currentPanelRef.current) {
       gsap.to(currentPanelRef.current, {
-        x: [-8, 8, -6, 6, -4, 4, 0],
-        rotation: [-0.5, 0.5, -0.3, 0.3, 0],
+        keyframes: [
+          { x: -8, rotation: -0.5 },
+          { x: 8, rotation: 0.5 },
+          { x: -6, rotation: -0.3 },
+          { x: 6, rotation: 0.3 },
+          { x: -4, rotation: 0 },
+          { x: 4, rotation: 0 },
+          { x: 0, rotation: 0 },
+        ],
         duration: 0.5,
         ease: 'power2.out',
       });

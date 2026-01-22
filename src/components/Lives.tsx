@@ -11,9 +11,18 @@ export default function Lives({ lives, maxLives = 5 }: LivesProps) {
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       className="flex items-center gap-2 bg-paper-cream px-4 py-2 rounded-full shadow-[var(--shadow-paper)] border-2 border-forest-300/20"
+      role="status"
+      aria-label={`${lives} of ${maxLives} guesses remaining`}
     >
-      <span className="text-xs font-bold text-forest-600 uppercase tracking-wider">Guesses</span>
-      <div className="flex items-center gap-1">
+      <span className="text-xs font-bold text-forest-600 uppercase tracking-wider" aria-hidden="true">Guesses</span>
+      <div
+        className="flex items-center gap-1"
+        role="progressbar"
+        aria-valuenow={lives}
+        aria-valuemin={0}
+        aria-valuemax={maxLives}
+        aria-label="Guesses remaining"
+      >
         {Array.from({ length: maxLives }).map((_, i) => (
           <motion.div
             key={i}
@@ -28,10 +37,11 @@ export default function Lives({ lives, maxLives = 5 }: LivesProps) {
                 ? 'bg-forest-600'
                 : 'bg-ink-200'
             }`}
+            aria-hidden="true"
           />
         ))}
       </div>
-      <span className="text-sm font-bold text-forest-800 tabular-nums">{lives}/{maxLives}</span>
+      <span className="text-sm font-bold text-forest-800 tabular-nums" aria-hidden="true">{lives}/{maxLives}</span>
     </motion.div>
   );
 }

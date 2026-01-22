@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -23,20 +23,23 @@ export default function DailyChallenge() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   const isValidCategory = category && VALID_CATEGORIES.includes(category as DailyCategory);
   const categoryName = isValidCategory ? CATEGORY_NAMES[category as DailyCategory] : '';
 
-  useEffect(() => {
-    if (!isValidCategory) {
-      navigate('/daily', { replace: true });
-      return;
-    }
-    loadDailyChallenge();
-  }, [category]);
+  const loadDailyChallenge = useCallback(async () => {
+    if (!isValidCategory || !SUPABASE_URL || !SUPABASE_ANON_KEY) return;
 
-  const loadDailyChallenge = async () => {
-    if (!isValidCategory) return;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetchWithTimeout(
@@ -48,29 +51,67 @@ export default function DailyChallenge() {
             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           },
           timeout: 30000,
+          signal: abortControllerRef.current.signal,
         }
       );
 
+      if (!isMountedRef.current) return;
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to load daily challenge');
+        let errorMessage = 'Failed to load daily challenge';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // JSON parsing failed, use default message
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
 
-      if (data.token) {
+      if (!isMountedRef.current) return;
+
+      if (data.token && typeof data.token === 'string') {
         setIsRevealing(true);
-        setTimeout(() => {
-          navigate(`/play?t=${data.token}`);
+        setLoading(false);
+        timeoutRef.current = setTimeout(() => {
+          if (isMountedRef.current) {
+            navigate(`/play?t=${encodeURIComponent(data.token)}`);
+          }
         }, 1200);
       } else {
         throw new Error('No token received');
       }
     } catch (err: any) {
+      if (!isMountedRef.current) return;
+      if (err.name === 'AbortError') return;
+
       setError(err.message || 'Failed to fetch');
       setLoading(false);
     }
-  };
+  }, [category, isValidCategory, navigate]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (!isValidCategory) {
+      navigate('/daily', { replace: true });
+      return;
+    }
+
+    loadDailyChallenge();
+
+    return () => {
+      isMountedRef.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [category, isValidCategory, navigate, loadDailyChallenge]);
 
   if (loading && !isRevealing) {
     return (
@@ -98,7 +139,7 @@ export default function DailyChallenge() {
                   <p className="text-xl font-serif font-bold text-forest-800">
                     Loading {categoryName} Mystery
                   </p>
-                  <div className="flex justify-center gap-2">
+                  <div className="flex justify-center gap-2" role="status" aria-label="Loading">
                     <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                     <div className="w-2 h-2 bg-forest-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -137,14 +178,15 @@ export default function DailyChallenge() {
           </Link>
 
           <div className="bg-white rounded-2xl p-8 paper-shadow paper-texture text-center space-y-4 border-2 border-red-200">
-            <div className="text-5xl">⚠️</div>
+            <div className="text-5xl" role="img" aria-label="Warning">!</div>
             <h2 className="text-2xl font-serif font-bold text-forest-800">Unable to Load</h2>
             <p className="text-forest-600">{error}</p>
             <button
               onClick={loadDailyChallenge}
-              className="px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full font-bold hover:shadow-xl transition-all transform hover:scale-105"
+              disabled={loading}
+              className="px-6 py-3 bg-gradient-to-r from-forest-600 to-forest-700 text-gold-50 rounded-full font-bold hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Try Again
+              {loading ? 'Loading...' : 'Try Again'}
             </button>
           </div>
         </div>

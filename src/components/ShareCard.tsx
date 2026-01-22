@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { trackEvent } from '../utils/tracking';
 import { shareResults } from '../utils/shareResults';
-import { Share2, Check, Copy, Sparkles, Home } from 'lucide-react';
+import { Share2, Check, Copy, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EnvelopePanel from './paper/EnvelopePanel';
 import StickyNote from './paper/StickyNote';
@@ -49,7 +49,7 @@ export default function ShareCard({ rank, solved, answer, guesses, phase, shareU
 
       if (challengeId) {
         await trackEvent('share', challengeId, {
-          share_method: navigator.share ? 'native' : 'clipboard',
+          share_method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
           rank,
           solved,
           category,
@@ -142,8 +142,8 @@ export default function ShareCard({ rank, solved, answer, guesses, phase, shareU
             </>
           ) : (
             <>
-              {navigator.share ? <Share2 size={20} /> : <Copy size={20} />}
-              {navigator.share ? 'Share Result' : 'Copy Result'}
+              {typeof navigator.share === 'function' ? <Share2 size={20} /> : <Copy size={20} />}
+              {typeof navigator.share === 'function' ? 'Share Result' : 'Copy Result'}
             </>
           )}
         </motion.button>
