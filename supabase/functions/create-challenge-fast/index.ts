@@ -146,7 +146,7 @@ Respond with ONLY a JSON object:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-5.1-chat-latest",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are a helpful assistant that responds in JSON format." },
           { role: "user", content: scorePrompt }
@@ -370,7 +370,7 @@ Respond with ONLY valid JSON:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-5.1-chat-latest",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: "You are a helpful assistant that responds in JSON format." },
             { role: "user", content: validationPrompt }
@@ -386,7 +386,7 @@ Respond with ONLY valid JSON:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-5.1-chat-latest",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
