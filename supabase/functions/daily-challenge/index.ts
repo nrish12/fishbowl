@@ -24,7 +24,7 @@ const CATEGORY_CONFIGS: Record<DailyCategory, CategoryConfig> = {
   pop_culture: {
     name: "Pop Culture",
     types: ["person", "thing", "place"],
-    typeWeights: [0.6, 0.3, 0.1],
+    typeWeights: [0.34, 0.33, 0.33],
     subjectPrompt: `You are picking a famous POP CULTURE subject for a daily guessing game.
 
 FOCUS AREAS:
@@ -48,7 +48,7 @@ AVOID:
   history_science: {
     name: "History & Science",
     types: ["person", "thing", "place"],
-    typeWeights: [0.5, 0.35, 0.15],
+    typeWeights: [0.34, 0.33, 0.33],
     subjectPrompt: `You are picking a famous HISTORY or SCIENCE subject for a daily guessing game.
 
 FOCUS AREAS:
@@ -77,7 +77,7 @@ AVOID:
   sports: {
     name: "Sports",
     types: ["person", "place", "thing"],
-    typeWeights: [0.7, 0.15, 0.15],
+    typeWeights: [0.34, 0.33, 0.33],
     subjectPrompt: `You are picking a famous SPORTS subject for a daily guessing game.
 
 FOCUS AREAS:
@@ -106,7 +106,7 @@ AVOID:
   geography: {
     name: "Geography",
     types: ["place", "thing", "person"],
-    typeWeights: [0.7, 0.2, 0.1],
+    typeWeights: [0.34, 0.33, 0.33],
     subjectPrompt: `You are picking a famous GEOGRAPHY subject for a daily guessing game.
 
 FOCUS AREAS:
