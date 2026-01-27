@@ -200,9 +200,31 @@ async function generateCategorySubject(
   const config = CATEGORY_CONFIGS[category];
   const excludeList = [previousTarget, ...recentSubjects].filter(Boolean).join(", ");
 
+  const categoryConstraints: Record<DailyCategory, string> = {
+    sports: `STRICT REQUIREMENT: The ${type} MUST be directly related to SPORTS.
+- If picking a PERSON: Must be an athlete, coach, sports commentator, or sports figure
+- If picking a PLACE: Must be a stadium, arena, sports venue, or location famous for sports
+- If picking a THING: Must be a sports event, trophy, sports equipment, or sports phenomenon
+DO NOT pick general landmarks, mysteries, or anything not directly tied to athletics/sports.`,
+    pop_culture: `STRICT REQUIREMENT: The ${type} MUST be directly related to POP CULTURE/ENTERTAINMENT.
+- If picking a PERSON: Must be an entertainer, celebrity, or entertainment industry figure
+- If picking a PLACE: Must be famous for entertainment/media (studios, entertainment venues)
+- If picking a THING: Must be a movie, TV show, song, or entertainment phenomenon`,
+    history_science: `STRICT REQUIREMENT: The ${type} MUST be directly related to HISTORY or SCIENCE.
+- If picking a PERSON: Must be a historical figure, scientist, or inventor
+- If picking a PLACE: Must be a historically significant location or scientific landmark
+- If picking a THING: Must be an invention, discovery, or historical artifact`,
+    geography: `STRICT REQUIREMENT: The ${type} MUST be a GEOGRAPHIC feature or location.
+- If picking a PERSON: Must be an explorer or geographer
+- If picking a PLACE: Must be a natural wonder, famous city, or geographic landmark
+- If picking a THING: Must be a geographic feature (river, mountain range, desert, etc.)`
+  };
+
   const prompt = `${config.subjectPrompt}
 
 TYPE TO PICK: ${type}
+
+${categoryConstraints[category]}
 
 ${excludeList ? `EXCLUSIONS - Do NOT pick any of these (used recently): ${excludeList}` : ''}
 
@@ -213,7 +235,8 @@ THE FAMILY FEUD STANDARD:
 
 Respond with ONLY a JSON object:
 {
-  "target": "the ${type} you've chosen"
+  "target": "the ${type} you've chosen",
+  "category_justification": "brief explanation of why this fits the ${config.name} category"
 }`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -225,7 +248,7 @@ Respond with ONLY a JSON object:
     body: JSON.stringify({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: config.systemPrompt },
+        { role: "system", content: config.systemPrompt + ` CRITICAL: Only pick subjects that are DIRECTLY and PRIMARILY associated with ${config.name}. Never pick subjects from other categories.` },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
@@ -238,6 +261,7 @@ Respond with ONLY a JSON object:
 
   const data = await response.json();
   const result = JSON.parse(data.choices[0].message.content);
+  console.log(`[${category}] AI justification: ${result.category_justification}`);
   return result.target;
 }
 
