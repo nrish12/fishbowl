@@ -4,7 +4,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:4173",
-  "https://clueladder.com",
+  "https://mystle.app",
+  "https://www.mystle.app",
+  "https://fishbowl-roan.vercel.app",
 ];
 
 function getCorsHeaders(origin: string | null) {

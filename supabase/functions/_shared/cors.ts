@@ -1,9 +1,9 @@
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:4173",
-  "https://clueladder.com",
-  "https://www.clueladder.com",
-  "https://mystle.vercel.app",
+  "https://mystle.app",
+  "https://www.mystle.app",
+  "https://fishbowl-roan.vercel.app",
   Deno.env.get("PUBLIC_SITE_URL"),
   Deno.env.get("SITE_URL"),
 ].filter(Boolean) as string[];
