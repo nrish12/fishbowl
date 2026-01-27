@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const CATEGORIES = ["pop_culture", "history_science", "sports", "geography"] as const;
+type Category = typeof CATEGORIES[number];
 type Difficulty = "easy" | "medium" | "hard";
 
 const DIFFICULTY_WEIGHTS: Record<Difficulty, number> = {
@@ -28,6 +29,60 @@ function selectDifficulty(): Difficulty {
   return "medium";
 }
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function generateChallengeWithRetry(
+  supabaseUrl: string,
+  supabaseAnonKey: string,
+  category: Category,
+  maxRetries: number = 3,
+  baseDelayMs: number = 2000
+): Promise<{ success: boolean; challenge_id?: string; error?: string }> {
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const difficulty = selectDifficulty();
+    console.log(`[Scheduled] Attempt ${attempt}/${maxRetries} for ${category} with difficulty: ${difficulty}`);
+
+    try {
+      const dailyChallengeUrl = `${supabaseUrl}/functions/v1/daily-challenge?category=${category}&difficulty=${difficulty}`;
+
+      const response = await fetch(dailyChallengeUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${supabaseAnonKey}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`[Scheduled] Successfully generated ${category} challenge on attempt ${attempt}`);
+        return { success: true, challenge_id: data.challenge_id };
+      }
+
+      const errorText = await response.text();
+      console.error(`[Scheduled] Attempt ${attempt} failed for ${category}:`, errorText);
+
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt - 1);
+        console.log(`[Scheduled] Waiting ${delay}ms before retry...`);
+        await sleep(delay);
+      }
+    } catch (err) {
+      console.error(`[Scheduled] Attempt ${attempt} error for ${category}:`, err);
+
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt - 1);
+        console.log(`[Scheduled] Waiting ${delay}ms before retry...`);
+        await sleep(delay);
+      }
+    }
+  }
+
+  return { success: false, error: `Failed after ${maxRetries} attempts` };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -46,13 +101,19 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const targetDate = tomorrow.toISOString().split("T")[0];
+    const url = new URL(req.url);
+    const forToday = url.searchParams.get("today") === "true";
 
-    console.log(`[Scheduled] Generating challenges for ${targetDate}`);
+    const targetDateObj = new Date();
+    if (!forToday) {
+      targetDateObj.setDate(targetDateObj.getDate() + 1);
+    }
+    const targetDate = targetDateObj.toISOString().split("T")[0];
+
+    console.log(`[Scheduled] Generating challenges for ${targetDate} (forToday: ${forToday})`);
 
     const results: Record<string, { success: boolean; challenge_id?: string; error?: string }> = {};
+    const failedCategories: Category[] = [];
 
     for (const category of CATEGORIES) {
       const { data: existing } = await supabase
@@ -68,30 +129,25 @@ Deno.serve(async (req: Request) => {
         continue;
       }
 
-      const difficulty = selectDifficulty();
-      console.log(`[Scheduled] Generating ${category} challenge with difficulty: ${difficulty}...`);
-      const dailyChallengeUrl = `${supabaseUrl}/functions/v1/daily-challenge?category=${category}&difficulty=${difficulty}`;
+      const result = await generateChallengeWithRetry(supabaseUrl, supabaseAnonKey, category, 3, 2000);
+      results[category] = result;
 
-      try {
-        const response = await fetch(dailyChallengeUrl, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${supabaseAnonKey}`,
-          },
-        });
+      if (!result.success) {
+        failedCategories.push(category);
+      }
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`[Scheduled] Failed to generate ${category}:`, errorText);
-          results[category] = { success: false, error: errorText };
-        } else {
-          const data = await response.json();
-          console.log(`[Scheduled] Successfully generated ${category} challenge`);
-          results[category] = { success: true, challenge_id: data.challenge_id };
-        }
-      } catch (err) {
-        console.error(`[Scheduled] Error generating ${category}:`, err);
-        results[category] = { success: false, error: err.message };
+      await sleep(1000);
+    }
+
+    if (failedCategories.length > 0) {
+      console.log(`[Scheduled] Retrying ${failedCategories.length} failed categories with longer delays...`);
+      await sleep(5000);
+
+      for (const category of failedCategories) {
+        console.log(`[Scheduled] Final retry for ${category}...`);
+        const result = await generateChallengeWithRetry(supabaseUrl, supabaseAnonKey, category, 2, 5000);
+        results[category] = result;
+        await sleep(2000);
       }
     }
 

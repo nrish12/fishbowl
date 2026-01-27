@@ -23,6 +23,29 @@ interface CategoryConfig {
   systemPrompt: string;
 }
 
+const FALLBACK_SUBJECTS: Record<DailyCategory, { person: string[]; place: string[]; thing: string[] }> = {
+  pop_culture: {
+    person: ["Tom Hanks", "Taylor Swift", "Oprah Winfrey", "Will Smith", "Beyonce", "Leonardo DiCaprio", "Jennifer Aniston", "Dwayne Johnson"],
+    place: ["Hollywood Sign", "Broadway", "Graceland", "Abbey Road", "Las Vegas Strip", "Disney World"],
+    thing: ["Star Wars", "The Simpsons", "Netflix", "iPhone", "Harry Potter", "Marvel Cinematic Universe", "Game of Thrones"]
+  },
+  history_science: {
+    person: ["Marie Curie", "Leonardo da Vinci", "Cleopatra", "Neil Armstrong", "Benjamin Franklin", "Albert Einstein", "Galileo Galilei", "Isaac Newton"],
+    place: ["Pompeii", "The Colosseum", "Machu Picchu", "Stonehenge", "The Pyramids of Giza", "The Great Wall of China"],
+    thing: ["The Printing Press", "Penicillin", "The Lightbulb", "DNA", "The Telescope", "The Compass", "The Wheel"]
+  },
+  sports: {
+    person: ["Michael Jordan", "Serena Williams", "Muhammad Ali", "Babe Ruth", "Pele", "Tiger Woods", "Tom Brady", "Usain Bolt"],
+    place: ["Madison Square Garden", "Wembley Stadium", "Augusta National", "Wimbledon", "Yankee Stadium", "The Olympic Stadium"],
+    thing: ["The Super Bowl", "The Olympics", "FIFA World Cup", "The Stanley Cup", "March Madness", "The Kentucky Derby"]
+  },
+  geography: {
+    person: ["Marco Polo", "Christopher Columbus", "Amelia Earhart", "Ferdinand Magellan", "Lewis and Clark", "Jacques Cousteau"],
+    place: ["The Amazon Rainforest", "Mount Everest", "The Grand Canyon", "The Great Barrier Reef", "Niagara Falls", "The Sahara Desert"],
+    thing: ["The Northern Lights", "The Mississippi River", "The Alps", "Route 66", "The Panama Canal", "The Nile River"]
+  }
+};
+
 const CATEGORY_CONFIGS: Record<DailyCategory, CategoryConfig> = {
   pop_culture: {
     name: "Pop Culture",
@@ -361,42 +384,105 @@ Deno.serve(async (req: Request) => {
     const recentSubjects = await getRecentSubjects(supabase, category, 14);
     console.log(`[${category}] Avoiding ${recentSubjects.length} recent subjects:`, recentSubjects);
 
-    const type = selectTypeByWeight(categoryConfig.types, categoryConfig.typeWeights);
-    console.log(`[${category}] Selected type: ${type}`);
-
-    const target = await generateCategorySubject(category, type, null, recentSubjects, openaiKey);
-    console.log(`[${category}] Generated target: ${target}`);
-
     const createUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-challenge-fast`;
     let challengeData = null;
-    let attempts = 0;
-    const maxAttempts = 3;
-    let currentTarget = target;
+    let totalAttempts = 0;
+    const maxTotalAttempts = 9;
+    const typesToTry = [...categoryConfig.types];
 
-    while (!challengeData && attempts < maxAttempts) {
-      attempts++;
+    while (!challengeData && totalAttempts < maxTotalAttempts && typesToTry.length > 0) {
+      const currentType = typesToTry[0];
+      let typeAttempts = 0;
+      const maxTypeAttempts = 3;
 
-      const createResponse = await fetch(createUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-        },
-        body: JSON.stringify({ type, target: currentTarget }),
-      });
+      console.log(`[${category}] Trying type: ${currentType}`);
 
-      if (createResponse.ok) {
-        challengeData = await createResponse.json();
-        break;
-      } else {
-        const errorData = await createResponse.json();
-        console.log(`[${category}] Attempt ${attempts} failed for ${currentTarget}:`, errorData.error || errorData.reason);
-        if (attempts >= maxAttempts) {
-          throw new Error(`Failed to generate challenge after ${maxAttempts} attempts: ${errorData.error || errorData.reason}`);
+      while (!challengeData && typeAttempts < maxTypeAttempts) {
+        totalAttempts++;
+        typeAttempts++;
+
+        let currentTarget: string;
+        try {
+          currentTarget = await generateCategorySubject(category, currentType, null, recentSubjects, openaiKey);
+          console.log(`[${category}] AI generated target: ${currentTarget}`);
+        } catch (aiError) {
+          console.log(`[${category}] AI generation failed, using fallback`);
+          const fallbacks = FALLBACK_SUBJECTS[category][currentType as keyof typeof FALLBACK_SUBJECTS[typeof category]];
+          const availableFallbacks = fallbacks.filter(f => !recentSubjects.includes(f));
+          if (availableFallbacks.length === 0) {
+            console.log(`[${category}] No available fallbacks for ${currentType}, trying next type`);
+            break;
+          }
+          currentTarget = availableFallbacks[Math.floor(Math.random() * availableFallbacks.length)];
+          console.log(`[${category}] Using fallback target: ${currentTarget}`);
         }
-        currentTarget = await generateCategorySubject(category, type, currentTarget, recentSubjects, openaiKey);
+
+        try {
+          const createResponse = await fetch(createUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+            },
+            body: JSON.stringify({ type: currentType, target: currentTarget }),
+          });
+
+          if (createResponse.ok) {
+            challengeData = await createResponse.json();
+            console.log(`[${category}] Successfully created challenge for ${currentTarget}`);
+            break;
+          } else {
+            const errorData = await createResponse.json();
+            console.log(`[${category}] Attempt ${totalAttempts} failed for ${currentTarget}:`, errorData.error || errorData.reason);
+            recentSubjects.push(currentTarget);
+          }
+        } catch (fetchError) {
+          console.log(`[${category}] Fetch error on attempt ${totalAttempts}:`, fetchError);
+        }
+
+        if (typeAttempts < maxTypeAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      if (!challengeData) {
+        typesToTry.shift();
+        if (typesToTry.length > 0) {
+          console.log(`[${category}] Switching to next type: ${typesToTry[0]}`);
+        }
       }
     }
+
+    if (!challengeData) {
+      console.log(`[${category}] All attempts failed, trying final fallback...`);
+      const fallbackType = categoryConfig.types[0];
+      const fallbacks = FALLBACK_SUBJECTS[category][fallbackType as keyof typeof FALLBACK_SUBJECTS[typeof category]];
+      const availableFallbacks = fallbacks.filter(f => !recentSubjects.includes(f));
+
+      if (availableFallbacks.length > 0) {
+        const fallbackTarget = availableFallbacks[0];
+        console.log(`[${category}] Final fallback attempt with: ${fallbackTarget}`);
+
+        const createResponse = await fetch(createUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+          },
+          body: JSON.stringify({ type: fallbackType, target: fallbackTarget }),
+        });
+
+        if (createResponse.ok) {
+          challengeData = await createResponse.json();
+        }
+      }
+    }
+
+    if (!challengeData) {
+      throw new Error(`Failed to generate challenge after ${totalAttempts} attempts across all types`);
+    }
+
+    const type = challengeData.type;
 
     const hintIndex = DIFFICULTY_TO_INDEX[difficulty];
     const selectedPhase1Index = hintIndex;
