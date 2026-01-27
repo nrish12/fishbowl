@@ -1,8 +1,12 @@
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:4173",
-  Deno.env.get("PUBLIC_SITE_URL") || Deno.env.get("SITE_URL") || "https://clueladder.com",
-];
+  "https://clueladder.com",
+  "https://www.clueladder.com",
+  "https://mystle.vercel.app",
+  Deno.env.get("PUBLIC_SITE_URL"),
+  Deno.env.get("SITE_URL"),
+].filter(Boolean) as string[];
 
 export function getCorsHeaders(
   origin: string | null,
@@ -10,11 +14,12 @@ export function getCorsHeaders(
 ) {
   const isLocalhost = origin && (origin.includes("localhost") || origin.includes("127.0.0.1"));
   const isPreview = origin && (origin.includes("webcontainer") || origin.includes("stackblitz"));
+  const isVercel = origin && origin.includes(".vercel.app");
   const isAllowed = origin && allowedOrigins.includes(origin);
 
-  const baseOrigin = (isLocalhost || isPreview || isAllowed) && origin
+  const baseOrigin = (isLocalhost || isPreview || isVercel || isAllowed) && origin
     ? origin
-    : allowedOrigins[allowedOrigins.length - 1];
+    : "*";
 
   return {
     "Access-Control-Allow-Origin": baseOrigin,
