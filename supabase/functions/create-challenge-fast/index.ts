@@ -16,6 +16,40 @@ function extractJSON(text: string): any {
   return JSON.parse(text);
 }
 
+function sanitizeText(text: string): string {
+  return text
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/\u2026/g, '...')
+    .replace(/\u00A0/g, ' ')
+    .replace(/[\u2000-\u200B]/g, ' ')
+    .trim();
+}
+
+function sanitizeHints(hints: any): any {
+  if (!hints) return hints;
+
+  const sanitizeValue = (val: any): any => {
+    if (typeof val === 'string') {
+      return sanitizeText(val);
+    }
+    if (Array.isArray(val)) {
+      return val.map(sanitizeValue);
+    }
+    if (typeof val === 'object' && val !== null) {
+      const result: any = {};
+      for (const key in val) {
+        result[key] = sanitizeValue(val[key]);
+      }
+      return result;
+    }
+    return val;
+  };
+
+  return sanitizeValue(hints);
+}
+
 function getAnswerWords(target: string): Set<string> {
   const words = new Set<string>();
   const targetLower = target.toLowerCase();
@@ -541,15 +575,21 @@ Respond with ONLY valid JSON:
       })
       .catch(err => console.warn("Quality scoring failed:", err));
 
+    const sanitizedHints = sanitizeHints({
+      phase1_options: hints.phase1_options,
+      phase2_options: hints.phase2_options,
+      phase3: hints.phase3,
+    });
+
     return new Response(
       JSON.stringify({
         challenge_id: challengeId,
         type,
         target,
         fame_score: validationResult.fame_score,
-        phase1_options: hints.phase1_options,
-        phase2_options: hints.phase2_options,
-        phase3: hints.phase3,
+        phase1_options: sanitizedHints.phase1_options,
+        phase2_options: sanitizedHints.phase2_options,
+        phase3: sanitizedHints.phase3,
         aliases: enhancedAliases,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
