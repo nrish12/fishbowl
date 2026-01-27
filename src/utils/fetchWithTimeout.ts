@@ -2,14 +2,24 @@ interface FetchWithTimeoutOptions extends RequestInit {
   timeout?: number;
 }
 
+export class TimeoutError extends Error {
+  name = 'TimeoutError';
+  constructor(message = 'Request timeout - please try again') {
+    super(message);
+  }
+}
+
 export async function fetchWithTimeout(
   url: string,
   options: FetchWithTimeoutOptions = {}
 ): Promise<Response> {
-  const { timeout = 30000, ...fetchOptions } = options;
+  const { timeout = 30000, signal: externalSignal, ...fetchOptions } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  const handleExternalAbort = () => controller.abort();
+  externalSignal?.addEventListener('abort', handleExternalAbort);
 
   try {
     const response = await fetch(url, {
@@ -23,7 +33,10 @@ export async function fetchWithTimeout(
     clearTimeout(timeoutId);
 
     if (error.name === 'AbortError') {
-      throw new Error('Request timeout - please try again');
+      if (externalSignal?.aborted) {
+        throw error;
+      }
+      throw new TimeoutError();
     }
 
     if (!navigator.onLine) {
@@ -31,6 +44,8 @@ export async function fetchWithTimeout(
     }
 
     throw error;
+  } finally {
+    externalSignal?.removeEventListener('abort', handleExternalAbort);
   }
 }
 
@@ -45,6 +60,10 @@ export async function retryFetch(
     try {
       return await fetchWithTimeout(url, options);
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw error;
+      }
+
       lastError = error;
 
       if (attempt < maxRetries) {

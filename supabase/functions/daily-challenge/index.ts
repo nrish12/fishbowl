@@ -546,6 +546,14 @@ Deno.serve(async (req: Request) => {
       throw dailyInsertError;
     }
 
+    await supabase.from("challenge_metadata").insert({
+      challenge_id: challengeData.challenge_id,
+      is_daily: true,
+      daily_date: today,
+      selected_phase1_index: selectedPhase1Index,
+      selected_phase2_index: selectedPhase2Index,
+    });
+
     const token = await createToken(newChallenge, category, difficulty);
 
     return new Response(

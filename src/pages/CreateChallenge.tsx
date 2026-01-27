@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, Check, AlertCircle } from 'lucide-react';
 import Logo from '../components/Logo';
 import { getSessionId, logPreview, trackEvent } from '../utils/tracking';
+import { retryFetch } from '../utils/fetchWithTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -81,14 +82,15 @@ export default function CreateChallenge() {
     setDisambiguation(null);
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-challenge-fast`, {
+      const response = await retryFetch(`${SUPABASE_URL}/functions/v1/create-challenge-fast`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ type, target: target.trim() }),
-      });
+        timeout: 60000,
+      }, 2);
 
       const data = await response.json();
 

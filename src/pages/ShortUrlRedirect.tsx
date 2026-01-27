@@ -25,9 +25,6 @@ export default function ShortUrlRedirect() {
         throw new Error('Configuration error: Missing Supabase credentials');
       }
 
-      console.log('Resolving short URL:', shortCode);
-      console.log('Using Supabase URL:', SUPABASE_URL);
-
       const response = await fetch(`${SUPABASE_URL}/functions/v1/s?c=${shortCode}`, {
         headers: {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -35,16 +32,12 @@ export default function ShortUrlRedirect() {
         },
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Short URL not found');
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
 
       if (data.token) {
         navigate(`/play?t=${data.token}`, { replace: true });
@@ -52,7 +45,6 @@ export default function ShortUrlRedirect() {
         throw new Error('Invalid response from server');
       }
     } catch (err: any) {
-      console.error('Short URL resolution error:', err);
       setError(err.message || 'Failed to resolve short URL');
     }
   };

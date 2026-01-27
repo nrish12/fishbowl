@@ -91,9 +91,13 @@ export default function PlayChallenge() {
   });
 
   const isSubmittingRef = useRef(false);
+  const suggestionPendingRef = useRef(false);
   const progressLoadedRef = useRef(false);
+  const lastTokenRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const STORAGE_KEY_PREFIX = 'mystle_progress_';
+  const DAILY_PROGRESS_PREFIX = 'mystle_daily_progress_';
   const DAILY_CHALLENGE_DATE_KEY = 'mystle_daily_date';
 
   const saveProgress = useCallback(() => {
@@ -108,23 +112,29 @@ export default function PlayChallenge() {
       startTime,
       selectedCategory,
       phase4Nudge,
+      phase4Keywords,
       phase5Data,
       timestamp: Date.now(),
       challengeId,
+      isDaily: !!dailyCategory,
     };
 
     try {
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}${token}`, JSON.stringify(progress));
+      const prefix = dailyCategory ? DAILY_PROGRESS_PREFIX : STORAGE_KEY_PREFIX;
+      localStorage.setItem(`${prefix}${token}`, JSON.stringify(progress));
     } catch (error) {
       console.warn('Failed to save progress:', error);
     }
-  }, [token, phase, guesses, wrongGuesses, guessScores, guessPhases, startTime, selectedCategory, phase4Nudge, phase5Data, challengeId]);
+  }, [token, phase, guesses, wrongGuesses, guessScores, guessPhases, startTime, selectedCategory, phase4Nudge, phase4Keywords, phase5Data, challengeId, dailyCategory]);
 
   const loadProgress = useCallback(() => {
     if (!token) return null;
 
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_PREFIX}${token}`);
+      let saved = localStorage.getItem(`${STORAGE_KEY_PREFIX}${token}`);
+      if (!saved) {
+        saved = localStorage.getItem(`${DAILY_PROGRESS_PREFIX}${token}`);
+      }
       if (!saved) return null;
 
       const progress = JSON.parse(saved);
@@ -132,6 +142,7 @@ export default function PlayChallenge() {
       const hoursSinceSave = (Date.now() - progress.timestamp) / (1000 * 60 * 60);
       if (hoursSinceSave > 24) {
         localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
+        localStorage.removeItem(`${DAILY_PROGRESS_PREFIX}${token}`);
         return null;
       }
 
@@ -146,6 +157,7 @@ export default function PlayChallenge() {
     if (!token) return;
     try {
       localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
+      localStorage.removeItem(`${DAILY_PROGRESS_PREFIX}${token}`);
     } catch (error) {
       console.warn('Failed to clear progress:', error);
     }
@@ -159,7 +171,7 @@ export default function PlayChallenge() {
       if (lastDaily !== today) {
         const keys = Object.keys(localStorage);
         keys.forEach(key => {
-          if (key.startsWith(STORAGE_KEY_PREFIX)) {
+          if (key.startsWith(DAILY_PROGRESS_PREFIX)) {
             localStorage.removeItem(key);
           }
         });
@@ -266,9 +278,23 @@ export default function PlayChallenge() {
       return;
     }
 
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
     checkAndClearDailyChallenge();
     loadChallenge();
+
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [token, checkAndClearDailyChallenge]);
+
+  useEffect(() => {
+    if (token !== lastTokenRef.current) {
+      progressLoadedRef.current = false;
+      lastTokenRef.current = token;
+    }
+  }, [token]);
 
   useEffect(() => {
     if (token && gameState === 'playing' && challengeId && !progressLoadedRef.current) {
@@ -283,6 +309,7 @@ export default function PlayChallenge() {
         if (progress.startTime) setStartTime(progress.startTime);
         setSelectedCategory(progress.selectedCategory);
         if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
+        if (progress.phase4Keywords) setPhase4Keywords(progress.phase4Keywords);
         if (progress.phase5Data) setPhase5Data(progress.phase5Data);
       }
     }
@@ -302,6 +329,7 @@ export default function PlayChallenge() {
         headers: {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        signal: abortControllerRef.current?.signal,
       });
 
       if (!response.ok) {
@@ -325,6 +353,7 @@ export default function PlayChallenge() {
         });
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       setError(err.message);
       setGameState('failed');
     }
@@ -332,7 +361,7 @@ export default function PlayChallenge() {
 
   const handleGuess = useCallback(async (guess: string) => {
     if (!token || !hints || !challengeId) return;
-    if (isSubmittingRef.current) return;
+    if (isSubmittingRef.current || suggestionPendingRef.current) return;
 
     const trimmedGuess = guess.trim();
     if (!trimmedGuess) return;
@@ -366,6 +395,7 @@ export default function PlayChallenge() {
       const isCorrect = data.result === 'correct';
 
       if (data.suggestion && data.suggestion !== trimmedGuess) {
+        suggestionPendingRef.current = true;
         setPendingGuess(trimmedGuess);
         setSuggestedCorrection(data.suggestion);
         setIsThinking(false);
@@ -691,6 +721,7 @@ export default function PlayChallenge() {
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => {
+                      suggestionPendingRef.current = false;
                       setSuggestedCorrection(null);
                       if (pendingGuess) {
                         handleGuess(suggestedCorrection);
@@ -703,6 +734,7 @@ export default function PlayChallenge() {
                   </button>
                   <button
                     onClick={async () => {
+                      suggestionPendingRef.current = false;
                       setSuggestedCorrection(null);
                       setLastGuessResult('incorrect');
                       if (pendingGuess) {
