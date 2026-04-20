@@ -1,5 +1,7 @@
 import { Globe, Clock, Sparkles, BarChart3, Eye } from 'lucide-react';
 
+type FirstClueKey = 'geography' | 'history' | 'culture' | 'stats' | 'visual';
+
 interface CategoryPickerProps {
   categories: {
     geography: string;
@@ -11,9 +13,10 @@ interface CategoryPickerProps {
   revealed: boolean;
   selectedCategory: string | null;
   onSelectCategory?: (category: string) => void;
+  allowedCategories?: FirstClueKey[];
 }
 
-const categoryConfig = {
+const categoryConfig: Record<FirstClueKey, { icon: typeof Globe; label: string; description: string }> = {
   geography: { icon: Globe, label: 'Geography', description: 'Location & context' },
   history: { icon: Clock, label: 'History', description: 'Timeline & events' },
   culture: { icon: Sparkles, label: 'Culture', description: 'Traditions & relevance' },
@@ -26,7 +29,10 @@ export default function CategoryPicker({
   revealed,
   selectedCategory,
   onSelectCategory,
+  allowedCategories,
 }: CategoryPickerProps) {
+  const visibleEntries = (Object.entries(categoryConfig) as [FirstClueKey, typeof categoryConfig[FirstClueKey]][])
+    .filter(([key]) => !allowedCategories || allowedCategories.includes(key));
   if (!revealed && !onSelectCategory) return null;
 
   if (!revealed && onSelectCategory) {
@@ -40,8 +46,8 @@ export default function CategoryPicker({
             Pick one category to reveal
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3">
-          {Object.entries(categoryConfig).map(([key, config]) => {
+        <div className={`grid gap-2 sm:gap-3 ${visibleEntries.length >= 5 ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-3'}`}>
+          {visibleEntries.map(([key, config]) => {
             const Icon = config.icon;
             return (
               <button

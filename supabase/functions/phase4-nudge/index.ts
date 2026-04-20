@@ -156,6 +156,8 @@ Write a HELPFUL 15-20 word nudge that:
 2. Gives a SPECIFIC distinguishing detail about ${target} that separates it from their guesses
 3. Does NOT reveal the answer directly
 
+VOCABULARY RULE: Use simple, everyday words an 8th grader would understand. Avoid fancy, academic, or obscure terms. Short, common words beat long, rare ones. Say "famous" not "renowned", "show" not "exemplify", "first" not "inaugural".
+
 Return JSON:
 {
   "nudge": "Your 15-20 word personalized hint based on their guesses",

@@ -1,11 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Film, Landmark, Trophy, Globe, Sparkles } from 'lucide-react';
+import { ArrowLeft, Film, Landmark, Trophy, Globe, Sparkles, Check, Clock } from 'lucide-react';
 import Logo from '../components/Logo';
 import PaperSurface from '../components/paper/PaperSurface';
 import Footer from '../components/Footer';
 import { trackInteraction } from '../utils/tracking';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const DAILY_PLAYED_PREFIX = 'mystle_daily_played_';
+
+type PlayedStatus = 'solved' | 'failed';
+type PlayedMap = Partial<Record<'pop_culture' | 'history_science' | 'sports' | 'geography', PlayedStatus>>;
+
+function getTodayKey(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function readPlayedMap(): PlayedMap {
+  try {
+    const raw = localStorage.getItem(`${DAILY_PLAYED_PREFIX}${getTodayKey()}`);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function formatCountdown(): string {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  const diff = tomorrow.getTime() - now.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
 
 export type DailyCategory = 'pop_culture' | 'history_science' | 'sports' | 'geography';
 
@@ -67,8 +98,42 @@ export default function DailyCategoryPicker() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<DailyCategory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [playedMap, setPlayedMap] = useState<PlayedMap>(() => readPlayedMap());
+  const [countdown, setCountdown] = useState<string>(() => formatCountdown());
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCountdown(formatCountdown());
+      const today = getTodayKey();
+      const current = readPlayedMap();
+      setPlayedMap(current);
+      const lastKey = localStorage.getItem('mystle_daily_picker_day');
+      if (lastKey !== today) {
+        localStorage.setItem('mystle_daily_picker_day', today);
+      }
+    }, 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
+    const controller = new AbortController();
+    categories.forEach(c => {
+      fetch(`${SUPABASE_URL}/functions/v1/daily-challenge?category=${c.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        signal: controller.signal,
+      }).catch(() => {});
+    });
+    return () => controller.abort();
+  }, []);
 
   const handleCategorySelect = (categoryId: DailyCategory) => {
+    if (playedMap[categoryId]) return;
+
     setSelectedCategory(categoryId);
     setIsLoading(true);
 
@@ -148,6 +213,8 @@ export default function DailyCategoryPicker() {
           {categories.map((category, index) => {
             const Icon = category.icon;
             const isSelected = selectedCategory === category.id;
+            const playedStatus = playedMap[category.id];
+            const isPlayed = !!playedStatus;
 
             return (
               <motion.button
@@ -156,24 +223,29 @@ export default function DailyCategoryPicker() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
                 onClick={() => handleCategorySelect(category.id)}
-                disabled={isLoading}
-                className="group text-left w-full"
+                disabled={isLoading || isPlayed}
+                aria-disabled={isPlayed}
+                className={`group text-left w-full ${isPlayed ? 'cursor-not-allowed' : ''}`}
               >
                 <motion.div
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={isPlayed ? undefined : { scale: 1.02, y: -4 }}
+                  whileTap={isPlayed ? undefined : { scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <PaperSurface
                     variant="lifted"
-                    className={`h-full transition-all duration-300 ring-1 ${category.ring} ${category.hoverShadow} ${
+                    className={`h-full transition-all duration-300 ring-1 ${category.ring} ${
+                      isPlayed ? '' : category.hoverShadow
+                    } ${
                       isSelected ? 'ring-2 ring-forest-500' : ''
-                    } ${isLoading && !isSelected ? 'opacity-50' : ''}`}
+                    } ${isLoading && !isSelected ? 'opacity-50' : ''} ${
+                      isPlayed ? 'opacity-60 grayscale' : ''
+                    }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3 p-4 sm:p-5">
                       <motion.div
                         className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full ${category.iconBg} flex items-center justify-center shadow-lg`}
-                        whileHover={{ rotate: 5, scale: 1.1 }}
+                        whileHover={isPlayed ? undefined : { rotate: 5, scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
                         <Icon size={24} className="text-white" strokeWidth={2.5} />
@@ -188,23 +260,36 @@ export default function DailyCategoryPicker() {
                         </p>
                       </div>
 
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${category.gradient} text-white rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center group-hover:shadow-xl transition-shadow`}
-                      >
-                        {isSelected && isLoading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Loading...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={14} />
-                            Play
-                          </>
-                        )}
-                      </motion.div>
+                      {isPlayed ? (
+                        <div className="inline-flex flex-col items-center gap-1 px-4 py-2 bg-ink-muted/15 text-ink-primary rounded-full text-xs sm:text-sm font-semibold w-full sm:w-auto">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Check size={14} className="text-forest-700" />
+                            {playedStatus === 'solved' ? 'Solved today' : 'Played today'}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-ink-muted font-medium">
+                            <Clock size={11} />
+                            Resets in {countdown}
+                          </span>
+                        </div>
+                      ) : (
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${category.gradient} text-white rounded-full text-sm font-bold shadow-lg w-full sm:w-auto justify-center group-hover:shadow-xl transition-shadow`}
+                        >
+                          {isSelected && isLoading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles size={14} />
+                              Play
+                            </>
+                          )}
+                        </motion.div>
+                      )}
                     </div>
                   </PaperSurface>
                 </motion.div>
@@ -220,7 +305,7 @@ export default function DailyCategoryPicker() {
           className="mt-6 text-center"
         >
           <p className="text-xs text-forest-500">
-            New challenges every day at midnight
+            New challenges in {countdown} (midnight local time)
           </p>
         </motion.div>
       </motion.div>

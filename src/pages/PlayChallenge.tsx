@@ -50,6 +50,14 @@ interface Phase5Data {
 
 type GameState = 'loading' | 'playing' | 'solved' | 'failed';
 type Phase = 1 | 2 | 3 | 4 | 5;
+type FirstClueKey = 'geography' | 'history' | 'culture' | 'stats' | 'visual';
+
+const DAILY_FIRST_CLUE_CATEGORIES: Record<string, FirstClueKey[]> = {
+  pop_culture: ['geography', 'history', 'stats'],
+  history_science: ['culture', 'geography', 'stats'],
+  sports: ['culture', 'history', 'stats'],
+  geography: ['culture', 'geography', 'visual'],
+};
 
 export default function PlayChallenge() {
   const [searchParams] = useSearchParams();
@@ -99,6 +107,7 @@ export default function PlayChallenge() {
   const STORAGE_KEY_PREFIX = 'mystle_progress_';
   const DAILY_PROGRESS_PREFIX = 'mystle_daily_progress_';
   const DAILY_CHALLENGE_DATE_KEY = 'mystle_daily_date';
+  const DAILY_PLAYED_PREFIX = 'mystle_daily_played_';
 
   const saveProgress = useCallback(() => {
     if (!token) return;
@@ -174,6 +183,9 @@ export default function PlayChallenge() {
           if (key.startsWith(DAILY_PROGRESS_PREFIX)) {
             localStorage.removeItem(key);
           }
+          if (key.startsWith(DAILY_PLAYED_PREFIX) && key !== `${DAILY_PLAYED_PREFIX}${today}`) {
+            localStorage.removeItem(key);
+          }
         });
         localStorage.setItem(DAILY_CHALLENGE_DATE_KEY, today);
       }
@@ -181,6 +193,20 @@ export default function PlayChallenge() {
       console.warn('Failed to check daily challenge:', error);
     }
   }, []);
+
+  const markDailyPlayed = useCallback((status: 'solved' | 'failed') => {
+    if (!dailyCategory) return;
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const key = `${DAILY_PLAYED_PREFIX}${today}`;
+      const existing = localStorage.getItem(key);
+      const played = existing ? JSON.parse(existing) : {};
+      played[dailyCategory] = status;
+      localStorage.setItem(key, JSON.stringify(played));
+    } catch (error) {
+      console.warn('Failed to mark daily played:', error);
+    }
+  }, [dailyCategory]);
 
   const revealAnswer = useCallback(async () => {
     try {
@@ -320,8 +346,9 @@ export default function PlayChallenge() {
       saveProgress();
     } else if (gameState === 'solved' || gameState === 'failed') {
       clearProgress();
+      markDailyPlayed(gameState === 'solved' ? 'solved' : 'failed');
     }
-  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data, saveProgress, clearProgress]);
+  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data, saveProgress, clearProgress, markDailyPlayed]);
 
   const loadChallenge = async () => {
     try {
@@ -464,6 +491,11 @@ export default function PlayChallenge() {
   const handlePhaseClick = useCallback((p: number) => setViewingPhase(p), []);
   const handleCloseModal = useCallback(() => setViewingPhase(null), []);
 
+  const allowedFirstClueCategories = useMemo(
+    () => (dailyCategory ? DAILY_FIRST_CLUE_CATEGORIES[dailyCategory] : undefined),
+    [dailyCategory]
+  );
+
   const phaseContent = useMemo(() => {
     if (!hints) return [];
     return [
@@ -473,6 +505,7 @@ export default function PlayChallenge() {
             categories={hints.phase3}
             revealed={true}
             selectedCategory={selectedCategory}
+            allowedCategories={allowedFirstClueCategories}
           />
         ) : (
           <CategoryPicker
@@ -480,6 +513,7 @@ export default function PlayChallenge() {
             revealed={false}
             selectedCategory={selectedCategory}
             onSelectCategory={handleSelectCategory}
+            allowedCategories={allowedFirstClueCategories}
           />
         )}
       </div>,
@@ -516,7 +550,7 @@ export default function PlayChallenge() {
         )}
       </div>,
     ];
-  }, [hints, selectedCategory, handleSelectCategory, phase4Nudge, phase4Keywords, phase5Data]);
+  }, [hints, selectedCategory, handleSelectCategory, phase4Nudge, phase4Keywords, phase5Data, allowedFirstClueCategories]);
 
   const mappedWrongGuesses = useMemo(() =>
     wrongGuesses.map(guess => ({

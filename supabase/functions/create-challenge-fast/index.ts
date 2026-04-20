@@ -459,7 +459,7 @@ Respond with ONLY valid JSON:
           messages: [
             {
               role: "system",
-              content: "You are a creative puzzle designer who excels at creating dramatically different difficulty levels. Avoid repetition at all costs."
+              content: "You are a creative puzzle designer who excels at creating dramatically different difficulty levels. Avoid repetition at all costs. VOCABULARY RULE: Use simple, everyday words an 8th grader would understand. Avoid fancy, academic, technical, or obscure terms. Write like you're talking to a friend. Prefer short, common words over long, rare ones. Never use words like 'epitomize', 'quintessential', 'renowned', 'iconic' when 'famous' works, or 'emanate' when 'come from' works."
             },
             { role: "user", content: hintPrompt }
           ],

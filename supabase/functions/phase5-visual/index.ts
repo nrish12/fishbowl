@@ -141,6 +141,8 @@ Guesses: ${guessesSummary}
 Rate each guess 0-100 based on conceptual similarity, category overlap, and thematic connections.
 NEVER use these words: ${bannedWords}
 
+VOCABULARY RULE: Use simple, everyday words an 8th grader would understand. Keep "reason", "pattern", "synthesis", and "theme" text short and plain. Avoid fancy or academic terms. Prefer short common words over long rare ones.
+
 Return JSON:
 {
   "semantic_scores": [{"guess": "...", "score": 0-100, "reason": "..."}],

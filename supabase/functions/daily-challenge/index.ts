@@ -413,6 +413,11 @@ Deno.serve(async (req: Request) => {
     let totalAttempts = 0;
     const maxTotalAttempts = 9;
     const typesToTry = [...categoryConfig.types];
+    for (let i = typesToTry.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [typesToTry[i], typesToTry[j]] = [typesToTry[j], typesToTry[i]];
+    }
+    console.log(`[${category}] Shuffled type order: ${typesToTry.join(", ")}`);
 
     while (!challengeData && totalAttempts < maxTotalAttempts && typesToTry.length > 0) {
       const currentType = typesToTry[0];
