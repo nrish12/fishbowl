@@ -33,7 +33,8 @@ export default function GuessBar({ onSubmit, disabled = false, placeholder = "Ty
             maxLength={50}
             aria-label="Enter your guess"
             autoComplete="off"
-            className="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-transparent text-sm sm:text-base text-ink-charcoal placeholder-forest-400 focus:outline-none disabled:opacity-50 font-medium"
+            style={{ fontSize: '16px' }}
+            className="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-transparent text-base text-ink-charcoal placeholder-forest-400 focus:outline-none disabled:opacity-50 font-medium"
           />
           <button
             type="submit"
