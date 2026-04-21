@@ -112,43 +112,50 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[Scheduled] Generating challenges for ${targetDate} (forToday: ${forToday})`);
 
+    const { data: existingRows } = await supabase
+      .from("daily_challenges")
+      .select("category, challenge_id")
+      .eq("challenge_date", targetDate);
+
+    const existingByCategory: Record<string, string> = {};
+    (existingRows || []).forEach((r: any) => {
+      existingByCategory[r.category] = r.challenge_id;
+    });
+
     const results: Record<string, { success: boolean; challenge_id?: string; error?: string }> = {};
-    const failedCategories: Category[] = [];
 
-    for (const category of CATEGORIES) {
-      const { data: existing } = await supabase
-        .from("daily_challenges")
-        .select("challenge_id")
-        .eq("challenge_date", targetDate)
-        .eq("category", category)
-        .maybeSingle();
-
-      if (existing) {
+    const categoryPromises = CATEGORIES.map(async (category) => {
+      if (existingByCategory[category]) {
         console.log(`[Scheduled] ${category} challenge for ${targetDate} already exists`);
-        results[category] = { success: true, challenge_id: existing.challenge_id };
-        continue;
+        return { category, result: { success: true, challenge_id: existingByCategory[category] } };
       }
-
       const result = await generateChallengeWithRetry(supabaseUrl, supabaseAnonKey, category, 3, 2000);
+      return { category, result };
+    });
+
+    const settled = await Promise.all(categoryPromises);
+    settled.forEach(({ category, result }) => {
       results[category] = result;
+    });
 
-      if (!result.success) {
-        failedCategories.push(category);
-      }
-
-      await sleep(1000);
-    }
+    const failedCategories = settled
+      .filter(({ result }) => !result.success)
+      .map(({ category }) => category);
 
     if (failedCategories.length > 0) {
       console.log(`[Scheduled] Retrying ${failedCategories.length} failed categories with longer delays...`);
       await sleep(5000);
 
-      for (const category of failedCategories) {
-        console.log(`[Scheduled] Final retry for ${category}...`);
-        const result = await generateChallengeWithRetry(supabaseUrl, supabaseAnonKey, category, 2, 5000);
+      const retryResults = await Promise.all(
+        failedCategories.map(async (category) => {
+          console.log(`[Scheduled] Final retry for ${category}...`);
+          const result = await generateChallengeWithRetry(supabaseUrl, supabaseAnonKey, category, 2, 5000);
+          return { category, result };
+        })
+      );
+      retryResults.forEach(({ category, result }) => {
         results[category] = result;
-        await sleep(2000);
-      }
+      });
     }
 
     const allSucceeded = Object.values(results).every(r => r.success);

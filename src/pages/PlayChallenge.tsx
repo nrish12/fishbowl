@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Flag } from 'lucide-react';
 import Logo from '../components/Logo';
 import PhaseChips from '../components/PhaseChips';
 import SentenceCard from '../components/SentenceCard';
@@ -13,488 +13,20 @@ import Phase5Visual from '../components/Phase5Visual';
 import FoldedLetter from '../components/FoldedLetter';
 import Confetti from '../components/Confetti';
 import { ChallengeTimer } from '../components/ChallengeTimer';
-import { getSessionId, trackEvent } from '../utils/tracking';
-import { fetchWithTimeout } from '../utils/fetchWithTimeout';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-interface Hints {
-  phase1: string[];
-  phase2: string;
-  phase3: {
-    geography: string;
-    history: string;
-    culture: string;
-    stats: string;
-    visual: string;
-  };
-  phase4_nudge?: string;
-}
-
-interface Phase5Data {
-  semantic_scores: Array<{
-    guess: string;
-    score: number;
-    reason: string;
-  }>;
-  connections: Array<{
-    guess: string;
-    hint: string;
-    pattern: string;
-  }>;
-  synthesis: string;
-  themes_identified: string[];
-  themes_missing: string[];
-}
-
-type GameState = 'loading' | 'playing' | 'solved' | 'failed';
-type Phase = 1 | 2 | 3 | 4 | 5;
-type FirstClueKey = 'geography' | 'history' | 'culture' | 'stats' | 'visual';
-
-const DAILY_FIRST_CLUE_CATEGORIES: Record<string, FirstClueKey[]> = {
-  pop_culture: ['geography', 'history', 'stats'],
-  history_science: ['culture', 'geography', 'stats'],
-  sports: ['culture', 'history', 'stats'],
-  geography: ['culture', 'geography', 'visual'],
-};
+import { useChallengeGame } from '../hooks/useChallengeGame';
 
 export default function PlayChallenge() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('t');
 
-  const [gameState, setGameState] = useState<GameState>('loading');
-  const [hints, setHints] = useState<Hints | null>(null);
-  const [challengeType, setChallengeType] = useState<string>('');
-  const [phase, setPhase] = useState<Phase>(1);
-  const [guesses, setGuesses] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [rank, setRank] = useState<'Gold' | 'Silver' | 'Bronze' | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [startTime, setStartTime] = useState<number>(Date.now());
-  const [isThinking, setIsThinking] = useState(false);
-  const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
-  const [guessScores, setGuessScores] = useState<Record<string, number>>({});
-  const [guessPhases, setGuessPhases] = useState<Record<string, number>>({});
-  const [suggestedCorrection, setSuggestedCorrection] = useState<string | null>(null);
-  const [pendingGuess, setPendingGuess] = useState<string | null>(null);
-  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
-  const [phase4Nudge, setPhase4Nudge] = useState<string | null>(null);
-  const [phase4Keywords, setPhase4Keywords] = useState<string[]>([]);
-  const [phase5Data, setPhase5Data] = useState<Phase5Data | null>(null);
-  const [shouldShake, setShouldShake] = useState(false);
-  const [guessError, setGuessError] = useState<string | null>(null);
-  const [viewingPhase, setViewingPhase] = useState<number | null>(null);
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
-  const [isExpired, setIsExpired] = useState(false);
-  const [dailyCategory, setDailyCategory] = useState<string | null>(null);
-  const [playerFingerprint] = useState(() => {
-    try {
-      return getSessionId();
-    } catch {
-      return `session_${Math.random().toString(36).slice(2)}`;
-    }
-  });
-
-  const isSubmittingRef = useRef(false);
-  const suggestionPendingRef = useRef(false);
-  const progressLoadedRef = useRef(false);
-  const lastTokenRef = useRef<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const STORAGE_KEY_PREFIX = 'mystle_progress_';
-  const DAILY_PROGRESS_PREFIX = 'mystle_daily_progress_';
-  const DAILY_CHALLENGE_DATE_KEY = 'mystle_daily_date';
-  const DAILY_PLAYED_PREFIX = 'mystle_daily_played_';
-
-  const saveProgress = useCallback(() => {
-    if (!token) return;
-
-    const progress = {
-      phase,
-      guesses,
-      wrongGuesses,
-      guessScores,
-      guessPhases,
-      startTime,
-      selectedCategory,
-      phase4Nudge,
-      phase4Keywords,
-      phase5Data,
-      timestamp: Date.now(),
-      challengeId,
-      isDaily: !!dailyCategory,
-    };
-
-    try {
-      const prefix = dailyCategory ? DAILY_PROGRESS_PREFIX : STORAGE_KEY_PREFIX;
-      localStorage.setItem(`${prefix}${token}`, JSON.stringify(progress));
-    } catch (error) {
-      console.warn('Failed to save progress:', error);
-    }
-  }, [token, phase, guesses, wrongGuesses, guessScores, guessPhases, startTime, selectedCategory, phase4Nudge, phase4Keywords, phase5Data, challengeId, dailyCategory]);
-
-  const loadProgress = useCallback(() => {
-    if (!token) return null;
-
-    try {
-      let saved = localStorage.getItem(`${STORAGE_KEY_PREFIX}${token}`);
-      if (!saved) {
-        saved = localStorage.getItem(`${DAILY_PROGRESS_PREFIX}${token}`);
-      }
-      if (!saved) return null;
-
-      const progress = JSON.parse(saved);
-
-      const hoursSinceSave = (Date.now() - progress.timestamp) / (1000 * 60 * 60);
-      if (hoursSinceSave > 24) {
-        localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
-        localStorage.removeItem(`${DAILY_PROGRESS_PREFIX}${token}`);
-        return null;
-      }
-
-      return progress;
-    } catch (error) {
-      console.warn('Failed to load progress:', error);
-      return null;
-    }
-  }, [token]);
-
-  const clearProgress = useCallback(() => {
-    if (!token) return;
-    try {
-      localStorage.removeItem(`${STORAGE_KEY_PREFIX}${token}`);
-      localStorage.removeItem(`${DAILY_PROGRESS_PREFIX}${token}`);
-    } catch (error) {
-      console.warn('Failed to clear progress:', error);
-    }
-  }, [token]);
-
-  const checkAndClearDailyChallenge = useCallback(() => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const lastDaily = localStorage.getItem(DAILY_CHALLENGE_DATE_KEY);
-
-      if (lastDaily !== today) {
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-          if (key.startsWith(DAILY_PROGRESS_PREFIX)) {
-            localStorage.removeItem(key);
-          }
-          if (key.startsWith(DAILY_PLAYED_PREFIX) && key !== `${DAILY_PLAYED_PREFIX}${today}`) {
-            localStorage.removeItem(key);
-          }
-        });
-        localStorage.setItem(DAILY_CHALLENGE_DATE_KEY, today);
-      }
-    } catch (error) {
-      console.warn('Failed to check daily challenge:', error);
-    }
-  }, []);
-
-  const markDailyPlayed = useCallback((status: 'solved' | 'failed') => {
-    if (!dailyCategory) return;
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const key = `${DAILY_PLAYED_PREFIX}${today}`;
-      const existing = localStorage.getItem(key);
-      const played = existing ? JSON.parse(existing) : {};
-      played[dailyCategory] = status;
-      localStorage.setItem(key, JSON.stringify(played));
-    } catch (error) {
-      console.warn('Failed to mark daily played:', error);
-    }
-  }, [dailyCategory]);
-
-  const revealAnswer = useCallback(async () => {
-    try {
-      const answerResponse = await fetch(`${SUPABASE_URL}/functions/v1/check-guess`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ token, guess: '__reveal__', phase }),
-      });
-      if (!answerResponse.ok) {
-        throw new Error('Failed to reveal answer');
-      }
-      const answerData = await answerResponse.json();
-      setAnswer(answerData.canonical || 'Unknown');
-    } catch (err) {
-      console.error('Failed to reveal answer:', err);
-      setAnswer('Unknown');
-    }
-    setGameState('failed');
-  }, [token, phase]);
-
-  const advancePhase = useCallback(async (_currentGuess: string, allWrongGuesses: string[]) => {
-    if (phase === 1) {
-      setPhase(2);
-    } else if (phase === 2) {
-      setPhase(3);
-    } else if (phase === 3) {
-      try {
-        const phase4Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase4-nudge`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            token,
-            guesses: allWrongGuesses,
-            hints: hints,
-          }),
-          timeout: 45000,
-        });
-
-        if (phase4Response.ok) {
-          const nudgeData = await phase4Response.json();
-          setPhase4Nudge(nudgeData.nudge);
-          setPhase4Keywords(nudgeData.keywords || []);
-        }
-      } catch (err) {
-        console.error('[Phase 4] Error:', err);
-      }
-      setPhase(4);
-    } else if (phase === 4) {
-      try {
-        const phase5Response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/phase5-visual`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            token,
-            guesses: allWrongGuesses,
-            hints: {
-              ...hints,
-              phase4_nudge: phase4Nudge,
-            },
-          }),
-          timeout: 45000,
-        });
-
-        if (phase5Response.ok) {
-          const visualData = await phase5Response.json();
-          if (visualData?.semantic_scores) {
-            const mergedScores = visualData.semantic_scores.map((item: any) => ({
-              ...item,
-              score: guessScores[item.guess] !== undefined ? guessScores[item.guess] : item.score,
-            }));
-            visualData.semantic_scores = mergedScores;
-          }
-          setPhase5Data(visualData);
-        }
-      } catch (err) {
-        console.error('[Phase 5] Error:', err);
-      }
-      setPhase(5);
-    }
-  }, [token, hints, phase, phase4Nudge, guessScores]);
-
-  useEffect(() => {
-    if (!token) {
-      setError('No challenge token provided');
-      setGameState('failed');
-      return;
-    }
-
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-
-    checkAndClearDailyChallenge();
-    loadChallenge();
-
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [token, checkAndClearDailyChallenge]);
-
-  useEffect(() => {
-    if (token !== lastTokenRef.current) {
-      progressLoadedRef.current = false;
-      lastTokenRef.current = token;
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (token && gameState === 'playing' && challengeId && !progressLoadedRef.current) {
-      const progress = loadProgress();
-      if (progress && progress.challengeId === challengeId) {
-        progressLoadedRef.current = true;
-        setPhase(progress.phase);
-        setGuesses(progress.guesses);
-        setWrongGuesses(progress.wrongGuesses || []);
-        if (progress.guessScores) setGuessScores(progress.guessScores);
-        if (progress.guessPhases) setGuessPhases(progress.guessPhases);
-        if (progress.startTime) setStartTime(progress.startTime);
-        setSelectedCategory(progress.selectedCategory);
-        if (progress.phase4Nudge) setPhase4Nudge(progress.phase4Nudge);
-        if (progress.phase4Keywords) setPhase4Keywords(progress.phase4Keywords);
-        if (progress.phase5Data) setPhase5Data(progress.phase5Data);
-      }
-    }
-  }, [challengeId, gameState, token, loadProgress]);
-
-  useEffect(() => {
-    if (gameState === 'playing' && progressLoadedRef.current) {
-      saveProgress();
-    } else if (gameState === 'solved' || gameState === 'failed') {
-      clearProgress();
-      markDailyPlayed(gameState === 'solved' ? 'solved' : 'failed');
-    }
-  }, [gameState, phase, guesses, wrongGuesses, guessPhases, selectedCategory, phase4Nudge, phase5Data, saveProgress, clearProgress, markDailyPlayed]);
-
-  const loadChallenge = async () => {
-    try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/resolve-challenge?t=${token}`, {
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        signal: abortControllerRef.current?.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to load challenge');
-      }
-
-      const data = await response.json();
-      setHints(data.hints);
-      setChallengeType(data.type);
-      setChallengeId(data.id);
-      setExpiresAt(data.expires_at);
-      setDailyCategory(data.category || null);
-      setGameState('playing');
-      setStartTime(Date.now());
-
-      if (data.id) {
-        await trackEvent('visit', data.id, {
-          referrer: document.referrer || 'direct',
-          category: data.category || null,
-        });
-      }
-    } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      setError(err.message);
-      setGameState('failed');
-    }
-  };
-
-  const handleGuess = useCallback(async (guess: string) => {
-    if (!token || !hints || !challengeId) return;
-    if (isSubmittingRef.current || suggestionPendingRef.current) return;
-
-    const trimmedGuess = guess.trim();
-    if (!trimmedGuess) return;
-
-    isSubmittingRef.current = true;
-    setIsThinking(true);
-    setLastGuessResult(null);
-
-    try {
-      const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/check-guess`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          token,
-          guess: trimmedGuess,
-          phase,
-          player_fingerprint: playerFingerprint,
-        }),
-        timeout: 30000,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to validate guess');
-      }
-
-      const data = await response.json();
-      const isCorrect = data.result === 'correct';
-
-      if (data.suggestion && data.suggestion !== trimmedGuess) {
-        suggestionPendingRef.current = true;
-        setPendingGuess(trimmedGuess);
-        setSuggestedCorrection(data.suggestion);
-        setIsThinking(false);
-        isSubmittingRef.current = false;
-        return;
-      }
-
-      if (data.similarity_score !== undefined) {
-        setGuessScores(prev => ({ ...prev, [trimmedGuess]: data.similarity_score }));
-      }
-
-      trackEvent('attempt', challengeId, {
-        guess_text: trimmedGuess,
-        phase_revealed: phase,
-        is_correct: isCorrect,
-        category: dailyCategory,
-      }).catch(() => {});
-
-      if (isCorrect) {
-        setLastGuessResult('correct');
-        setAnswer(data.canonical);
-        setRank(phase === 1 ? 'Gold' : phase === 2 ? 'Silver' : 'Bronze');
-        setGuesses(prev => prev + 1);
-        setTimeout(() => setGameState('solved'), 800);
-
-        const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-        trackEvent('completion', challengeId, {
-          completed_phase: phase,
-          total_attempts: guesses + 1,
-          time_taken_seconds: timeElapsed,
-          category: dailyCategory,
-        }).catch(() => {});
-      } else {
-        setLastGuessResult('incorrect');
-        const newWrongGuesses = [...wrongGuesses, trimmedGuess];
-        setWrongGuesses(newWrongGuesses);
-        setGuessPhases(prev => ({ ...prev, [trimmedGuess]: phase }));
-        setGuesses(prev => prev + 1);
-        setShouldShake(true);
-        setTimeout(() => setShouldShake(false), 400);
-
-        if (newWrongGuesses.length >= 5 && phase === 5) {
-          await revealAnswer();
-        } else if (phase < 5) {
-          await advancePhase(trimmedGuess, newWrongGuesses);
-        }
-      }
-    } catch (err) {
-      console.error('Guess error:', err);
-      setGuessError('Something went wrong. Please try again.');
-      setTimeout(() => setGuessError(null), 4000);
-    } finally {
-      setTimeout(() => {
-        setIsThinking(false);
-        setLastGuessResult(null);
-        isSubmittingRef.current = false;
-      }, 1500);
-    }
-  }, [token, hints, challengeId, phase, playerFingerprint, wrongGuesses, guesses, startTime, dailyCategory, revealAnswer, advancePhase]);
-
-  const handleSelectCategory = useCallback((category: string) => {
-    setSelectedCategory(category);
-  }, []);
-
-  const handleExpired = useCallback(() => setIsExpired(true), []);
-  const handlePhaseClick = useCallback((p: number) => setViewingPhase(p), []);
-  const handleCloseModal = useCallback(() => setViewingPhase(null), []);
-
-  const allowedFirstClueCategories = useMemo(
-    () => (dailyCategory ? DAILY_FIRST_CLUE_CATEGORIES[dailyCategory] : undefined),
-    [dailyCategory]
-  );
+  const {
+    gameState, hints, challengeType, phase, guesses, answer, rank, selectedCategory, error, challengeId,
+    isThinking, suggestedCorrection, pendingGuess, lastGuessResult,
+    phase4Nudge, phase4Keywords, phase5Data, shouldShake, guessError, viewingPhase, expiresAt, isExpired,
+    dailyCategory, mappedWrongGuesses, allowedFirstClueCategories,
+    handleGuess, handleSelectCategory, handleExpired, handlePhaseClick, handleCloseModal,
+    showNextPhase, showPrevPhase, acceptSuggestion, rejectSuggestion, giveUp,
+  } = useChallengeGame(token);
 
   const phaseContent = useMemo(() => {
     if (!hints) return [];
@@ -518,11 +50,7 @@ export default function PlayChallenge() {
         )}
       </div>,
       <div key="phase2">
-        <SentenceCard
-          sentence={hints.phase2}
-          revealed={true}
-          onReveal={undefined}
-        />
+        <SentenceCard sentence={hints.phase2} revealed={true} onReveal={undefined} />
       </div>,
       <div key="phase3">
         <PhaseChips words={hints.phase1} revealed={true} />
@@ -552,14 +80,6 @@ export default function PlayChallenge() {
     ];
   }, [hints, selectedCategory, handleSelectCategory, phase4Nudge, phase4Keywords, phase5Data, allowedFirstClueCategories]);
 
-  const mappedWrongGuesses = useMemo(() =>
-    wrongGuesses.map(guess => ({
-      guess,
-      score: guessScores[guess] ?? null,
-      phaseGuessed: guessPhases[guess] ?? 1
-    })),
-  [wrongGuesses, guessScores, guessPhases]);
-
   if (gameState === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center">
@@ -575,7 +95,7 @@ export default function PlayChallenge() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200 text-center space-y-4">
-          <div className="text-5xl">❌</div>
+          <div className="text-5xl">X</div>
           <h2 className="text-2xl font-serif font-bold text-forest">Challenge Error</h2>
           <p className="text-forest/70">{error}</p>
           <Link
@@ -593,7 +113,7 @@ export default function PlayChallenge() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border-2 border-orange-200 text-center space-y-4">
-          <div className="text-5xl">⏰</div>
+          <div className="text-5xl">!</div>
           <h2 className="text-2xl font-serif font-bold text-forest">Challenge Expired</h2>
           <p className="text-forest/70">
             This challenge's 24-hour time limit has expired. Create a new challenge to share with friends!
@@ -697,10 +217,7 @@ export default function PlayChallenge() {
 
                   {viewingPhase > 1 && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setViewingPhase(viewingPhase - 1);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); showPrevPhase(); }}
                       className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
                       aria-label="Previous phase"
                     >
@@ -710,10 +227,7 @@ export default function PlayChallenge() {
 
                   {viewingPhase < phase - 1 && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setViewingPhase(viewingPhase + 1);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); showNextPhase(); }}
                       className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-forest-700 hover:bg-forest-800 text-gold-300 rounded-full transition-all shadow-lg z-10 text-lg sm:text-xl font-bold border-2 border-gold-300/50 hover:scale-105 hover:border-gold-400"
                       aria-label="Next phase"
                     >
@@ -737,14 +251,14 @@ export default function PlayChallenge() {
 
             {lastGuessResult === 'correct' && !isThinking && (
               <div className="flex items-center justify-center gap-2 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border-2 border-green-400 paper-shadow animate-success-glow">
-                <span className="text-lg sm:text-xl">✅</span>
+                <span className="text-lg sm:text-xl">+</span>
                 <p className="text-xs sm:text-sm font-bold text-green-700">Correct! Well done!</p>
               </div>
             )}
 
             {lastGuessResult === 'incorrect' && !isThinking && !suggestedCorrection && (
               <div className="flex items-center justify-center gap-2 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border-2 border-red-400 paper-shadow animate-[fadeIn_0.3s_ease-in-out]">
-                <span className="text-lg sm:text-xl">❌</span>
+                <span className="text-lg sm:text-xl">X</span>
                 <p className="text-xs sm:text-sm font-bold text-red-700">Not quite! Try again</p>
               </div>
             )}
@@ -754,39 +268,13 @@ export default function PlayChallenge() {
                 <p className="text-xs sm:text-sm font-bold text-ink-600 mb-2 sm:mb-3 text-center">Did you mean:</p>
                 <div className="flex justify-center gap-3">
                   <button
-                    onClick={() => {
-                      suggestionPendingRef.current = false;
-                      setSuggestedCorrection(null);
-                      if (pendingGuess) {
-                        handleGuess(suggestedCorrection);
-                      }
-                      setPendingGuess(null);
-                    }}
+                    onClick={acceptSuggestion}
                     className="px-6 py-2 bg-forest-600 text-white rounded-full font-bold hover:bg-forest-700 transition-colors"
                   >
                     {suggestedCorrection}
                   </button>
                   <button
-                    onClick={async () => {
-                      suggestionPendingRef.current = false;
-                      setSuggestedCorrection(null);
-                      setLastGuessResult('incorrect');
-                      if (pendingGuess) {
-                        const newWrongGuesses = [...wrongGuesses, pendingGuess];
-                        setWrongGuesses(newWrongGuesses);
-                        setGuessPhases(prev => ({ ...prev, [pendingGuess]: phase }));
-                        setGuesses(prev => prev + 1);
-                        setShouldShake(true);
-                        setTimeout(() => setShouldShake(false), 400);
-
-                        if (newWrongGuesses.length >= 5 && phase === 5) {
-                          await revealAnswer();
-                        } else if (phase < 5) {
-                          await advancePhase(pendingGuess, newWrongGuesses);
-                        }
-                      }
-                      setPendingGuess(null);
-                    }}
+                    onClick={rejectSuggestion}
                     className="px-6 py-2 bg-gray-300 text-ink-700 rounded-full font-bold hover:bg-gray-400 transition-colors"
                   >
                     No, use "{pendingGuess}"
@@ -804,9 +292,25 @@ export default function PlayChallenge() {
             <div className="mb-2 sm:mb-3 pb-safe">
               <GuessBar onSubmit={handleGuess} placeholder="What's your guess?" disabled={isThinking || !!suggestedCorrection} />
             </div>
-            <div className="text-center text-[11px] sm:text-sm text-ink-300 font-medium pb-2 sm:pb-0">
-              Phase {phase} of 5 • {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
+            <div className="text-center text-[11px] sm:text-sm text-ink-300 font-medium pb-1 sm:pb-0">
+              Phase {phase} of 5 &bull; {guesses} {guesses === 1 ? 'guess' : 'guesses'} used
             </div>
+
+            {(phase === 4 || phase === 5) && (
+              <div className="flex justify-center pb-2 sm:pb-0">
+                <button
+                  onClick={() => {
+                    if (window.confirm('Give up and reveal the answer?')) {
+                      giveUp();
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-ink-400 hover:text-ink-600 bg-white/60 hover:bg-white border border-ink-200 rounded-full transition-colors"
+                >
+                  <Flag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  Give up and reveal
+                </button>
+              </div>
+            )}
           </div>
         )}
 
