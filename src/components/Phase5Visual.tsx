@@ -12,8 +12,9 @@ interface Phase5Data {
     pattern: string;
   }>;
   synthesis: string;
-  themes_identified: string[];
-  themes_missing: string[];
+  themes_identified?: string[];
+  themes_missing?: string[];
+  narrowing_questions?: Array<{ question: string; why: string }>;
 }
 
 interface Phase5VisualProps {
@@ -21,9 +22,14 @@ interface Phase5VisualProps {
 }
 
 export default function Phase5Visual({ data }: Phase5VisualProps) {
-  const [activeTab, setActiveTab] = useState<'guesses' | 'themes'>('guesses');
+  const hasQuestions = Array.isArray(data?.narrowing_questions) && data.narrowing_questions.length > 0;
+  const hasLegacyThemes =
+    (Array.isArray(data?.themes_identified) && data.themes_identified!.length > 0) ||
+    (Array.isArray(data?.themes_missing) && data.themes_missing!.length > 0);
 
-  if (!data || !data.semantic_scores || !data.themes_identified || !data.themes_missing) {
+  const [activeTab, setActiveTab] = useState<'guesses' | 'narrow'>('guesses');
+
+  if (!data || !data.semantic_scores) {
     return (
       <div className="w-full max-w-6xl mx-auto py-2">
         <div className="text-center">
@@ -33,6 +39,8 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
     );
   }
 
+  const showSecondTab = hasQuestions || hasLegacyThemes;
+
   return (
     <div className="w-full mx-auto">
       <div className="bg-gradient-to-r from-forest-50 via-amber-50 to-forest-50 rounded-lg sm:rounded-xl p-2 sm:p-2.5 border border-forest-200/60 mb-2">
@@ -41,28 +49,30 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
         </p>
       </div>
 
-      <div className="flex gap-1 sm:gap-2 mb-2 justify-center">
-        <button
-          onClick={() => setActiveTab('guesses')}
-          className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
-            activeTab === 'guesses'
-              ? 'bg-forest-600 text-white shadow-md'
-              : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
-          }`}
-        >
-          Your Guesses
-        </button>
-        <button
-          onClick={() => setActiveTab('themes')}
-          className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
-            activeTab === 'themes'
-              ? 'bg-forest-600 text-white shadow-md'
-              : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
-          }`}
-        >
-          Themes Analysis
-        </button>
-      </div>
+      {showSecondTab && (
+        <div className="flex gap-1 sm:gap-2 mb-2 justify-center">
+          <button
+            onClick={() => setActiveTab('guesses')}
+            className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
+              activeTab === 'guesses'
+                ? 'bg-forest-600 text-white shadow-md'
+                : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
+            }`}
+          >
+            Your Guesses
+          </button>
+          <button
+            onClick={() => setActiveTab('narrow')}
+            className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
+              activeTab === 'narrow'
+                ? 'bg-forest-600 text-white shadow-md'
+                : 'bg-white text-forest-700 border border-forest-300 hover:bg-forest-50'
+            }`}
+          >
+            {hasQuestions ? 'Narrow It Down' : 'Themes Analysis'}
+          </button>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg sm:rounded-xl border border-forest-200 p-2 sm:p-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
         {activeTab === 'guesses' && (
@@ -105,19 +115,44 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
           </div>
         )}
 
-        {activeTab === 'themes' && (
+        {activeTab === 'narrow' && hasQuestions && (
+          <div className="space-y-2">
+            {data.narrowing_questions!.map((q, idx) => (
+              <div
+                key={idx}
+                className="bg-amber-50 rounded-lg sm:rounded-xl p-2.5 sm:p-3 border-2 border-amber-300/60"
+                style={{ animation: `fadeIn 0.4s ease-out ${idx * 80}ms both` }}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold mt-0.5">
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] sm:text-sm font-bold text-forest-800 leading-snug mb-1">
+                      {q.question}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-forest-700/80 italic leading-snug">
+                      {q.why}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'narrow' && !hasQuestions && hasLegacyThemes && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
             <div className="bg-green-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-green-300/60">
               <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold">✓</div>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold">+</div>
                 <h4 className="text-[10px] sm:text-xs font-bold text-forest-800 uppercase tracking-wide">You Found</h4>
               </div>
               <div className="space-y-1 sm:space-y-1.5">
-                {data.themes_identified && data.themes_identified.map((theme, idx) => (
+                {(data.themes_identified || []).map((theme, idx) => (
                   <div
                     key={idx}
                     className="text-[10px] sm:text-xs text-forest-800 bg-white px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold border border-green-200 shadow-sm"
-                    style={{ animation: 'slideIn 0.3s ease-out', animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
                   >
                     {theme}
                   </div>
@@ -131,7 +166,7 @@ export default function Phase5Visual({ data }: Phase5VisualProps) {
                 <h4 className="text-[10px] sm:text-xs font-bold text-forest-800 uppercase tracking-wide">You Missed</h4>
               </div>
               <div className="space-y-1 sm:space-y-1.5">
-                {data.themes_missing && data.themes_missing.map((theme, idx) => (
+                {(data.themes_missing || []).map((theme, idx) => (
                   <div
                     key={idx}
                     className="text-[10px] sm:text-xs text-forest-800 bg-white px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold border border-red-200 shadow-sm"

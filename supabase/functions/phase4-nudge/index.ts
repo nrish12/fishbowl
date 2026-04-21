@@ -1,6 +1,52 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit, getClientIdentifier } from "../_shared/rateLimit.ts";
+
+type Category = "pop_culture" | "history_science" | "sports" | "geography" | null | undefined;
+
+const CATEGORY_VOICES: Record<string, { system: string; tone: string; fallback: string }> = {
+  pop_culture: {
+    system: "You are a playful entertainment insider giving a radio-host style hint. Warm, teasing, references entertainment industry, uses casual language a fan of TV/movies/music would recognize.",
+    tone: "a radio host who teases celebrities",
+    fallback: "Think about who's lighting up the red carpets and what decade made them unmissable.",
+  },
+  history_science: {
+    system: "You are a patient, curious professor giving a measured hint. Informative, precise, uses educational language — the kind of teacher who points at a map or a timeline.",
+    tone: "a professor narrowing down an era or discovery",
+    fallback: "Pin down the century and the field of work first, then who made the breakthrough people still cite today.",
+  },
+  sports: {
+    system: "You are a sports coach in the locker room giving a direct, motivational hint. Punchy, confident, uses the language of stats, titles, and legendary moments.",
+    tone: "a coach naming what stat or sport matters most",
+    fallback: "Lock in the sport, then the era. Who held the record or trophy everyone talks about?",
+  },
+  geography: {
+    system: "You are an evocative travel guide giving an atmospheric hint. Paints a sensory picture — climate, landscape, famous nearby landmarks — without naming the place.",
+    tone: "a travel guide describing a destination",
+    fallback: "Picture the climate, the terrain, and one landmark nearby. What continent are you standing on?",
+  },
+  default: {
+    system: "You are a helpful game master giving a personalized hint based on a player's wrong guesses.",
+    tone: "a thoughtful guide",
+    fallback: "Look at what your guesses have in common, then think about the one thing that makes the answer different.",
+  },
+};
+
+function categoryKey(category: Category): string {
+  if (!category) return "default";
+  return CATEGORY_VOICES[category] ? category : "default";
+}
+
+async function hashGuesses(guesses: string[]): Promise<string> {
+  const sorted = [...guesses].map(g => g.toLowerCase().trim()).sort().join("|");
+  const data = new TextEncoder().encode(sorted);
+  const buffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 32);
+}
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
@@ -26,7 +72,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    let { token, guesses, hints } = await req.json();
+    let { token, guesses, hints, similarity_scores } = await req.json();
 
     if (!token || !guesses || !hints) {
       return new Response(
@@ -35,7 +81,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Decode token to get target and type
     try {
       token = decodeURIComponent(token);
     } catch {
@@ -82,7 +127,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const isValid = await crypto.subtle.verify("HMAC", key, signature, signatureData);
-
     if (!isValid) {
       return new Response(
         JSON.stringify({ error: "Invalid token signature" }),
@@ -94,8 +138,7 @@ Deno.serve(async (req: Request) => {
     try {
       const payloadBase64 = encodedPayload.replace(/-/g, "+").replace(/_/g, "/");
       const payloadPadded = payloadBase64.padEnd(payloadBase64.length + (4 - payloadBase64.length % 4) % 4, "=");
-      const payloadJson = atob(payloadPadded);
-      payload = JSON.parse(payloadJson);
+      payload = JSON.parse(atob(payloadPadded));
     } catch {
       return new Response(
         JSON.stringify({ error: "Failed to decode token payload" }),
@@ -113,14 +156,47 @@ Deno.serve(async (req: Request) => {
 
     const target = payload.target;
     const type = payload.type || "unknown";
+    const category = payload.category as Category;
+    const challengeId = payload.id;
+    const voice = CATEGORY_VOICES[categoryKey(category)];
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const guessesHash = await hashGuesses(guesses);
+
+    if (challengeId) {
+      const { data: cached } = await supabase
+        .from("nudge_cache")
+        .select("response")
+        .eq("challenge_id", challengeId)
+        .eq("phase", "phase4")
+        .eq("guesses_hash", guessesHash)
+        .maybeSingle();
+
+      if (cached?.response) {
+        const tCache = Date.now();
+        console.log(`[PERF] phase4-nudge CACHE HIT | total:${tCache-t0}ms`);
+        return new Response(
+          JSON.stringify({ ...cached.response, cached: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     const t1 = Date.now();
-
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) {
       return new Response(
-        JSON.stringify({ error: "OpenAI API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          nudge: voice.fallback,
+          keywords: [],
+          pattern_identified: null,
+          fallback: true,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -130,79 +206,117 @@ Phase 2 (sentence): ${hints.phase2}
 Phase 3 (5 categories): ${JSON.stringify(hints.phase3)}
 `;
 
-    const guessesSummary = guesses.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n');
+    const scoreLookup = new Map<string, number>();
+    if (similarity_scores && typeof similarity_scores === "object") {
+      for (const [g, s] of Object.entries(similarity_scores)) {
+        if (typeof s === "number") scoreLookup.set(g.toLowerCase().trim(), s);
+      }
+    }
 
-    const prompt = `You are helping a player in a guessing game. The correct answer is "${target}" (a ${type}).
+    const guessesSummary = guesses
+      .map((g: string, i: number) => {
+        const score = scoreLookup.get(g.toLowerCase().trim());
+        return `${i + 1}. "${g}"${typeof score === "number" ? ` (similarity ${score}%)` : ""}`;
+      })
+      .join("\n");
 
-The player has seen these hints:
+    const closestGuess = [...guesses]
+      .map((g: string) => ({ g, s: scoreLookup.get(g.toLowerCase().trim()) ?? 0 }))
+      .sort((a, b) => b.s - a.s)[0];
+
+    const prompt = `Answer: "${target}" (a ${type}${category ? `, category: ${category}` : ""})
+
+Player's hints so far:
 ${hintsSummary}
 
-The player has made these WRONG guesses:
+Player's wrong guesses${closestGuess?.s ? ` (closest was "${closestGuess.g}" at ${closestGuess.s}%)` : ""}:
 ${guessesSummary}
 
-Your task: Analyze WHY the player is guessing wrong and guide them toward the correct answer.
+Write your nudge as ${voice.tone}.
 
-ANALYSIS STEPS:
-1. Look at what the wrong guesses have in COMMON - this shows the player's thinking pattern
-2. Identify what DISTINGUISHES the correct answer (${target}) from their guesses
-3. Find a connection between their guesses and the real answer that could help them pivot
+Your nudge MUST:
+1. Name the exact DIMENSION the player is missing on. Pick one: era/time, place/region, profession/role, genre/field, scale/size, or specific trait.
+2. Anchor on the closest wrong guess. Say something like "You're close on X but you're off on Y".
+3. Give one SPECIFIC distinguishing detail about "${target}" along that dimension.
+4. Do NOT reveal the answer or any word from it.
+5. 18-25 words total, conversational, in the voice of ${voice.tone}.
 
-For example:
-- If they guessed "Lady Gaga" and "Beyonce" but answer is "Ariana Grande" - they're thinking female pop stars, guide them to think about: vocal range, Disney/Nickelodeon origins, ponytail signature
-- If they guessed "Paris" and "London" but answer is "Rome" - they're thinking European capitals, guide them to: ancient history, Vatican, Colosseum
-
-Write a HELPFUL 15-20 word nudge that:
-1. Acknowledges their thinking pattern WITHOUT saying "you're close" or "you're on the right track"
-2. Gives a SPECIFIC distinguishing detail about ${target} that separates it from their guesses
-3. Does NOT reveal the answer directly
-
-VOCABULARY RULE: Use simple, everyday words an 8th grader would understand. Avoid fancy, academic, or obscure terms. Short, common words beat long, rare ones. Say "famous" not "renowned", "show" not "exemplify", "first" not "inaugural".
+VOCABULARY: simple 8th-grade words. "famous" not "renowned", "show" not "exemplify".
 
 Return JSON:
 {
-  "nudge": "Your 15-20 word personalized hint based on their guesses",
-  "keywords": ["3 keywords that distinguish ${target} from their guesses"],
-  "pattern_identified": "What the player seems to be thinking"
+  "nudge": "Your 18-25 word hint in the category voice, naming the missing dimension",
+  "keywords": ["3", "distinguishing", "words"],
+  "pattern_identified": "1-sentence description of what the player seems to be thinking",
+  "dimension_off": "era" | "place" | "profession" | "genre" | "scale" | "trait"
 }`;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openaiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.7,
-        max_tokens: 200,
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful game master who gives personalized hints based on player behavior. Analyze their wrong guesses to understand their thinking, then guide them toward the answer without revealing it."
-          },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
+    let result: any;
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openaiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.7,
+          max_tokens: 220,
+          messages: [
+            { role: "system", content: voice.system },
+            { role: "user", content: prompt },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI failed: ${JSON.stringify(errorData)}`);
+      if (!response.ok) {
+        throw new Error(`OpenAI failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      result = JSON.parse(data.choices[0].message.content);
+    } catch (aiErr) {
+      console.error("[phase4-nudge] OpenAI error, returning fallback:", aiErr);
+      const fallbackResponse = {
+        nudge: voice.fallback,
+        keywords: [],
+        pattern_identified: null,
+        fallback: true,
+      };
+      return new Response(
+        JSON.stringify(fallbackResponse),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
-
-    const data = await response.json();
-    const result = JSON.parse(data.choices[0].message.content);
 
     const t2 = Date.now();
     console.log(`[PERF] phase4-nudge | jwt:${t1-t0}ms openai:${t2-t1}ms total:${t2-t0}ms`);
 
+    const response = {
+      nudge: result.nudge,
+      keywords: result.keywords || [],
+      pattern_identified: result.pattern_identified || null,
+      dimension_off: result.dimension_off || null,
+    };
+
+    if (challengeId) {
+      supabase
+        .from("nudge_cache")
+        .upsert({
+          challenge_id: challengeId,
+          phase: "phase4",
+          guesses_hash: guessesHash,
+          response,
+        }, { onConflict: "challenge_id,phase,guesses_hash" })
+        .then(({ error }: any) => {
+          if (error) console.error("[phase4-nudge] cache write failed:", error);
+        });
+    }
+
     return new Response(
-      JSON.stringify({
-        nudge: result.nudge,
-        keywords: result.keywords || [],
-        pattern_identified: result.pattern_identified || null,
-      }),
+      JSON.stringify(response),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

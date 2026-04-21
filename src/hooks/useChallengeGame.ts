@@ -22,8 +22,9 @@ export interface Phase5Data {
   semantic_scores: Array<{ guess: string; score: number; reason: string }>;
   connections: Array<{ guess: string; hint: string; pattern: string }>;
   synthesis: string;
-  themes_identified: string[];
-  themes_missing: string[];
+  themes_identified?: string[];
+  themes_missing?: string[];
+  narrowing_questions?: Array<{ question: string; why: string }>;
 }
 
 export type GameState = 'loading' | 'playing' | 'solved' | 'failed';
@@ -190,7 +191,7 @@ export function useChallengeGame(token: string | null) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({ token, guesses: allWrongGuesses, hints }),
+        body: JSON.stringify({ token, guesses: allWrongGuesses, hints, similarity_scores: guessScores }),
         timeout: 45000,
       });
       if (!res.ok) return null;
@@ -200,7 +201,7 @@ export function useChallengeGame(token: string | null) {
       console.error('[Phase 4] prefetch error:', err);
       return null;
     }
-  }, [token, hints]);
+  }, [token, hints, guessScores]);
 
   const advancePhase = useCallback(async (_currentGuess: string, allWrongGuesses: string[]) => {
     if (phase === 1) {
